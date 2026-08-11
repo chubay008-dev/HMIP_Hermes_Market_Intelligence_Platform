@@ -4,8 +4,10 @@
 #   2. Render Dashboard → New → Blueprint → chọn repo → dùng file này
 #   HOẶC: New → Web Service → kết nối repo → Runtime: Docker → để trống (tự dùng Dockerfile)
 #
-# Lưu ý: free tier Render tự ngủ sau 15p không truy cập (spin-up ~30s).
-# Nếu muốn luôn thức, dùng gói paid ($7/tháng) hoặc bật "Health Check".
+# Lưu ý:
+#   - free tier Render tự ngủ sau 15p không truy cập (spin-up ~30s).
+#   - Không mount disk (free tier web service chạy ephemeral FS; data reset khi restart).
+#     Muốn lưu lịch sử giá bền vực → nâng gói paid hoặc dùng Postgres external.
 
 services:
   - type: web
@@ -26,9 +28,3 @@ services:
       - key: HMIP_API_TOKEN
         sync: false            # NHẬP TOKEN TỪ RENDER DASHBOARD (bảo mật)
         generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên
-    # Ổ đĩa bền vực để hmip.db (lịch sử giá) không bị mất khi container restart.
-    # Render Disk mount dùng key "mounts" (không phải "disks").
-    mounts:
-      - name: hmip-data
-        path: /app/data
-        sizeGB: 1
