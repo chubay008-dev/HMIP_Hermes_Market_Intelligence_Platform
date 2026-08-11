@@ -1,0 +1,30 @@
+# Generic linear workflow fixture used only to test that
+# WorkflowLoader -> Planner -> TaskRegistry -> TaskExecutor -> EventBus
+# compose correctly (Sprint 2 scope). Modeled after the step names in
+# 19_Example_Workflows.md's PRC-001 example, but with no-op handlers —
+# this is NOT the real PRC-001 domain workflow (that belongs under
+# domains/beer/pricing/ starting Sprint 3).
+id: "WF-TEST-001"
+version: "0.1.0"
+owner: "Platform Team"
+status: "DRAFT"
+risk: "LOW"
+tasks:
+  - id: collect
+    type: adapter
+    dependencies: []
+  - id: extract
+    type: prompt
+    dependencies: [collect]
+  - id: validate
+    type: schema_validate
+    dependencies: [extract]
+  - id: compare
+    type: transform
+    dependencies: [validate]
+  - id: decide
+    type: decision
+    dependencies: [compare]
+  - id: alert
+    type: notify
+    dependencies: [decide]

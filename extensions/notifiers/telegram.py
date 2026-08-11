@@ -1,0 +1,86 @@
+"""notifiers/telegram.py — bọc gửi cảnh báo Telegram.
+
+Thiết kế:
+- Đọc token/userid từ env (HMIP_TELEGRAM_BOT_TOKEN, HMIP_TELEGRAM_CHAT_ID).
+  KHÔNG hardcode secret — tuân thủ quy tắc bảo mật.
+- Nếu chưa cấu hình, tự động chuyển sang "console notifier" (ghi log
+  thay vì gửi) — app vẫn chạy bình thường, chỉ không có push.
+- Hàm `notify(decision, product, price, delta)` chuẩn hóa message.
+
+Phần notify KHÔNG sửa kernel; alert handler gốc chỉ trả dict, còn
+việc đẩy đi đâu là chuyện của lớp ngoài (scheduler / API).
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+
+import httpx
+
+log = logging.getLogger("hmip.notify")
+
+TELEGRAM_BOT_TOKEN = os.getenv("HMIP_TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("HMIP_TELEGRAM_CHAT_ID", "")
+
+
+def is_configured() -> bool:
+    return bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)
+
+
+def _format(decision: str, product_name: str, price, delta_percent, base_price) -> str:
+    arrow = "▲" if (delta_percent or 0) > 0 else "▼"
+    dp = f"{delta_percent:+.2f}%" if delta_percent is not None else "—"
+    p = f"{float(price):,.0f}" if price is not None else "—"
+    b = f"{float(base_price):,.0f}" if base_price is not None else "—"
+    emoji = {
+        "ALERT": "🟠",
+        "ESCALATE": "🔴",
+        "HUMAN_REVIEW": "🟡",
+    }.get(decision, "⚪")
+    return (
+        f"{emoji} *HMIP — Cảnh báo giá*\n"
+        f"*Sản phẩm:* {product_name}\n"
+        f"*Giá hiện tại:* {p} VND\n"
+        f"*Giá tham chiếu:* {b} VND\n"
+        f"*Biến động:* {arrow} {dp}\n"
+        f"*Quyết định:* {decision}"
+    )
+
+
+def notify(
+    decision: str,
+    product_name: str,
+    price=None,
+    delta_percent=None,
+    base_price=None,
+) -> bool:
+    """Gửi cảnh báo. Trả True nếu gửi thành công/thành công-log.
+
+    Nếu chưa cấu hình Telegram, ghi log (không lỗi) và vẫn trả True
+    để không làm hỏng luồng scheduler.
+    """
+    message = _format(decision, product_name, price, delta_percent, base_price)
+
+    if not is_configured():
+        log.info("[notify:console-fallback] %s", message.replace("*", ""))
+        return True
+
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    try:
+        resp = httpx.post(
+            url,
+            json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"},
+            timeout=10.0,
+        )
+        resp.raise_for_status()
+        return True
+    except httpx.HTTPError as exc:
+        log.error("Telegram notify failed: %s", exc)
+        return False
+
+
+if __name__ == "__main__":
+    # test nhanh (console fallback)
+    logging.basicConfig(level=logging.INFO)
+    notify("ESCALATE", "Saigon Special 330ml", 20083.0, 11.57, 18000.0)

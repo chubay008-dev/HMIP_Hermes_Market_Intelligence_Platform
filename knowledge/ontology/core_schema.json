@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hmip.internal/schemas/knowledge/core_schema.json",
+  "version": "1.0.0",
+  "title": "HMIP Core Ontology",
+  "description": "Brand/Product/SKU entities and relationships. See 01_System_Specification.md section 2.3 and 17_Glossary.md's 'Ontology' entry. Product.brand_id references Brand.id; SKU.product_id references Product.id — referential integrity across a dataset is enforced by knowledge.ontology.loader.OntologyLoader, not by this schema alone (JSON Schema has no native foreign-key concept).",
+  "definitions": {
+    "Brand": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "country": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "Product": {
+      "type": "object",
+      "required": ["id", "brand_id", "name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "brand_id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "category": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "SKU": {
+      "type": "object",
+      "required": ["id", "product_id", "pack_size"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "product_id": { "type": "string", "minLength": 1 },
+        "pack_size": { "type": "string", "minLength": 1 },
+        "barcode": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

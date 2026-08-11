@@ -1,0 +1,98 @@
+# PRC-001 — Daily Beer Price Collection
+# See 03_Domain_Specification.md section 6 and 19_Example_Workflows.md
+# section 2 for the business flow this implements.
+
+id: "WF-PRC-001"
+version: "1.2.0"
+owner: "Pricing Team"
+status: "PRODUCTION"
+risk: "MEDIUM"
+
+inputs:
+  - product_id
+  - source
+  - market
+
+outputs:
+  - decision
+
+retry_policy:
+  strategy: exponential_backoff
+  max_attempts: 3
+  base_delay_ms: 200
+
+compensation_policy: "STRICT"
+
+schema_dependencies:
+  - schema.json
+
+prompt_dependencies:
+  - extract_price.md
+
+skill_dependencies:
+  - beer.pricing.collect_price
+  - beer.pricing.extract_price
+  - beer.pricing.validate_price
+  - beer.pricing.enrich_price
+  - beer.pricing.compare_price
+  - beer.pricing.decision_engine
+  - beer.pricing.alert_price
+
+tasks:
+  - id: collect
+    type: adapter
+    input:
+      product_id: "${product_id}"
+      source: "${source}"
+      market: "${market}"
+    dependencies: []
+    timeout: 30
+    failure_modes: ["timeout", "network_error", "source_unavailable"]
+
+  - id: extract
+    type: prompt
+    input:
+      raw_payload: "${collect.output}"
+    dependencies: ["collect"]
+    timeout: 15
+    failure_modes: ["invalid_extraction", "malformed_output"]
+
+  - id: validate
+    type: schema_validate
+    input:
+      structured_price: "${extract.output}"
+    dependencies: ["extract"]
+    timeout: 5
+    failure_modes: ["schema_mismatch", "missing_required_field"]
+
+  - id: enrich
+    type: transform
+    input:
+      validated_price: "${validate.output}"
+    dependencies: ["validate"]
+    timeout: 5
+    failure_modes: ["unknown_product", "brand_mismatch"]
+
+  - id: compare
+    type: transform
+    input:
+      validated_price: "${enrich.output}"
+    dependencies: ["enrich"]
+    timeout: 5
+    failure_modes: ["invalid_base_price", "inconsistent_currency"]
+
+  - id: decide
+    type: decision
+    input:
+      compare_result: "${compare.output}"
+    dependencies: ["compare"]
+    timeout: 5
+    failure_modes: ["threshold_ambiguity", "low_confidence"]
+
+  - id: alert
+    type: notify
+    input:
+      decision_result: "${decide.output}"
+    dependencies: ["decide"]
+    timeout: 10
+    failure_modes: ["notification_failure", "queue_failure"]

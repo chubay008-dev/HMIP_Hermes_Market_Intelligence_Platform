@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMIP — Giám sát giá thị trường</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#141d26; --panel2:#1b2631; --line:#243542;
+    --tx:#ecf0f1; --dim:#8fa3b0; --cyan:#5dade2; --yellow:#f4d03f;
+    --green:#82c99a; --orange:#e59866; --red:#e74c6c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--tx);font:14px/1.55 "Segoe UI",system-ui,sans-serif;padding:24px}
+  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+  h1{font-size:19px;color:var(--yellow);letter-spacing:.3px}
+  .sub{color:var(--dim);font-size:12px;margin-top:3px}
+  .btn{background:var(--panel2);color:var(--tx);border:1px solid var(--cyan);
+       padding:9px 16px;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s}
+  .btn:hover{background:var(--cyan);color:#08131c}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.alt{border-color:var(--dim)}
+  .btn.sm{padding:5px 11px;font-size:12px}
+  .btn.active{background:var(--cyan);color:#08131c}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:16px}
+  .card .k{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+  .card .v{font-size:26px;font-weight:600;margin-top:7px}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:18px;margin-bottom:20px}
+  h2{font-size:14px;color:var(--yellow);margin-bottom:14px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--dim);font-weight:500;font-size:11px;text-transform:uppercase;
+     letter-spacing:.5px;padding:9px 10px;border-bottom:1px solid var(--line)}
+  td{padding:11px 10px;border-bottom:1px solid #1b2733}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#18222c}
+  .tag{display:inline-block;padding:3px 10px;border-radius:11px;font-size:11px;font-weight:600}
+  .IGNORE{background:rgba(143,163,176,.16);color:var(--dim)}
+  .ALERT{background:rgba(229,152,102,.17);color:var(--orange)}
+  .ESCALATE{background:rgba(231,76,108,.17);color:var(--red)}
+  .HUMAN_REVIEW{background:rgba(244,208,63,.15);color:var(--yellow)}
+  .up{color:var(--red)} .down{color:var(--green)}
+  .mono{font-family:Consolas,"SF Mono",monospace}
+  .empty{color:var(--dim);text-align:center;padding:26px;font-style:italic}
+  #toast{position:fixed;right:22px;bottom:22px;background:var(--panel2);
+         border:1px solid var(--cyan);border-radius:7px;padding:13px 18px;
+         opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;max-width:380px}
+  #toast.show{opacity:1;transform:none}
+  /* chart */
+  .chart-wrap{position:relative;width:100%;overflow-x:auto}
+  svg.chart{width:100%;min-width:600px;height:320px;background:#0e151c;border-radius:7px}
+  .axis{stroke:var(--line);stroke-width:1}
+  .axis-label{fill:var(--dim);font-size:10px}
+  .pt{fill:var(--cyan)}
+  .line{fill:none;stroke:var(--cyan);stroke-width:2}
+  .map{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .map .lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+  .map .sw{width:12px;height:12px;border-radius:3px}
+  /* login */
+  #login{position:fixed;inset:0;background:rgba(8,12,17,.97);display:flex;
+        align-items:center;justify-content:center;z-index:50}
+  #login .box{background:var(--panel);border:1px solid var(--cyan);border-radius:11px;
+        padding:30px 32px;width:340px;max-width:92vw}
+  #login h3{color:var(--yellow);font-size:16px;margin-bottom:6px}
+  #login p{color:var(--dim);font-size:12px;margin-bottom:16px}
+  #login input{width:100%;padding:11px 12px;border-radius:7px;border:1px solid var(--line);
+        background:var(--bg);color:var(--tx);font-size:14px;margin-bottom:4px}
+  #login .err{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px}
+  #login .btn{width:100%;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h3>🔐 HMIP — Nhập mã truy cập</h3>
+    <p>Ứng dụng được bảo vệ. Nhập <code>HMIP_API_TOKEN</code> do quản trị viên cung cấp.</p>
+    <input id="tok" type="password" placeholder="API token" autofocus>
+    <div class="err" id="loginErr"></div>
+    <button class="btn" id="loginBtn">Vào dashboard</button>
+  </div>
+</div>
+
+<header>
+  <div>
+    <h1>HMIP — Giám sát giá thị trường</h1>
+    <div class="sub">Chạy trên HMIP workflow kernel · WF-PRC-001 · <span id="mode" class="mono"></span></div>
+  </div>
+  <div style="display:flex;gap:9px">
+    <button class="btn" id="scan">⟳ Quét tất cả</button>
+    <button class="btn alt" id="auto">⏱ Tự động: TẮT</button>
+    <button class="btn alt" id="refresh">Làm mới</button>
+    <button class="btn alt" id="logout">Đăng xuất</button>
+  </div>
+</header>
+
+<div class="grid" id="stats"></div>
+
+<section>
+  <h2>➕ Thêm sản phẩm theo dõi</h2>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+    <div><div class="sub">Mã SP (vd P789)</div><input id="np_id" placeholder="P789" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
+    <div><div class="sub">Tên sản phẩm</div><input id="np_name" placeholder="Tiger Beer 330ml" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
+    <div><div class="sub">Thương hiệu</div><input id="np_brand" placeholder="Tiger" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
+    <div><div class="sub">Nguồn</div><input id="np_source" placeholder="shopee" value="manual" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px;width:90px"></div>
+    <button class="btn" id="np_add">Thêm</button>
+    <span class="sub" id="np_hint" style="align-self:center">base_price tự động = giá quét đầu</span>
+  </div>
+</section>
+
+<section>
+  <h2>
+    📈 Biểu đồ lịch sử giá
+    <span style="margin-left:auto;display:flex;gap:6px" id="rangeBtns">
+      <button class="btn sm alt" data-range="1h">1h</button>
+      <button class="btn sm alt" data-range="24h">24h</button>
+      <button class="btn sm alt" data-range="7d">7d</button>
+      <button class="btn sm alt active" data-range="all">Tất cả</button>
+    </span>
+  </h2>
+  <div class="chart-wrap"><svg id="chart" class="chart" viewBox="0 0 800 320" preserveAspectRatio="none"></svg></div>
+  <div class="map" id="chartLegend"></div>
+</section>
+
+<section>
+  <h2>Giá mới nhất</h2>
+  <div id="latest"><div class="empty">Đang tải…</div></div>
+</section>
+
+<section>
+  <h2>Cảnh báo gần đây <span class="sub" style="font-weight:400">(quyết định ≠ IGNORE)</span></h2>
+  <div id="alerts"><div class="empty">Đang tải…</div></div>
+</section>
+
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const fmt = n => n==null ? '—' : Number(n).toLocaleString('vi-VN',{maximumFractionDigits:0});
+const pct = n => n==null ? '—' : (n>0?'▲ +':(n<0?'▼ ':'')) + Number(n).toFixed(2) + '%';
+const when = s => s ? new Date(s).toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+const TOK_KEY = 'hmip_token';
+let CUR_RANGE = 'all';
+
+function toast(msg, ms=3600){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), ms);
+}
+
+async function api(path, opts={}){
+  const tok = localStorage.getItem(TOK_KEY) || '';
+  opts.headers = Object.assign({}, opts.headers,
+    {'Content-Type':'application/json', 'Authorization':'Bearer ' + tok});
+  const r = await fetch(path, opts);
+  if(r.status === 401){
+    localStorage.removeItem(TOK_KEY);
+    $('#login').style.display = 'flex';
+    throw new Error('Thiếu hoặc sai HMIP_API_TOKEN');
+  }
+  if(!r.ok){
+    let d; try{ d = await r.json(); }catch(_){ d = {detail:r.statusText}; }
+    throw new Error(typeof d.detail==='string' ? d.detail : JSON.stringify(d.detail));
+  }
+  return r.json();
+}
+
+// ---------- chart ----------
+const PALETTE = ['#5dade2','#e59866','#82c99a','#f4d03f','#e74c6c','#a569bd'];
+
+function renderChart(data){
+  const svg = $('#chart');
+  const W=800, H=320, PAD_L=55, PAD_R=15, PAD_T=15, PAD_B=30;
+  const pw = W-PAD_L-PAD_R, ph = H-PAD_T-PAD_B;
+  const prods = Object.entries(data.products||{});
+  if(!prods.length || prods.every(([,v])=>!v.points.length)){
+    svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#8fa3b0" font-size="13" text-anchor="middle">Chưa có dữ liệu lịch sử — bấm "Quét tất cả"</text>`;
+    $('#chartLegend').innerHTML='';
+    return;
+  }
+  // thu thập tất cả điểm để tìm min/max
+  let allP=[], allT=[];
+  prods.forEach(([pid,v])=> v.points.forEach(p=>{ allP.push(p.price); allT.push(new Date(p.t).getTime()); }));
+  let minP=Math.min(...allP), maxP=Math.max(...allP);
+  if(minP===maxP){ minP*=0.98; maxP*=1.02; }
+  const pad=(maxP-minP)*0.1; minP-=pad; maxP+=pad;
+  const tMin=Math.min(...allT), tMax=Math.max(...allT);
+  const t0 = tMin===tMax ? tMin-3600e3 : tMin, t1 = tMax;
+  const x = t => PAD_L + (t1===t0 ? pw/2 : ( (t-t0)/(t1-t0) )*pw);
+  const y = p => PAD_T + (1-(p-minP)/(maxP-minP))*ph;
+
+  let s = '';
+  // grid + y labels
+  for(let i=0;i<=4;i++){
+    const yy=PAD_T+ph*i/4; const val=maxP-(maxP-minP)*i/4;
+    s+=`<line class="axis" x1="${PAD_L}" y1="${yy}" x2="${W-PAD_R}" y2="${yy}"/>`;
+    s+=`<text class="axis-label" x="${PAD_L-6}" y="${yy+3}" text-anchor="end">${fmt(val)}</text>`;
+  }
+  // x label (đầu/cuối)
+  s+=`<text class="axis-label" x="${PAD_L}" y="${H-10}">${when(new Date(t0).toISOString())}</text>`;
+  s+=`<text class="axis-label" x="${W-PAD_R}" y="${H-10}" text-anchor="end">${when(new Date(t1).toISOString())}</text>`;
+
+  // lines + points
+  prods.forEach(([pid,v],idx)=>{
+    const col=PALETTE[idx%PALETTE.length];
+    if(v.points.length<2){
+      const p=v.points[0]; if(!p) return;
+      s+=`<circle class="pt" cx="${x(new Date(p.t).getTime())}" cy="${y(p.price)}" r="3.5" fill="${col}"/>`;
+      return;
+    }
+    const pts=v.points.map(p=>`${x(new Date(p.t).getTime())},${y(p.price)}`).join(' ');
+    s+=`<polyline class="line" points="${pts}" style="stroke:${col}"/>`;
+    v.points.forEach(p=>{ s+=`<circle class="pt" cx="${x(new Date(p.t).getTime())}" cy="${y(p.price)}" r="3" fill="${col}"/>`; });
+  });
+  svg.innerHTML=s;
+
+  // legend
+  $('#chartLegend').innerHTML = prods.map(([pid,v],idx)=>{
+    const col=PALETTE[idx%PALETTE.length];
+    return `<div class="lg"><span class="sw" style="background:${col}"></span>${v.name||pid}</div>`;
+  }).join('');
+}
+
+// ---------- tables ----------
+function renderStats(latest, alerts){
+  const esc = alerts.filter(a=>a.decision==='ESCALATE').length;
+  const al  = alerts.filter(a=>a.decision==='ALERT').length;
+  $('#stats').innerHTML = `
+    <div class="card"><div class="k">Sản phẩm theo dõi</div><div class="v">${latest.length}</div></div>
+    <div class="card"><div class="k">Cảnh báo (ALERT)</div><div class="v" style="color:var(--orange)">${al}</div></div>
+    <div class="card"><div class="k">Khẩn cấp (ESCALATE)</div><div class="v" style="color:var(--red)">${esc}</div></div>
+    <div class="card"><div class="k">Lần quét gần nhất</div><div class="v" style="font-size:15px">${when(latest[0]?.captured_at)}</div></div>`;
+}
+function renderLatest(rows){
+  if(!rows.length){ $('#latest').innerHTML='<div class="empty">Chưa có dữ liệu — bấm "Quét tất cả".</div>'; return; }
+  $('#latest').innerHTML = `<table><thead><tr>
+      <th>Sản phẩm</th><th>Thương hiệu</th><th>Giá hiện tại</th>
+      <th>Biến động</th><th>Quyết định</th><th>Cập nhật</th><th></th>
+    </tr></thead><tbody>${rows.map(r=>`
+      <tr>
+        <td><strong>${r.name??r.id}</strong><div class="sub mono">${r.id}</div></td>
+        <td>${r.brand??'—'}</td>
+        <td class="mono">${fmt(r.price)} ${r.currency??''}</td>
+        <td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
+        <td><span class="tag ${r.decision??'IGNORE'}">${r.decision??'—'}</span></td>
+        <td class="sub">${when(r.captured_at)}</td>
+        <td><button class="btn sm" onclick="runOne('${r.id}')">Quét</button></td>
+      </tr>`).join('')}</tbody></table>`;
+}
+function renderAlerts(rows){
+  if(!rows.length){ $('#alerts').innerHTML='<div class="empty">Chưa có cảnh báo nào.</div>'; return; }
+  $('#alerts').innerHTML = `<table><thead><tr>
+      <th>Thời điểm</th><th>Sản phẩm</th><th>Giá</th><th>Lệch</th><th>Quyết định</th>
+    </tr></thead><tbody>${rows.slice(0,15).map(r=>`
+      <tr>
+        <td class="sub">${when(r.captured_at)}</td>
+        <td>${r.product_name??r.product_id}</td>
+        <td class="mono">${fmt(r.price)}</td>
+        <td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
+        <td><span class="tag ${r.decision}">${r.decision}</span></td>
+      </tr>`).join('')}</tbody></table>`;
+}
+
+async function load(){
+  try{
+    const [latest, alerts, health, chart] = await Promise.all([
+      api('/api/latest'), api('/api/alerts'), api('/api/health'), api('/api/chart?range='+CUR_RANGE)
+    ]);
+    $('#mode').textContent = 'nguồn: ' + health.collect_mode;
+    renderStats(latest, alerts); renderLatest(latest); renderAlerts(alerts);
+    renderChart(chart);
+  }catch(e){ if(!e.message.includes('TOKEN')) toast('Lỗi tải dữ liệu: ' + e.message); }
+}
+
+async function runOne(pid){
+  try{
+    toast('Đang quét ' + pid + '…');
+    const r = await api('/api/run', {method:'POST', body: JSON.stringify({product_id:pid, source:'manual'})});
+    toast(`${pid}: ${r.decision} · ${fmt(r.price)}đ (${pct(r.delta_percent)})`);
+    load();
+  }catch(e){ toast('Quét lỗi: ' + e.message, 5200); }
+}
+
+$('#scan').onclick = async () => {
+  const b = $('#scan'); b.disabled = true; b.textContent = 'Đang quét…';
+  try{
+    const r = await api('/api/run-all', {method:'POST'});
+    const n = r.results.filter(x=>x.decision && x.decision!=='IGNORE').length;
+    toast(`Quét xong ${r.scanned} sản phẩm · ${n} cảnh báo`);
+    load();
+  }catch(e){ toast('Lỗi: ' + e.message); }
+  finally{ b.disabled = false; b.textContent = '⟳ Quét tất cả'; }
+};
+$('#refresh').onclick = load;
+$('#logout').onclick = () => { localStorage.removeItem(TOK_KEY); $('#login').style.display='flex'; };
+
+// thêm sản phẩm động
+$('#np_add').onclick = async () => {
+  const pid = $('#np_id').value.trim();
+  const name = $('#np_name').value.trim();
+  if(!pid || !name){ $('#np_hint').textContent='Cần nhập Mã SP và Tên'; return; }
+  try{
+    await api('/api/products', {method:'POST', body: JSON.stringify({
+      product_id: pid, name, brand: $('#np_brand').value.trim(),
+      source: $('#np_source').value.trim() || 'manual'
+    })});
+    $('#np_hint').textContent = `Đã thêm ${pid} — quét để lấy giá mốc`;
+    $('#np_id').value=''; $('#np_name').value=''; $('#np_brand').value='';
+    toast(`Đã thêm ${pid}. Bấm "Quét tất cả" để lấy giá mốc tự động.`);
+    load();
+  }catch(e){ $('#np_hint').textContent='Lỗi: '+e.message; }
+};
+
+// range filter
+$('#rangeBtns').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-range]'); if(!btn) return;
+  CUR_RANGE = btn.dataset.range;
+  document.querySelectorAll('#rangeBtns button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  api('/api/chart?range='+CUR_RANGE).then(renderChart).catch(()=>{});
+});
+
+async function syncAuto(){
+  try{
+    const s = await api('/api/autoscan/status');
+    const btn = $('#auto');
+    btn.textContent = s.running ? '⏱ Tự động: BẬT' : '⏱ Tự động: TẮT';
+    btn.classList.toggle('alt', !s.running);
+  }catch(e){}
+}
+$('#auto').onclick = async () => {
+  const turningOn = $('#auto').textContent.includes('TẮT');
+  try{
+    turningOn ? await api('/api/autoscan/start',{method:'POST'}) : await api('/api/autoscan/stop',{method:'POST'});
+    toast(turningOn ? 'Đã bật quét tự động' : 'Đã tắt quét tự động');
+    syncAuto();
+  }catch(e){ toast('Lỗi: ' + e.message); }
+};
+
+function doLogin(){
+  const tok = $('#tok').value.trim();
+  if(!tok){ $('#loginErr').textContent='Vui lòng nhập token'; return; }
+  localStorage.setItem(TOK_KEY, tok);
+  api('/api/health').then(()=>{ $('#login').style.display='none'; load(); syncAuto(); })
+    .catch(e=>{ localStorage.removeItem(TOK_KEY); $('#loginErr').textContent=e.message; });
+}
+$('#loginBtn').onclick = doLogin;
+$('#tok').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+if(localStorage.getItem(TOK_KEY)){ $('#login').style.display='none'; load(); syncAuto(); }
+setInterval(()=>{ if(localStorage.getItem(TOK_KEY)) load(); }, 30000);
+</script>
+</body>
+</html>

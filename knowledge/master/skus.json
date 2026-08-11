@@ -1,0 +1,20 @@
+[
+  {
+    "id": "SKU-P123-330",
+    "product_id": "P123",
+    "pack_size": "330ml",
+    "barcode": "8934588123456"
+  },
+  {
+    "id": "SKU-P456-330",
+    "product_id": "P456",
+    "pack_size": "330ml",
+    "barcode": null
+  },
+  {
+    "id": "SKU-P555",
+    "product_id": "P555",
+    "pack_size": "330ml",
+    "barcode": "000P555"
+  }
+]

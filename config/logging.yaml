@@ -1,0 +1,12 @@
+# HMIP logging configuration.
+# See 02_Runtime_Specification.md section 14 and 06_Coding_Standard.md
+# section 9 (structured logging, no secrets in logs).
+
+logging:
+  level: "${HMIP_LOG_LEVEL:-INFO}"
+  format: "json"
+  redact_fields:
+    - "password"
+    - "token"
+    - "secret"
+    - "api_key"

@@ -1,0 +1,9 @@
+Dynamic intelligence data — time-varying, runtime-derived data. This
+is where `core.lineage.PersistentLineageTracer`'s default path
+(`knowledge/dynamic/lineage/lineage.jsonl`) writes to when no explicit
+path is given (project decision — see SPRINT_4_STATUS.md). Also
+intended for other time-varying, runtime-derived data (e.g. computed
+price trend snapshots) as distinct from the stable reference records
+in `knowledge/master/` (15_Acceptance_Criteria.md section 4:
+"Master/dynamic data tách biệt") — nothing else writes here yet, since
+no derived-intelligence computation exists in this codebase.

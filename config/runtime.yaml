@@ -1,0 +1,14 @@
+# HMIP runtime configuration.
+# Consumed by core.config.ConfigLoader — see 02_Runtime_Specification.md
+# section 8 for the full load/merge/expand/resolve/validate/freeze pipeline.
+
+runtime:
+  environment: "${HMIP_ENV:-development}"
+  service_name: "hmip"
+  version: "0.1.0"
+
+registry:
+  freeze_on_bootstrap: true
+
+policy:
+  config_mode: "IMMUTABLE"

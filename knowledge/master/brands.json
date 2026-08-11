@@ -1,0 +1,28 @@
+[
+  {
+    "id": "BRAND-SAIGON",
+    "name": "Saigon Beer",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-HEINEKEN",
+    "name": "Heineken",
+    "country": "NL"
+  },
+  {
+    "id": "BRAND-PTESTX",
+    "name": "TmpBrand"
+  },
+  {
+    "id": "BRAND-PNEWB",
+    "name": "NewBrand"
+  },
+  {
+    "id": "BRAND-P999",
+    "name": "B"
+  },
+  {
+    "id": "BRAND-P555",
+    "name": "Saigon"
+  }
+]

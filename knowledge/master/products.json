@@ -1,0 +1,20 @@
+[
+  {
+    "id": "P123",
+    "brand_id": "BRAND-SAIGON",
+    "name": "Saigon Special 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "P456",
+    "brand_id": "BRAND-HEINEKEN",
+    "name": "Heineken Lager 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "P555",
+    "brand_id": "BRAND-P555",
+    "name": "Bia Saigon Export 330ml",
+    "category": "beer"
+  }
+]

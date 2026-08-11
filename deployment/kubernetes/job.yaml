@@ -1,0 +1,48 @@
+# HMIP is a run-to-completion bootstrap CLI, not a long-running
+# server (see platform/bootstrap.py) — a Kubernetes Job matches this
+# execution model; a Deployment (with a readinessProbe HTTP endpoint)
+# would not, since there is no HTTP server to probe. For a recurring
+# run (e.g. daily PRC-001 collection), wrap this in a CronJob instead
+# — see 09_Deployment_Guide.md section 4 for the schedule.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hmip-bootstrap
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: hmip
+          image: hmip:latest
+          envFrom:
+            - configMapRef:
+                name: hmip-config
+            # - secretRef:
+            #     name: hmip-secrets   # once a secret provider exists
+          # No livenessProbe/readinessProbe here: those assume a
+          # long-running process. This container's own HEALTHCHECK
+          # (see Dockerfile) covers the "process alive" check; job
+          # success/failure IS the readiness signal for a Job.
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          volumeMounts:
+            - name: reports
+              mountPath: /app/reports
+            - name: data
+              mountPath: /app/data
+            - name: knowledge-dynamic
+              mountPath: /app/knowledge/dynamic
+      volumes:
+        - name: reports
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
+        - name: knowledge-dynamic
+          emptyDir: {}

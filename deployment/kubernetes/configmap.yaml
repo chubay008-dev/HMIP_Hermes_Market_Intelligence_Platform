@@ -1,0 +1,11 @@
+# Non-secret environment configuration for HMIP.
+# HMIP_SECRET_PROVIDER (and any real secret values, once a provider
+# exists — see SPRINT_1_STATUS.md) belong in a Kubernetes Secret, NOT
+# here (09_Deployment_Guide.md section 6: "không chứa secret").
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hmip-config
+data:
+  HMIP_ENV: "production"
+  HMIP_LOG_LEVEL: "INFO"

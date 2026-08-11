@@ -1,0 +1,12 @@
+# Không copy vào image
+.git
+.gitignore
+__pycache__/
+*.pyc
+.venv
+.venv-app
+*.db
+*.sqlite
+knowledge/dynamic/lineage/lineage.jsonl
+docs/
+*.md

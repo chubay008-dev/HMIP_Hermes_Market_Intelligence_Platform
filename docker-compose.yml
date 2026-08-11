@@ -1,0 +1,33 @@
+# docker-compose.yml — HMIP Market Intelligence Platform
+#
+# Chạy local bằng Docker:  docker compose up --build
+# Mở http://localhost:8000  (nhập HMIP_API_TOKEN bên dưới)
+#
+# Deploy lên cloud (Render/Fly/Railway): đẩy repo, build image từ
+# Dockerfile, set env qua dashboard của họ. Biến quan trọng nhất:
+#   HMIP_API_TOKEN   (BẮT BUỘC — bảo vệ API khi mở internet)
+#   HMIP_DB_PATH=/app/data/hmip.db  (mặc định, gắn volume)
+#   HMIP_AUTOSCAN=on
+#   HMIP_SCAN_INTERVAL_MIN=30
+
+services:
+  hmip:
+    build: .
+    container_name: hmip
+    ports:
+      - "8000:8000"
+    environment:
+      HMIP_DB_PATH: /app/data/hmip.db
+      HMIP_COLLECT_MODE: ${HMIP_COLLECT_MODE:-demo}
+      HMIP_AUTOSCAN: ${HMIP_AUTOSCAN:-on}
+      HMIP_SCAN_INTERVAL_MIN: ${HMIP_SCAN_INTERVAL_MIN:-30}
+      # BẮT BUỘC đổi thành chuỗi dài ngẫu nhiên khi deploy!
+      HMIP_API_TOKEN: ${HMIP_API_TOKEN:-changeme-in-production}
+      HMIP_TELEGRAM_BOT_TOKEN: ${HMIP_TELEGRAM_BOT_TOKEN:-}
+      HMIP_TELEGRAM_CHAT_ID: ${HMIP_TELEGRAM_CHAT_ID:-}
+    volumes:
+      - hmip_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  hmip_data:

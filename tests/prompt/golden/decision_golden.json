@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "engine": "PricingDecisionEngine",
+  "engine_module": "domains/beer/pricing/decision_engine.py",
+  "cases": [
+    {
+      "name": "no_variance",
+      "current_price": 18000.0,
+      "base_price": 18000.0,
+      "confidence": 0.9,
+      "expected_decision": "IGNORE"
+    },
+    {
+      "name": "small_increase_within_tolerance",
+      "current_price": 18500.0,
+      "base_price": 18000.0,
+      "confidence": 0.9,
+      "expected_decision": "IGNORE"
+    },
+    {
+      "name": "moderate_increase_alert",
+      "current_price": 19080.0,
+      "base_price": 18000.0,
+      "confidence": 0.9,
+      "expected_decision": "ALERT"
+    },
+    {
+      "name": "large_increase_escalate",
+      "current_price": 20700.0,
+      "base_price": 18000.0,
+      "confidence": 0.9,
+      "expected_decision": "ESCALATE"
+    },
+    {
+      "name": "large_decrease_escalate_symmetric",
+      "current_price": 15300.0,
+      "base_price": 18000.0,
+      "confidence": 0.9,
+      "expected_decision": "ESCALATE"
+    },
+    {
+      "name": "moderate_variance_low_confidence_routes_to_human_review",
+      "current_price": 19080.0,
+      "base_price": 18000.0,
+      "confidence": 0.3,
+      "expected_decision": "HUMAN_REVIEW"
+    },
+    {
+      "name": "exactly_at_alert_threshold_5_percent",
+      "current_price": 18900.0,
+      "base_price": 18000.0,
+      "confidence": 0.9,
+      "expected_decision": "ALERT"
+    },
+    {
+      "name": "exactly_at_escalate_threshold_10_percent",
+      "current_price": 19800.0,
+      "base_price": 18000.0,
+      "confidence": 0.9,
+      "expected_decision": "ESCALATE"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+# HMIP deployment configuration.
+# See 13_Configuration_Specification.md section 5.5 (environment name,
+# container settings, health check behavior, readiness behavior,
+# resource settings) and 09_Deployment_Guide.md sections 6-8.
+
+deployment:
+  environment: "${HMIP_ENV:-production}"
+
+container:
+  base_image: "python:3.12-slim"
+  entrypoint: "python -m platform_.bootstrap"
+
+health_check:
+  command: "python -m platform_.health"
+  interval_seconds: 30
+  timeout_seconds: 5
+  start_period_seconds: 5
+  retries: 3
+
+readiness_check:
+  command: "python -m platform_.readiness"
+  marker_file_env_var: "HMIP_READY_FILE"
+
+resources:
+  cpu_request: "250m"
+  cpu_limit: "1"
+  memory_request: "256Mi"
+  memory_limit: "512Mi"

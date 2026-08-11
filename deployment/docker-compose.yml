@@ -1,0 +1,27 @@
+# Local/simple deployment via docker compose.
+# Matches this project's actual execution model: a run-to-completion
+# bootstrap CLI (see platform/bootstrap.py), not a long-running
+# server — so there is no exposed port here.
+
+services:
+  hmip-bootstrap:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      HMIP_ENV: production
+      HMIP_LOG_LEVEL: INFO
+      # HMIP_RUNTIME_VERSION, HMIP_KERNEL_VERSION, HMIP_SECRET_PROVIDER,
+      # HMIP_CONFIG_PATH, HMIP_DATA_DIR: see ../.env.example.
+    volumes:
+      # Persist reports/lineage/data across container restarts —
+      # none of these are baked into the image (see .dockerignore).
+      - ./volumes/reports:/app/reports
+      - ./volumes/data:/app/data
+      - ./volumes/knowledge-dynamic:/app/knowledge/dynamic
+    healthcheck:
+      test: ["CMD", "python", "-m", "platform_.health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 5s
+      retries: 3

@@ -1,0 +1,77 @@
+{
+  "version": "1.0.0",
+  "prompt": "extract_price",
+  "prompt_file": "domains/beer/pricing/prompts/extract_price.md",
+  "cases": [
+    {
+      "name": "saigon_beer_standard",
+      "input": {
+        "product_id": "P123",
+        "brand": "Saigon Beer",
+        "product_name": "Saigon Special 330ml",
+        "price_text": "18,500",
+        "currency": "VND",
+        "store": "Shopee",
+        "province": "HCMC",
+        "source_url": "https://example.com/product/123",
+        "source": "shopee",
+        "fetched_at": 1800000000.0
+      },
+      "expected": {
+        "product_id": "P123",
+        "sku": null,
+        "brand": "Saigon Beer",
+        "product_name": "Saigon Special 330ml",
+        "price": 18500.0,
+        "currency": "VND",
+        "store": "Shopee",
+        "province": "HCMC",
+        "confidence": 0.9,
+        "source_url": "https://example.com/product/123",
+        "source": "shopee"
+      }
+    },
+    {
+      "name": "missing_optional_fields_use_null_not_guessed_values",
+      "input": {
+        "price_text": "20000",
+        "fetched_at": 1800000000.0
+      },
+      "expected": {
+        "product_id": null,
+        "sku": null,
+        "brand": null,
+        "product_name": null,
+        "price": 20000.0,
+        "currency": "VND",
+        "store": null,
+        "province": null,
+        "confidence": 0.9,
+        "source_url": null,
+        "source": null
+      }
+    },
+    {
+      "name": "price_with_thousands_separator_and_decimal",
+      "input": {
+        "price_text": "1,234,567.89",
+        "fetched_at": 1800000000.0
+      },
+      "expected": {
+        "price": 1234567.89
+      }
+    },
+    {
+      "name": "explicit_low_confidence_is_preserved_not_overridden",
+      "input": {
+        "price_text": "18500",
+        "confidence": 0.4,
+        "fetched_at": 1800000000.0
+      },
+      "expected": {
+        "price": 18500.0,
+        "confidence": 0.4
+      }
+    }
+  ]
+}
