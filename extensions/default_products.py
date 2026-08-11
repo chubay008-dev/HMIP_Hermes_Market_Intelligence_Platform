@@ -59,4 +59,15 @@ DEFAULT_PRODUCTS: dict[str, dict[str, str | float]] = {
     "PZ_ER": {"brand": "Erdinger", "product_name": "Erdinger Alkoholfrei 330ml", "ref_price": 45000.0, "province": "HCMC"},
     "PZ_AS": {"brand": "Asahi", "product_name": "Asahi Dry Zero 330ml", "ref_price": 30000.0, "province": "HCMC"},
     "PZ_BK": {"brand": "Beck's", "product_name": "Beck's Blue 330ml", "ref_price": 29000.0, "province": "HCMC"},
+
+    # --- Bia Trung Quoc (Tsingtao) ---
+    "PCN_TL": {"brand": "Tsingtao", "product_name": "Tsingtao Lager 330ml", "ref_price": 26000.0, "province": "HCMC"},
+    "PCN_TP": {"brand": "Tsingtao", "product_name": "Tsingtao Premium Lager 330ml", "ref_price": 28000.0, "province": "HCMC"},
+    "PCN_TP6": {"brand": "Tsingtao", "product_name": "Tsingtao Premium Lager 640ml", "ref_price": 38000.0, "province": "HCMC"},
+    "PCN_19": {"brand": "Tsingtao", "product_name": "Tsingtao 1903 Premium Lager 330ml", "ref_price": 30000.0, "province": "HCMC"},
+    "PCN_19B": {"brand": "Tsingtao", "product_name": "Tsingtao 1903 Premium Lager 500ml", "ref_price": 42000.0, "province": "HCMC"},
+    "PCN_PD": {"brand": "Tsingtao", "product_name": "Tsingtao Pure Draft 330ml", "ref_price": 31000.0, "province": "HCMC"},
+    "PCN_LM": {"brand": "Tsingtao", "product_name": "Tsingtao Lemon 0.0 330ml", "ref_price": 29000.0, "province": "HCMC"},
+    "PCN_SE": {"brand": "Tsingtao", "product_name": "Tsingtao 2026 Special Edition 330ml", "ref_price": 35000.0, "province": "HCMC"},
+    "PCN_OB": {"brand": "Tsingtao", "product_name": "Tsingtao Oak Barrel Luxury Legend 330ml", "ref_price": 55000.0, "province": "HCMC"},
 }

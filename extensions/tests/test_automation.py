@@ -51,7 +51,7 @@ def test_notify_graceful_on_bad_token(temp_db, monkeypatch):
 def test_scan_once_runs_and_persists(temp_db, monkeypatch):
     monkeypatch.setattr("extensions.db.DEFAULT_DB_PATH", temp_db)
     counts = scan_once()
-    assert counts["scanned"] == 39
+    assert counts["scanned"] == 48
     assert counts["errors"] == 0
     from extensions import db
     total = sum(len(db.get_history(pid, path=temp_db)) for pid in ("P123", "P456"))

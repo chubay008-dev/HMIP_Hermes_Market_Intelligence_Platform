@@ -232,5 +232,59 @@
     "brand_id": "BRAND-PZ_BK",
     "name": "Beck's Blue 330ml",
     "category": "beer"
+  },
+  {
+    "id": "PCN_TL",
+    "brand_id": "BRAND-PCN_TL",
+    "name": "Tsingtao Lager 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_TP",
+    "brand_id": "BRAND-PCN_TP",
+    "name": "Tsingtao Premium Lager 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_TP6",
+    "brand_id": "BRAND-PCN_TP6",
+    "name": "Tsingtao Premium Lager 640ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_19",
+    "brand_id": "BRAND-PCN_19",
+    "name": "Tsingtao 1903 Premium Lager 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_19B",
+    "brand_id": "BRAND-PCN_19B",
+    "name": "Tsingtao 1903 Premium Lager 500ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_PD",
+    "brand_id": "BRAND-PCN_PD",
+    "name": "Tsingtao Pure Draft 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_LM",
+    "brand_id": "BRAND-PCN_LM",
+    "name": "Tsingtao Lemon 0.0 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_SE",
+    "brand_id": "BRAND-PCN_SE",
+    "name": "Tsingtao 2026 Special Edition 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCN_OB",
+    "brand_id": "BRAND-PCN_OB",
+    "name": "Tsingtao Oak Barrel Luxury Legend 330ml",
+    "category": "beer"
   }
 ]

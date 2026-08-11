@@ -23,7 +23,7 @@
   },
   {
     "id": "BRAND-P555",
-    "name": "Saigon"
+    "name": "Saigon Beer"
   },
   {
     "id": "BRAND-P123",
@@ -176,5 +176,41 @@
   {
     "id": "BRAND-PZ_BK",
     "name": "Beck's"
+  },
+  {
+    "id": "BRAND-PCN_TL",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_TP",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_TP6",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_19",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_19B",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_PD",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_LM",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_SE",
+    "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-PCN_OB",
+    "name": "Tsingtao"
   }
 ]
