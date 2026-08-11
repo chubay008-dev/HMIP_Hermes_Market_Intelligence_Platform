@@ -159,7 +159,9 @@ def test_api_endpoints(temp_db, monkeypatch):
     assert client.get("/api/health").json()["status"] == "ok"
 
     catalog = client.get("/api/catalog").json()
-    assert {c["product_id"] for c in catalog} == {"P123", "P456"}
+    assert {c["product_id"] for c in catalog} == set(
+        ["P123", "P456"] + list(__import__("extensions.default_products", fromlist=["DEFAULT_PRODUCTS"]).DEFAULT_PRODUCTS.keys())
+    )
 
     run = client.post("/api/run", json={"product_id": "P123", "source": "api-test"})
     assert run.status_code == 200

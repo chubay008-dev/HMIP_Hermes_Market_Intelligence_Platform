@@ -245,7 +245,15 @@ def run(req: RunRequest) -> dict[str, Any]:
 
 @app.post("/api/run-all")
 def run_all() -> dict[str, Any]:
-    """Quét TẤT CẢ sản phẩm đã thêm (từ DB). Fallback về catalog nếu DB rỗng."""
+    """Quét TẤT CẢ sản phẩm. Seed DB từ catalog mặc định nếu rỗng (Render ephemeral)."""
+    # Đảm bảo mọi sản phẩm trong catalog được ghi vào DB (idempotent upsert).
+    for pid, meta in _DEMO_CATALOG.items():
+        db.add_product(
+            pid,
+            meta.get("product_name", pid),
+            meta.get("brand", ""),
+            "catalog",
+        )
     products = db.get_products()
     pids = [p["id"] for p in products] or list(_DEMO_CATALOG.keys())
     results = []

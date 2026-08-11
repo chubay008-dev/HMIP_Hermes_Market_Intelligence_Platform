@@ -45,6 +45,9 @@ FIELD_CURRENCY = os.getenv("HMIP_PRICE_FIELD_CURRENCY", "currency")
 FIELD_PROVINCE = os.getenv("HMIP_PRICE_FIELD_PROVINCE", "province")
 
 # Giá tham chiếu cho chế độ demo — khớp sản phẩm trong knowledge/master/.
+# _DEMO_CATALOG = 2 SP gốc + toàn bộ DEFAULT_PRODUCTS (hardcode từ market map bia).
+from extensions.default_products import DEFAULT_PRODUCTS
+
 _DEMO_CATALOG: dict[str, dict[str, Any]] = {
     "P123": {
         "brand": "Saigon Beer",
@@ -58,6 +61,7 @@ _DEMO_CATALOG: dict[str, dict[str, Any]] = {
         "ref_price": 22000.0,
         "province": "HCMC",
     },
+    **DEFAULT_PRODUCTS,
 }
 
 
