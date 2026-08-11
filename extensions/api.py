@@ -211,7 +211,7 @@ def alerts(limit: int = 50) -> list[dict[str, Any]]:
     for product in db.get_products():
         for row in db.get_history(product["id"], limit=limit):
             if row.get("decision") and row["decision"] != "IGNORE":
-                out.append({**row, "product_name": product["name"]})
+                out.append({**row, "product_name": product["name"], "brand": product.get("brand") or ""})
     out.sort(key=lambda r: r["captured_at"], reverse=True)
     return out[:limit]
 

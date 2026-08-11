@@ -52,10 +52,22 @@
   .axis{stroke:var(--line);stroke-width:1}
   .axis-label{fill:var(--dim);font-size:10px}
   .pt{fill:var(--cyan)}
-  .line{fill:none;stroke:var(--cyan);stroke-width:2}
+  .line{fill:none;stroke-width:2}
   .map{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
-  .map .lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)}
+  .map .lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
+  .map .lg.off{opacity:.4;text-decoration:line-through}
   .map .sw{width:12px;height:12px;border-radius:3px}
+  /* filter bar */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .filters select,.filters input{padding:7px 10px;border-radius:6px;border:1px solid var(--line);
+       background:var(--bg);color:var(--tx);font-size:13px}
+  .filters .sub{margin-right:2px}
+  .chk-panel{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;max-height:140px;overflow-y:auto}
+  .chk{border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;user-select:none;font-size:12px;display:flex;align-items:center;gap:6px}
+  .chk input{accent-color:var(--cyan)}
+  .grp-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .grp-btn{font-size:11px;padding:4px 10px;border:1px solid var(--line);border-radius:11px;cursor:pointer;color:var(--dim)}
+  .grp-btn:hover{border-color:var(--cyan);color:var(--tx)}
   /* login */
   #login{position:fixed;inset:0;background:rgba(8,12,17,.97);display:flex;
         align-items:center;justify-content:center;z-index:50}
@@ -118,17 +130,53 @@
       <button class="btn sm alt active" data-range="all">Tất cả</button>
     </span>
   </h2>
+  <!-- Panel chọn/bỏ SP & nhóm -->
+  <div class="grp-row" id="grpQuick">
+    <span class="grp-btn" data-act="all">Chọn tất cả</span>
+    <span class="grp-btn" data-act="none">Bỏ chọn tất cả</span>
+    <span class="grp-btn" data-act="invert">Đảo ngược</span>
+  </div>
+  <div class="chk-panel" id="prodChecks"></div>
   <div class="chart-wrap"><svg id="chart" class="chart" viewBox="0 0 800 320" preserveAspectRatio="none"></svg></div>
   <div class="map" id="chartLegend"></div>
 </section>
 
 <section>
-  <h2>Giá mới nhất</h2>
+  <h2>Giá mới nhất
+    <span class="sub" style="font-weight:400">— lọc theo nhóm / quyết định</span>
+  </h2>
+  <div class="filters">
+    <span class="sub">Nhóm:</span><select id="f_brand"><option value="">Tất cả</option></select>
+    <span class="sub">Quyết định:</span>
+    <select id="f_dec">
+      <option value="">Tất cả</option>
+      <option value="IGNORE">IGNORE</option>
+      <option value="ALERT">ALERT</option>
+      <option value="ESCALATE">ESCALATE</option>
+      <option value="HUMAN_REVIEW">HUMAN_REVIEW</option>
+    </select>
+    <span class="sub">Tìm:</span><input id="f_search" placeholder="tên hoặc mã SP…" style="width:160px">
+    <button class="btn sm alt" id="f_reset">Xóa lọc</button>
+  </div>
   <div id="latest"><div class="empty">Đang tải…</div></div>
 </section>
 
 <section>
-  <h2>Cảnh báo gần đây <span class="sub" style="font-weight:400">(quyết định ≠ IGNORE)</span></h2>
+  <h2>Cảnh báo gần đây <span class="sub" style="font-weight:400">(quyết định ≠ IGNORE)</span>
+    <span class="sub" style="font-weight:400">— lọc theo nhóm / quyết định</span>
+  </h2>
+  <div class="filters">
+    <span class="sub">Nhóm:</span><select id="f_brand_a"><option value="">Tất cả</option></select>
+    <span class="sub">Quyết định:</span>
+    <select id="f_dec_a">
+      <option value="">Tất cả</option>
+      <option value="ALERT">ALERT</option>
+      <option value="ESCALATE">ESCALATE</option>
+      <option value="HUMAN_REVIEW">HUMAN_REVIEW</option>
+    </select>
+    <span class="sub">Tìm:</span><input id="f_search_a" placeholder="tên hoặc mã SP…" style="width:160px">
+    <button class="btn sm alt" id="f_reset_a">Xóa lọc</button>
+  </div>
   <div id="alerts"><div class="empty">Đang tải…</div></div>
 </section>
 
@@ -136,11 +184,14 @@
 
 <script>
 const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
 const fmt = n => n==null ? '—' : Number(n).toLocaleString('vi-VN',{maximumFractionDigits:0});
 const pct = n => n==null ? '—' : (n>0?'▲ +':(n<0?'▼ ':'')) + Number(n).toFixed(2) + '%';
 const when = s => s ? new Date(s).toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
 const TOK_KEY = 'hmip_token';
 let CUR_RANGE = 'all';
+let LATEST = [], ALERTS = [], CHART = null;
+let SHOWN = new Set();   // product_id đang được chọn hiển thị trên chart
 
 function toast(msg, ms=3600){
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
@@ -165,43 +216,62 @@ async function api(path, opts={}){
 }
 
 // ---------- chart ----------
-const PALETTE = ['#5dade2','#e59866','#82c99a','#f4d03f','#e74c6c','#a569bd'];
+const PALETTE = ['#5dade2','#e59866','#82c99a','#f4d03f','#e74c6c','#a569bd','#48c9b0','#e67e22'];
+
+function buildProdChecks(){
+  const box = $('#prodChecks');
+  if(!LATEST.length){ box.innerHTML=''; return; }
+  // init SHOWN = tất cả nếu rỗng
+  if(SHOWN.size===0) LATEST.forEach(p=>SHOWN.add(p.id));
+  box.innerHTML = LATEST.map(p=>`
+    <label class="chk"><input type="checkbox" data-pid="${p.id}" ${SHOWN.has(p.id)?'checked':''}>
+      <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colorOf(p.id)}"></span>
+      ${p.name??p.id} <span class="sub">(${p.brand??''})</span></label>`).join('');
+  box.querySelectorAll('input[type=checkbox]').forEach(c=>{
+    c.onchange = () => {
+      c.checked ? SHOWN.add(c.dataset.pid) : SHOWN.delete(c.dataset.pid);
+      renderChart(CHART);
+    };
+  });
+}
+
+function colorOf(pid){
+  const i = (LATEST.findIndex(p=>p.id===pid) + LATEST.length) % PALETTE.length;
+  return PALETTE[i];
+}
 
 function renderChart(data){
+  CHART = data;
   const svg = $('#chart');
   const W=800, H=320, PAD_L=55, PAD_R=15, PAD_T=15, PAD_B=30;
   const pw = W-PAD_L-PAD_R, ph = H-PAD_T-PAD_B;
-  const prods = Object.entries(data.products||{});
-  if(!prods.length || prods.every(([,v])=>!v.points.length)){
-    svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#8fa3b0" font-size="13" text-anchor="middle">Chưa có dữ liệu lịch sử — bấm "Quét tất cả"</text>`;
+  const all = Object.entries(data.products||{}).filter(([pid])=>SHOWN.has(pid));
+  if(!all.length || all.every(([,v])=>!v.points.length)){
+    svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#8fa3b0" font-size="13" text-anchor="middle">Chưa chọn sản phẩm nào — tick vào ô bên trên</text>`;
     $('#chartLegend').innerHTML='';
     return;
   }
-  // thu thập tất cả điểm để tìm min/max
   let allP=[], allT=[];
-  prods.forEach(([pid,v])=> v.points.forEach(p=>{ allP.push(p.price); allT.push(new Date(p.t).getTime()); }));
+  all.forEach(([pid,v])=> v.points.forEach(p=>{ allP.push(p.price); allT.push(new Date(p.t).getTime()); }));
   let minP=Math.min(...allP), maxP=Math.max(...allP);
   if(minP===maxP){ minP*=0.98; maxP*=1.02; }
   const pad=(maxP-minP)*0.1; minP-=pad; maxP+=pad;
   const tMin=Math.min(...allT), tMax=Math.max(...allT);
   const t0 = tMin===tMax ? tMin-3600e3 : tMin, t1 = tMax;
-  const x = t => PAD_L + (t1===t0 ? pw/2 : ( (t-t0)/(t1-t0) )*pw);
+  const x = t => PAD_L + (t1===t0 ? pw/2 : ((t-t0)/(t1-t0))*pw);
   const y = p => PAD_T + (1-(p-minP)/(maxP-minP))*ph;
 
   let s = '';
-  // grid + y labels
   for(let i=0;i<=4;i++){
     const yy=PAD_T+ph*i/4; const val=maxP-(maxP-minP)*i/4;
     s+=`<line class="axis" x1="${PAD_L}" y1="${yy}" x2="${W-PAD_R}" y2="${yy}"/>`;
     s+=`<text class="axis-label" x="${PAD_L-6}" y="${yy+3}" text-anchor="end">${fmt(val)}</text>`;
   }
-  // x label (đầu/cuối)
   s+=`<text class="axis-label" x="${PAD_L}" y="${H-10}">${when(new Date(t0).toISOString())}</text>`;
   s+=`<text class="axis-label" x="${W-PAD_R}" y="${H-10}" text-anchor="end">${when(new Date(t1).toISOString())}</text>`;
 
-  // lines + points
-  prods.forEach(([pid,v],idx)=>{
-    const col=PALETTE[idx%PALETTE.length];
+  all.forEach(([pid,v])=>{
+    const col = colorOf(pid);
     if(v.points.length<2){
       const p=v.points[0]; if(!p) return;
       s+=`<circle class="pt" cx="${x(new Date(p.t).getTime())}" cy="${y(p.price)}" r="3.5" fill="${col}"/>`;
@@ -213,11 +283,17 @@ function renderChart(data){
   });
   svg.innerHTML=s;
 
-  // legend
-  $('#chartLegend').innerHTML = prods.map(([pid,v],idx)=>{
-    const col=PALETTE[idx%PALETTE.length];
-    return `<div class="lg"><span class="sw" style="background:${col}"></span>${v.name||pid}</div>`;
+  $('#chartLegend').innerHTML = all.map(([pid,v])=>{
+    const col=colorOf(pid);
+    return `<div class="lg" data-pid="${pid}"><span class="sw" style="background:${col}"></span>${v.name||pid}</div>`;
   }).join('');
+  $('#chartLegend').querySelectorAll('.lg').forEach(l=>{
+    l.onclick = () => { SHOWN.delete(l.dataset.pid); syncChecks(); renderChart(CHART); };
+  });
+}
+
+function syncChecks(){
+  $$('#prodChecks input').forEach(c=> c.checked = SHOWN.has(c.dataset.pid));
 }
 
 // ---------- tables ----------
@@ -230,12 +306,21 @@ function renderStats(latest, alerts){
     <div class="card"><div class="k">Khẩn cấp (ESCALATE)</div><div class="v" style="color:var(--red)">${esc}</div></div>
     <div class="card"><div class="k">Lần quét gần nhất</div><div class="v" style="font-size:15px">${when(latest[0]?.captured_at)}</div></div>`;
 }
+function filterLatest(){
+  const b=$('#f_brand').value, d=$('#f_dec').value, s=$('#f_search').value.trim().toLowerCase();
+  return LATEST.filter(r=>
+    (!b || (r.brand||'')===b) &&
+    (!d || (r.decision??'IGNORE')===d) &&
+    (!s || (r.name??'').toLowerCase().includes(s) || (r.id||'').toLowerCase().includes(s))
+  );
+}
 function renderLatest(rows){
-  if(!rows.length){ $('#latest').innerHTML='<div class="empty">Chưa có dữ liệu — bấm "Quét tất cả".</div>'; return; }
+  const data = rows || filterLatest();
+  if(!data.length){ $('#latest').innerHTML='<div class="empty">Không có dữ liệu khớp bộ lọc.</div>'; return; }
   $('#latest').innerHTML = `<table><thead><tr>
       <th>Sản phẩm</th><th>Thương hiệu</th><th>Giá hiện tại</th>
       <th>Biến động</th><th>Quyết định</th><th>Cập nhật</th><th></th>
-    </tr></thead><tbody>${rows.map(r=>`
+    </tr></thead><tbody>${data.map(r=>`
       <tr>
         <td><strong>${r.name??r.id}</strong><div class="sub mono">${r.id}</div></td>
         <td>${r.brand??'—'}</td>
@@ -246,11 +331,20 @@ function renderLatest(rows){
         <td><button class="btn sm" onclick="runOne('${r.id}')">Quét</button></td>
       </tr>`).join('')}</tbody></table>`;
 }
+function filterAlerts(){
+  const b=$('#f_brand_a').value, d=$('#f_dec_a').value, s=$('#f_search_a').value.trim().toLowerCase();
+  return ALERTS.filter(r=>
+    (!b || (r.brand||r.product_brand||'')===b) &&
+    (!d || (r.decision??'')===d) &&
+    (!s || (r.product_name??'').toLowerCase().includes(s) || (r.product_id||'').toLowerCase().includes(s))
+  );
+}
 function renderAlerts(rows){
-  if(!rows.length){ $('#alerts').innerHTML='<div class="empty">Chưa có cảnh báo nào.</div>'; return; }
+  const data = rows || filterAlerts();
+  if(!data.length){ $('#alerts').innerHTML='<div class="empty">Không có cảnh báo khớp bộ lọc.</div>'; return; }
   $('#alerts').innerHTML = `<table><thead><tr>
       <th>Thời điểm</th><th>Sản phẩm</th><th>Giá</th><th>Lệch</th><th>Quyết định</th>
-    </tr></thead><tbody>${rows.slice(0,15).map(r=>`
+    </tr></thead><tbody>${data.slice(0,30).map(r=>`
       <tr>
         <td class="sub">${when(r.captured_at)}</td>
         <td>${r.product_name??r.product_id}</td>
@@ -260,13 +354,24 @@ function renderAlerts(rows){
       </tr>`).join('')}</tbody></table>`;
 }
 
+function fillBrandFilters(){
+  const brands = [...new Set(LATEST.map(p=>p.brand).filter(Boolean))].sort();
+  const opts = '<option value="">Tất cả</option>' + brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+  $('#f_brand').innerHTML = opts;
+  $('#f_brand_a').innerHTML = opts;
+}
+
 async function load(){
   try{
     const [latest, alerts, health, chart] = await Promise.all([
       api('/api/latest'), api('/api/alerts'), api('/api/health'), api('/api/chart?range='+CUR_RANGE)
     ]);
+    LATEST = latest; ALERTS = alerts;
     $('#mode').textContent = 'nguồn: ' + health.collect_mode;
-    renderStats(latest, alerts); renderLatest(latest); renderAlerts(alerts);
+    renderStats(latest, alerts);
+    fillBrandFilters();
+    buildProdChecks();
+    renderLatest(); renderAlerts();
     renderChart(chart);
   }catch(e){ if(!e.message.includes('TOKEN')) toast('Lỗi tải dữ liệu: ' + e.message); }
 }
@@ -318,6 +423,24 @@ $('#rangeBtns').addEventListener('click', e=>{
   btn.classList.add('active');
   api('/api/chart?range='+CUR_RANGE).then(renderChart).catch(()=>{});
 });
+
+// chart checkbox quick actions
+$('#grpQuick').addEventListener('click', e=>{
+  const act = e.target.dataset.act; if(!act) return;
+  if(act==='all') LATEST.forEach(p=>SHOWN.add(p.id));
+  else if(act==='none') SHOWN.clear();
+  else if(act==='invert') LATEST.forEach(p=> SHOWN.has(p.id)?SHOWN.delete(p.id):SHOWN.add(p.id));
+  syncChecks(); renderChart(CHART);
+});
+
+// table filters
+['#f_brand','#f_dec','#f_search'].forEach(s=>$(s).addEventListener('input',()=>renderLatest()));
+['#f_brand_a','#f_dec_a','#f_search_a'].forEach(s=>$(s).addEventListener?$(s).addEventListener('input',()=>renderAlerts()):0);
+$('#f_brand_a').addEventListener('input',()=>renderAlerts());
+$('#f_dec_a').addEventListener('input',()=>renderAlerts());
+$('#f_search_a').addEventListener('input',()=>renderAlerts());
+$('#f_reset').onclick = () => { $('#f_brand').value=''; $('#f_dec').value=''; $('#f_search').value=''; renderLatest(); };
+$('#f_reset_a').onclick = () => { $('#f_brand_a').value=''; $('#f_dec_a').value=''; $('#f_search_a').value=''; renderAlerts(); };
 
 async function syncAuto(){
   try{
