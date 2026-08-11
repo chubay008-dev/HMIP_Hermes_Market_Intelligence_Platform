@@ -16,5 +16,221 @@
     "brand_id": "BRAND-P555",
     "name": "Bia Saigon Export 330ml",
     "category": "beer"
+  },
+  {
+    "id": "P789",
+    "brand_id": "BRAND-P789",
+    "name": "Tiger Beer 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "P012",
+    "brand_id": "BRAND-P012",
+    "name": "Bia Ha Noi 450ml",
+    "category": "beer"
+  },
+  {
+    "id": "P333",
+    "brand_id": "BRAND-P333",
+    "name": "Bia Larue 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "P777",
+    "brand_id": "BRAND-P777",
+    "name": "Sapporo Premium 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "P888",
+    "brand_id": "BRAND-P888",
+    "name": "Budweiser 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTBG",
+    "brand_id": "BRAND-PTBG",
+    "name": "Tuborg 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTBG_G",
+    "brand_id": "BRAND-PTBG_G",
+    "name": "Tuborg Green 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTBG_C",
+    "brand_id": "BRAND-PTBG_C",
+    "name": "Tuborg Classic 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTBG_D",
+    "brand_id": "BRAND-PTBG_D",
+    "name": "Tuborg Gold 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PESP_EG",
+    "brand_id": "BRAND-PESP_EG",
+    "name": "Estrella Galicia 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PESP_ED",
+    "brand_id": "BRAND-PESP_ED",
+    "name": "Estrella Damm 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PESP_MH",
+    "brand_id": "BRAND-PESP_MH",
+    "name": "Mahou 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PESP_SM",
+    "brand_id": "BRAND-PESP_SM",
+    "name": "San Miguel 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PITA_PN",
+    "brand_id": "BRAND-PITA_PN",
+    "name": "Peroni Nastro Azzurro 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PITA_P",
+    "brand_id": "BRAND-PITA_P",
+    "name": "Peroni 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PITA_MO",
+    "brand_id": "BRAND-PITA_MO",
+    "name": "Moretti 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PITA_BM",
+    "brand_id": "BRAND-PITA_BM",
+    "name": "Birra Messina 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PITA_MN",
+    "brand_id": "BRAND-PITA_MN",
+    "name": "Menabrea 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PIRE_GD",
+    "brand_id": "BRAND-PIRE_GD",
+    "name": "Guinness Draught 440ml",
+    "category": "beer"
+  },
+  {
+    "id": "PIRE_GE",
+    "brand_id": "BRAND-PIRE_GE",
+    "name": "Guinness Extra Stout 440ml",
+    "category": "beer"
+  },
+  {
+    "id": "PIRE_GF",
+    "brand_id": "BRAND-PIRE_GF",
+    "name": "Guinness Foreign Extra Stout 440ml",
+    "category": "beer"
+  },
+  {
+    "id": "PIRE_G0",
+    "brand_id": "BRAND-PIRE_G0",
+    "name": "Guinness 0.0 440ml",
+    "category": "beer"
+  },
+  {
+    "id": "PMEX_CO",
+    "brand_id": "BRAND-PMEX_CO",
+    "name": "Corona Extra 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PMEX_CC",
+    "brand_id": "BRAND-PMEX_CC",
+    "name": "Corona Cero 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PMEX_ME",
+    "brand_id": "BRAND-PMEX_ME",
+    "name": "Modelo Especial 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PMEX_NM",
+    "brand_id": "BRAND-PMEX_NM",
+    "name": "Negra Modelo 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PMEX_SO",
+    "brand_id": "BRAND-PMEX_SO",
+    "name": "Sol 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PMEX_PA",
+    "brand_id": "BRAND-PMEX_PA",
+    "name": "Pacifico 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PMEX_DE",
+    "brand_id": "BRAND-PMEX_DE",
+    "name": "Dos Equis 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PRUS_BA",
+    "brand_id": "BRAND-PRUS_BA",
+    "name": "Baltika 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PRUS_B0",
+    "brand_id": "BRAND-PRUS_B0",
+    "name": "Baltika 0 (khong con) 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PZ_HN",
+    "brand_id": "BRAND-PZ_HN",
+    "name": "Heineken 0.0 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PZ_BW",
+    "brand_id": "BRAND-PZ_BW",
+    "name": "Budweiser Zero 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PZ_ER",
+    "brand_id": "BRAND-PZ_ER",
+    "name": "Erdinger Alkoholfrei 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PZ_AS",
+    "brand_id": "BRAND-PZ_AS",
+    "name": "Asahi Dry Zero 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PZ_BK",
+    "brand_id": "BRAND-PZ_BK",
+    "name": "Beck's Blue 330ml",
+    "category": "beer"
   }
 ]

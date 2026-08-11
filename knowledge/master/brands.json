@@ -24,5 +24,157 @@
   {
     "id": "BRAND-P555",
     "name": "Saigon"
+  },
+  {
+    "id": "BRAND-P123",
+    "name": "Saigon Beer"
+  },
+  {
+    "id": "BRAND-P456",
+    "name": "Heineken"
+  },
+  {
+    "id": "BRAND-P789",
+    "name": "Tiger"
+  },
+  {
+    "id": "BRAND-P012",
+    "name": "Habeco"
+  },
+  {
+    "id": "BRAND-P333",
+    "name": "Larue"
+  },
+  {
+    "id": "BRAND-P777",
+    "name": "Sapporo"
+  },
+  {
+    "id": "BRAND-P888",
+    "name": "Budweiser"
+  },
+  {
+    "id": "BRAND-PTBG",
+    "name": "Tuborg"
+  },
+  {
+    "id": "BRAND-PTBG_G",
+    "name": "Tuborg"
+  },
+  {
+    "id": "BRAND-PTBG_C",
+    "name": "Tuborg"
+  },
+  {
+    "id": "BRAND-PTBG_D",
+    "name": "Tuborg"
+  },
+  {
+    "id": "BRAND-PESP_EG",
+    "name": "Estrella"
+  },
+  {
+    "id": "BRAND-PESP_ED",
+    "name": "Estrella"
+  },
+  {
+    "id": "BRAND-PESP_MH",
+    "name": "Mahou"
+  },
+  {
+    "id": "BRAND-PESP_SM",
+    "name": "San Miguel"
+  },
+  {
+    "id": "BRAND-PITA_PN",
+    "name": "Peroni"
+  },
+  {
+    "id": "BRAND-PITA_P",
+    "name": "Peroni"
+  },
+  {
+    "id": "BRAND-PITA_MO",
+    "name": "Moretti"
+  },
+  {
+    "id": "BRAND-PITA_BM",
+    "name": "Birra Messina"
+  },
+  {
+    "id": "BRAND-PITA_MN",
+    "name": "Menabrea"
+  },
+  {
+    "id": "BRAND-PIRE_GD",
+    "name": "Guinness"
+  },
+  {
+    "id": "BRAND-PIRE_GE",
+    "name": "Guinness"
+  },
+  {
+    "id": "BRAND-PIRE_GF",
+    "name": "Guinness"
+  },
+  {
+    "id": "BRAND-PIRE_G0",
+    "name": "Guinness"
+  },
+  {
+    "id": "BRAND-PMEX_CO",
+    "name": "Corona"
+  },
+  {
+    "id": "BRAND-PMEX_CC",
+    "name": "Corona"
+  },
+  {
+    "id": "BRAND-PMEX_ME",
+    "name": "Modelo"
+  },
+  {
+    "id": "BRAND-PMEX_NM",
+    "name": "Modelo"
+  },
+  {
+    "id": "BRAND-PMEX_SO",
+    "name": "Sol"
+  },
+  {
+    "id": "BRAND-PMEX_PA",
+    "name": "Pacifico"
+  },
+  {
+    "id": "BRAND-PMEX_DE",
+    "name": "Dos Equis"
+  },
+  {
+    "id": "BRAND-PRUS_BA",
+    "name": "Baltika"
+  },
+  {
+    "id": "BRAND-PRUS_B0",
+    "name": "Baltika"
+  },
+  {
+    "id": "BRAND-PZ_HN",
+    "name": "Heineken"
+  },
+  {
+    "id": "BRAND-PZ_BW",
+    "name": "Budweiser"
+  },
+  {
+    "id": "BRAND-PZ_ER",
+    "name": "Erdinger"
+  },
+  {
+    "id": "BRAND-PZ_AS",
+    "name": "Asahi"
+  },
+  {
+    "id": "BRAND-PZ_BK",
+    "name": "Beck's"
   }
 ]
