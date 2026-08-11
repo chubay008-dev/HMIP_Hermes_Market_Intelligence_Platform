@@ -1,6 +1,6 @@
 # render.yaml — Deploy HMIP lên Render (free/paid)
 # Cách dùng:
-#   1. Push repo lên GitHub (đã làm)
+#   1. Push repo lên GitHub
 #   2. Render Dashboard → New → Blueprint → chọn repo → dùng file này
 #   HOẶC: New → Web Service → kết nối repo → Runtime: Docker → để trống (tự dùng Dockerfile)
 #
@@ -12,7 +12,7 @@ services:
     name: hmip
     runtime: docker
     dockerfilePath: ./Dockerfile
-    # Render cấp port qua biến $PORT; start.sh đọc $PORT.
+    # Render cấp port qua biến $PORT; start.sh đã đọc $PORT.
     healthCheckPath: /api/health
     envVars:
       - key: HMIP_IN_DOCKER
@@ -26,8 +26,9 @@ services:
       - key: HMIP_API_TOKEN
         sync: false            # NHẬP TOKEN TỪ RENDER DASHBOARD (bảo mật)
         generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên
-    # Ổ đĩa bền vực để hmip.db (lịch sử giá) không bị mất khi container restart
-    disks:
+    # Ổ đĩa bền vực để hmip.db (lịch sử giá) không bị mất khi container restart.
+    # Render Disk mount dùng key "mounts" (không phải "disks").
+    mounts:
       - name: hmip-data
-        mountPath: /app/data
+        path: /app/data
         sizeGB: 1
