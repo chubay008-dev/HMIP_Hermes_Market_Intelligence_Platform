@@ -126,3 +126,4 @@ reports/*
 # ------------------------------------------------------------
 *.pid
 *.pid.lock
+knowledge/dynamic/lineage/lineage.jsonl
