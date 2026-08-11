@@ -26,5 +26,4 @@ services:
       - key: HMIP_COLLECT_MODE
         value: "demo"          # đổi thành "http" nếu có nguồn giá thật
       - key: HMIP_API_TOKEN
-        sync: false            # NHẬP TOKEN TỪ RENDER DASHBOARD (bảo mật)
-        generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên
+        generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên (dùng login web)
