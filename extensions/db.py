@@ -118,6 +118,15 @@ def record_price_point(
     if path is None:
         path = DEFAULT_DB_PATH
     now = datetime.now(timezone.utc).isoformat()
+    # carry forward the last known province if caller omitted it (scans may not supply one)
+    if province is None:
+        with _session(path) as c:
+            row = c.execute(
+                "SELECT province FROM price_points WHERE product_id=? AND province IS NOT NULL ORDER BY id DESC LIMIT 1",
+                (product_id,),
+            ).fetchone()
+            if row:
+                province = row["province"]
     with _session(path) as c:
         cur = c.execute(
             """INSERT INTO price_points
