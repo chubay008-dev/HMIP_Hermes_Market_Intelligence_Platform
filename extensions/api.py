@@ -51,18 +51,14 @@ def _auto_scan_job() -> None:
 
 
 def _pi_collect_job() -> None:
-    """Job nền (B): quét giá thật từ Firecrawl/Tiki định kỳ, detect + notify."""
+    """Job nền (B): quét giá thật (Firecrawl → fallback Tiki API) định kỳ."""
     try:
-        from extensions.pi import firecrawl_collector as _fc
         from extensions.pi import collectors as _col
-        from extensions.pi import events as _ev
         import os as _os
         _path = _os.getenv("HMIP_PI_DB_PATH") or None
-        if _fc.FirecrawlCollector().api_key:
-            r = _fc.collect_realtime_firecrawl(channel="TIKI", limit=None, path=_path)
-        else:
-            r = _col.collect_realtime(channel="TIKI", limit=None, path=_path)
+        r = _col.collect_realtime_smart(limit=None, path=_path)
         log.info("PI collect: %s", r)
+        from extensions.pi import events as _ev
         _ev.detect_events(path=_path)
     except Exception as exc:  # noqa: BLE001
         log.exception("PI collect job lỗi: %s", exc)
@@ -502,23 +498,15 @@ def pi_reset() -> dict[str, Any]:
 
 @app.post("/api/prices/collect")
 def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any]:
-    """Quét giá THẬT (Firecrawl/Tiki) thay thế demo.
+    """Quét giá THẬT (Firecrawl ưu tiên, fallback Tiki API free).
 
-   Ưu tiên Firecrawl (vượt block Tiki, trả giá thật). Nếu thiếu key thì
-    fallback TikiCollector tự viết. Trả summary {collected, failed, total}.
-   """
+    Dùng collect_realtime_smart: Firecrawl trước, nếu hết credit (402) tự
+    chuyển Tiki API công khai (không tốn tiền). Trả summary + source_used.
+    """
     from extensions.pi import collectors as _col
-    from extensions.pi import firecrawl_collector as _fc
     import os as _os
     _path = _os.getenv("HMIP_PI_DB_PATH") or None
-    # Firecrawl là nguồn chính (giá thật ổn định)
-    if _fc.FirecrawlCollector().api_key:
-        return _fc.collect_realtime_firecrawl(channel=channel.upper(), limit=limit, path=_path)
-    # Fallback: TikiCollector tự viết (có thể bị block)
-    try:
-        return _col.collect_realtime(channel=channel.upper(), limit=limit, path=_path)
-    except NotImplementedError as exc:
-        raise HTTPException(501, str(exc))
+    return _col.collect_realtime_smart(limit=limit, path=_path)
 
 
 # ------------------------------------------------------------- static

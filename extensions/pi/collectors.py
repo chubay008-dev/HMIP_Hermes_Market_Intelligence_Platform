@@ -326,3 +326,30 @@ def collect_realtime(channel: str = "TIKI", limit: int | None = None, path: str 
             failed += 1
         time.sleep(_REQ_GAP_S)
     return {"channel": channel, "collected": collected, "failed": failed, "total": total}
+
+
+def collect_realtime_smart(limit: int | None = None, path: str | None = None) -> dict[str, Any]:
+    """Quét giá thật với fallback thông minh (không tốn tiền khi có thể).
+
+    Ưu tiên Firecrawl (trả giá thật ổn định) → nếu hết credit (402) hoặc thiếu
+    key → fallback Tiki API công khai (100% free, đã verify lấy được giá).
+    Trả summary có trường 'source_used' để biết dùng nguồn nào.
+    """
+    from . import firecrawl_collector as fc
+
+    fc_key = (fc.FirecrawlCollector().api_key or "").strip()
+    if fc_key:
+        res = fc.collect_realtime_firecrawl(channel="TIKI", limit=limit, path=path)
+        # Nếu Firecrawl fail hoàn toàn (thường do 402 hết credit) -> fallback Tiki
+        if res.get("collected", 0) == 0 and res.get("total", 0) > 0:
+            log.warning("Firecrawl fail (có thể hết credit) -> fallback Tiki API (free)")
+            tk = collect_realtime(channel="TIKI", limit=limit, path=path)
+            tk["source_used"] = "tiki-api-fallback"
+            tk["firecrawl_result"] = res
+            return tk
+        res["source_used"] = "firecrawl"
+        return res
+    # Không có Firecrawl key -> Tiki API trực tiếp
+    tk = collect_realtime(channel="TIKI", limit=limit, path=path)
+    tk["source_used"] = "tiki-api"
+    return tk
