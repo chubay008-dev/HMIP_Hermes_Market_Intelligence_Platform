@@ -297,6 +297,7 @@ const T = {
     noData:"Không có dữ liệu khớp bộ lọc.", emptyChart:"Chưa chọn sản phẩm nào — tick vào ô bên trên", loading:"Đang tải…",
     dec:{IGNORE:"IGNORE", ALERT:"ALERT", ESCALATE:"ESCALATE", HUMAN_REVIEW:"HUMAN_REVIEW"},
     aiGreeting:"Xin chào! Hãy hỏi về một sản phẩm hoặc thương hiệu, ví dụ: \"Tại sao Tiger tăng giá?\" hoặc \"So sánh Heineken và Tiger\".",
+    aiHello:"Chào bạn! Mình là AI Analyst của HMIP. Hãy hỏi về một sản phẩm hoặc thương hiệu (vd: \"Tại sao Tiger tăng giá?\", \"So sánh Heineken và Tiger\") để mình phân tích từ dữ liệu thật.",
     aiNoMatch:"Không tìm thấy sản phẩm/thương hiệu khớp từ khóa. Các thương hiệu có sẵn: ",
     posHi:"CAO", posLo:"THẤP", posXlab:"CHỈ SỐ GIÁ", posYlab:"SỐ SKU",
     regTitle:"Giá theo vùng (Regional Pricing)", regNote:"Giá trung bình mỗi tỉnh/thành phố · heatmap so với giá thị trường",
@@ -328,6 +329,7 @@ const T = {
     noData:"No data matches the filters.", emptyChart:"No product selected — tick a box above", loading:"Loading…",
     dec:{IGNORE:"IGNORE", ALERT:"ALERT", ESCALATE:"ESCALATE", HUMAN_REVIEW:"HUMAN_REVIEW"},
     aiGreeting:"Hello! Ask about a product or brand, e.g. \"Why did Tiger rise?\" or \"Compare Heineken and Tiger\".",
+    aiHello:"Hi! I'm HMIP's AI Analyst. Ask about a product or brand (e.g. \"Why did Tiger rise?\", \"Compare Heineken and Tiger\") and I'll analyze from real data.",
     aiNoMatch:"No matching product/brand found. Available brands: ",
     posHi:"HIGH", posLo:"LOW", posXlab:"PRICE INDEX", posYlab:"SKU COUNT",
     regTitle:"Regional Pricing", regNote:"Average price per province/city · heatmap vs market price",
@@ -359,6 +361,7 @@ const T = {
     noData:"没有符合筛选条件的数据。", emptyChart:"未选择产品 — 勾选上方复选框", loading:"加载中…",
     dec:{IGNORE:"忽略", ALERT:"警报", ESCALATE:"升级", HUMAN_REVIEW:"人工复核"},
     aiGreeting:"你好!请询问产品或品牌,例如:\"Tiger 为何涨价?\"或\"对比 Heineken 与 Tiger\"。",
+    aiHello:"你好!我是 HMIP 的 AI 分析师。请询问产品或品牌(例如:\"Tiger 为何涨价?\"、\"对比 Heineken 与 Tiger\"),我会基于真实数据分析。",
     aiNoMatch:"未找到匹配的产品/品牌。可用品牌: ",
     posHi:"高", posLo:"低", posXlab:"价格指数", posYlab:"SKU数",
     regTitle:"区域价格 (Regional Pricing)", regNote:"各省市平均价 · 与市场价对比热力图",
@@ -765,8 +768,18 @@ $('#langSeg').addEventListener('click',e=>{ const b=e.target.closest('button[dat
 applyTheme();
 
 /* ---------- AI Analyst (rule-based) ---------- */
+function isGreeting(q){
+  // lời chào / thanh lịch (không chứa từ khóa sản phẩm/thương hiệu)
+  const g={vi:['xin chào','chào','alo','chào bạn','hi','hello','hey','chào bn','có ai không','bạn khỏe không','tạm biệt','good morning','good afternoon','good evening','bonjour','привет','こんにちは','你好','您好'],
+        en:['hi','hello','hey','good morning','good afternoon','good evening','howdy','greetings','yo','sup','bye','thank'],
+        zh:['你好','您好','嗨','哈喽','在吗','谢谢','再见']};
+  const words=q.toLowerCase().split(/[\s,.;!?]+/).filter(Boolean);
+  if(words.length>4) return false; // câu dài → coi là câu hỏi thật
+  return g[LANG].some(w=> q.toLowerCase().includes(w)) || g.vi.some(w=>q.toLowerCase().includes(w));
+}
 function aiAnalyze(q){
   q=q.trim().toLowerCase();
+  if(isGreeting(q)) return `🤖 ${t('aiHello')}`;
   const brands=[...new Set(LATEST.map(p=>p.brand).filter(Boolean))];
   const matchBrand = brands.find(b=> q.includes(b.toLowerCase()));
   const matchProd = LATEST.find(p=> q.includes((p.name||'').toLowerCase()) || q.includes(p.id.toLowerCase()));
