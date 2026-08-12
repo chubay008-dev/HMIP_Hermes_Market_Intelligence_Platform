@@ -67,6 +67,16 @@ def init_pi_db(path: str | None = None) -> None:
                 unit         TEXT
             );
 
+            -- v3.1 P0: tách Variant thành bảng riêng (Brand→Product→Variant→SKU→Listing)
+            CREATE TABLE IF NOT EXISTS pi_variants (
+                variant_id   TEXT PRIMARY KEY,
+                product_id   TEXT NOT NULL REFERENCES pi_products(product_id),
+                name         TEXT NOT NULL,           -- "Original", "Light", "Zero"
+                slug         TEXT,
+                attributes   TEXT,                    -- JSON: flavor_type, special_ingredients
+                is_active    INTEGER DEFAULT 1
+            );
+
             CREATE TABLE IF NOT EXISTS pi_skus (
                 sku_id          TEXT PRIMARY KEY,
                 product_id      TEXT REFERENCES pi_products(product_id),
@@ -74,6 +84,18 @@ def init_pi_db(path: str | None = None) -> None:
                 pack_quantity   REAL,
                 unit_volume_ml  REAL,
                 normalized_unit TEXT
+            );
+
+            -- v3.1 P0: Source Listing (1 SKU có nhiều listing trên các sàn)
+            CREATE TABLE IF NOT EXISTS pi_source_listings (
+                listing_id    TEXT PRIMARY KEY,
+                sku_id       TEXT NOT NULL REFERENCES pi_skus(sku_id),
+                channel_id   TEXT REFERENCES pi_channels(channel_id),
+                seller_id    TEXT REFERENCES pi_sellers(seller_id),
+                region_id    TEXT REFERENCES pi_regions(region_id),
+                source_url   TEXT,
+                external_id  TEXT,                     -- ID sản phẩm trên sàn (vd Tiki spid)
+                is_active    INTEGER DEFAULT 1
             );
 
             CREATE TABLE IF NOT EXISTS pi_channels (
@@ -188,6 +210,9 @@ def init_pi_db(path: str | None = None) -> None:
             CREATE INDEX IF NOT EXISTS idx_pi_evt_time      ON pi_price_events(timestamp);
             CREATE INDEX IF NOT EXISTS idx_pi_alert_sev     ON pi_alerts(severity);
             CREATE INDEX IF NOT EXISTS idx_pi_promo_sku     ON pi_promotions(sku_id);
+            CREATE INDEX IF NOT EXISTS idx_pi_var_product   ON pi_variants(product_id);
+            CREATE INDEX IF NOT EXISTS idx_pi_listing_sku   ON pi_source_listings(sku_id);
+            CREATE INDEX IF NOT EXISTS idx_pi_listing_chan  ON pi_source_listings(channel_id);
             """
         )
         conn.commit()
@@ -320,6 +345,37 @@ def upsert_sku(sku_id: str, product_id: str, barcode: str | None = None,
             "barcode=excluded.barcode, pack_quantity=excluded.pack_quantity, "
             "unit_volume_ml=excluded.unit_volume_ml, normalized_unit=excluded.normalized_unit",
             (sku_id, product_id, barcode, pack_quantity, unit_volume_ml, normalized_unit),
+        )
+
+
+# v3.1 P0: tách Variant riêng biệt (Brand→Product→Variant→SKU→Listing)
+def upsert_variant(variant_id: str, product_id: str, name: str, slug: str | None = None,
+                  attributes: str | None = None, path: str | None = None) -> None:
+    with _session(path) as c:
+        c.execute(
+            "INSERT INTO pi_variants (variant_id, product_id, name, slug, attributes) "
+            "VALUES (?, ?, ?, ?, ?) "
+            "ON CONFLICT(variant_id) DO UPDATE SET product_id=excluded.product_id, "
+            "name=excluded.name, slug=excluded.slug, attributes=excluded.attributes",
+            (variant_id, product_id, name, slug, attributes),
+        )
+
+
+# v3.1 P0: Source Listing (per marketplace) cho 1 SKU
+def upsert_source_listing(listing_id: str, sku_id: str, channel_id: str | None = None,
+                          seller_id: str | None = None, region_id: str | None = None,
+                          source_url: str | None = None, external_id: str | None = None,
+                          path: str | None = None) -> None:
+    with _session(path) as c:
+        c.execute(
+            "INSERT INTO pi_source_listings "
+            "(listing_id, sku_id, channel_id, seller_id, region_id, source_url, external_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(listing_id) DO UPDATE SET sku_id=excluded.sku_id, "
+            "channel_id=excluded.channel_id, seller_id=excluded.seller_id, "
+            "region_id=excluded.region_id, source_url=excluded.source_url, "
+            "external_id=excluded.external_id",
+            (listing_id, sku_id, channel_id, seller_id, region_id, source_url, external_id),
         )
 
 

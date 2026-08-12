@@ -256,10 +256,20 @@ def ensure_catalog(path: str | None = None) -> None:
         ps.upsert_product(pid, bid, "BEER", str(meta["product_name"]),
                          variant=None, pack_size=None, volume_ml=float(meta.get("volume_ml", 330)),
                          unit="ml", path=path)
+        # v3.1 P0: tách Variant riêng (Brand→Product→Variant→SKU→Listing)
+        variant_name = str(meta.get("variant", "Original"))
+        vid = f"VAR-{pid}"
+        ps.upsert_variant(vid, pid, variant_name, slug=variant_name.lower().replace(" ", "-"),
+                          attributes=None, path=path)
         ps.upsert_sku(f"SKU-{pid}", pid, barcode=None,
                       pack_quantity=float(meta.get("pack_quantity", 1)),
                       unit_volume_ml=float(meta.get("volume_ml", 330)),
                       normalized_unit="100ml", path=path)
+        # v3.1 P0: Source Listing trên Tiki (per marketplace) cho SKU này
+        ps.upsert_source_listing(
+            listing_id=f"LST-TIKI-{pid}", sku_id=f"SKU-{pid}", channel_id="TIKI",
+            seller_id="UNKNOWN", region_id="ONLINE", source_url=None,
+            external_id=None, path=path)
 
 
 def store_price_point(pp: PricePoint, today: str | None = None, path: str | None = None) -> None:
