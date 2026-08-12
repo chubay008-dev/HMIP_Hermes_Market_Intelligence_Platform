@@ -34,6 +34,7 @@ from extensions.notifiers.telegram import is_configured as telegram_configured
 from extensions.run_workflow import resolve_base_price, run_prc_001
 from extensions.scheduler import scan_once
 from extensions.auth import protect_app
+from extensions.pi import service as pi_service
 
 _STATIC_DIR = Path(__file__).resolve().parent / "web"
 log = logging.getLogger("hmip.api")
@@ -52,6 +53,12 @@ def _auto_scan_job() -> None:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init_db()
+    # Tự seed Price Intelligence DB nếu rỗng (Render ephemeral FS: data reset
+    # khi restart → cần tái lập từ catalog mỗi lần cold start).
+    try:
+        pi_service.ensure_ready()
+    except Exception as exc:  # không block startup nếu seed lỗi
+        print(f"[PI] seed skip/error: {exc}")
     # Tự động bật auto-scan nếu env yêu cầu (mặc định TẮT để user chủ động).
     if os.getenv("HMIP_AUTOSCAN", "off").lower() in ("1", "on", "true", "yes"):
         _start_auto_scan()
@@ -294,6 +301,156 @@ def autoscan_status() -> dict[str, Any]:
     }
 
 
+# ------------------------------------------------------------- Price Intelligence (PI, Spec v2.0)
+
+class PIFilter(BaseModel):
+    product_id: str | None = None
+    brand_id: str | None = None
+    channel_id: str | None = None
+    region_id: str | None = None
+    period: str | None = "90D"
+    promotion_only: bool = False
+
+
+@app.get("/api/price-intelligence/catalog")
+def pi_catalog() -> dict[str, Any]:
+    """Dimensions cho filter bar (Spec §5)."""
+    return pi_service.get_catalog()
+
+
+@app.get("/api/price-intelligence/overview")
+def pi_overview(
+    product_id: str | None = None, brand_id: str | None = None,
+    channel_id: str | None = None, region_id: str | None = None,
+    period: str | None = "90D",
+) -> dict[str, Any]:
+    return pi_service.overview({
+        "product_id": product_id, "brand_id": brand_id,
+        "channel_id": channel_id, "region_id": region_id, "period": period,
+    })
+
+
+@app.get("/api/price-intelligence/workspace")
+def pi_workspace(
+    product_id: str | None = None, brand_id: str | None = None,
+    channel_id: str | None = None, region_id: str | None = None,
+    period: str | None = "90D",
+) -> dict[str, Any]:
+    """Gom toàn bộ dashboard một lần gọi."""
+    return pi_service.full_workspace({
+        "product_id": product_id, "brand_id": brand_id,
+        "channel_id": channel_id, "region_id": region_id, "period": period,
+    })
+
+
+@app.get("/api/prices/trend")
+def pi_trend(
+    product_id: str | None = None, channel_id: str | None = None,
+    region_id: str | None = None, period: str | None = "90D",
+    series: str | None = "sku_price,market_avg,brand_avg",
+) -> dict[str, Any]:
+    return pi_service.trend(
+        {"product_id": product_id, "channel_id": channel_id,
+         "region_id": region_id, "period": period},
+        series=series.split(",") if series else None,
+    )
+
+
+@app.get("/api/prices/index")
+def pi_index(
+    product_id: str | None = None, channel_id: str | None = None,
+    region_id: str | None = None, period: str | None = "90D",
+    method: str = "median",
+) -> dict[str, Any]:
+    return pi_service.index(
+        {"product_id": product_id, "channel_id": channel_id,
+         "region_id": region_id, "period": period}, method=method)
+
+
+@app.get("/api/prices/positioning")
+def pi_positioning(
+    product_id: str | None = None, channel_id: str | None = None,
+    region_id: str | None = None, period: str | None = "90D",
+) -> dict[str, Any]:
+    return pi_service.positioning({
+        "product_id": product_id, "channel_id": channel_id,
+        "region_id": region_id, "period": period})
+
+
+@app.get("/api/prices/sku/{sku_id}")
+def pi_sku(sku_id: str, period: str | None = "ALL") -> dict[str, Any]:
+    # sku_id ở đây thực tế là product_id (UI truyền product_id)
+    return pi_service.sku_explorer(sku_id)
+
+
+@app.get("/api/prices/channel-comparison")
+def pi_channel(
+    product_id: str | None = None, brand_id: str | None = None,
+    region_id: str | None = None, period: str | None = "90D",
+) -> dict[str, Any]:
+    return pi_service.channel({
+        "product_id": product_id, "brand_id": brand_id,
+        "region_id": region_id, "period": period})
+
+
+@app.get("/api/prices/regional")
+def pi_region(
+    product_id: str | None = None, brand_id: str | None = None,
+    channel_id: str | None = None, period: str | None = "90D",
+) -> dict[str, Any]:
+    return pi_service.region({
+        "product_id": product_id, "brand_id": brand_id,
+        "channel_id": channel_id, "period": period})
+
+
+@app.get("/api/prices/promotions")
+def pi_promotions(
+    product_id: str | None = None, channel_id: str | None = None,
+    region_id: str | None = None, period: str | None = "90D",
+) -> dict[str, Any]:
+    return pi_service.promotions({
+        "product_id": product_id, "channel_id": channel_id,
+        "region_id": region_id, "period": period})
+
+
+@app.get("/api/prices/events")
+def pi_events(
+    product_id: str | None = None, channel_id: str | None = None,
+    region_id: str | None = None, event_type: str | None = None,
+    limit: int = 100,
+) -> list[dict[str, Any]]:
+    return pi_service.price_events({
+        "product_id": product_id, "channel_id": channel_id,
+        "region_id": region_id, "event_type": event_type}, limit=limit)
+
+
+@app.get("/api/prices/alerts")
+def pi_alerts(severity: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+    return pi_service.alerts(severity=severity, limit=limit)
+
+
+@app.post("/api/price-intelligence/seed")
+def pi_seed(rebuild: bool = True) -> dict[str, Any]:
+    """Seed (hoặc rebuild) dữ liệu thị trường PI."""
+    if rebuild:
+        return pi_service.rebuild()
+    return pi_service.ensure_ready()
+
+
+@app.post("/api/ai/price-analysis")
+def pi_ai_analysis(
+    event_id: str | None = None,
+    question: str | None = None,
+    product_id: str | None = None,
+) -> dict[str, Any]:
+    """AI Analyst (Spec §27). Cần event_id hoặc (question + product_id)."""
+    if event_id:
+        return pi_service.ai_analyze(event_id)
+    if question:
+        return pi_service.ai_ask(question, product_id)
+    raise HTTPException(422, "cần event_id hoặc question")
+
+
 # ------------------------------------------------------------- static
 
 if _STATIC_DIR.exists():
@@ -302,3 +459,9 @@ if _STATIC_DIR.exists():
     @app.get("/")
     def index() -> FileResponse:
         return FileResponse(_STATIC_DIR / "index.html")
+
+    _PI_DIR = Path(__file__).resolve().parent / "web"
+
+    @app.get("/pi")
+    def pi_dashboard() -> FileResponse:
+        return FileResponse(_PI_DIR / "pi.html")

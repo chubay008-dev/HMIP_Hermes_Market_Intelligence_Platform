@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HMIP — Price Intelligence Workspace</title>
+<style>
+  :root {
+    --bg: #0f1419; --panel: #1a2029; --panel2: #222b36; --border: #2c3744;
+    --text: #e6edf3; --muted: #8b98a5; --accent: #4f9cff; --accent2: #7c5cff;
+    --green: #2ea043; --red: #f85149; --orange: #db8b1a; --blue: #4f9cff;
+    --gray: #6e7681; --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  html[data-theme="light"] {
+    --bg: #f6f8fa; --panel: #ffffff; --panel2: #f0f3f6; --border: #d8dee4;
+    --text: #1f2328; --muted: #656d76; --accent: #0969da; --accent2: #8250df;
+    --green: #1a7f37; --red: #cf222e; --orange: #bc4c00; --blue: #0969da;
+    --gray: #8c959f; --shadow: 0 1px 3px rgba(0,0,0,.1);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px; }
+  header { display:flex; align-items:center; gap:14px; padding:12px 20px; background:var(--panel);
+    border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20; }
+  header h1 { font-size:16px; margin:0; font-weight:650; letter-spacing:.2px; }
+  header .sub { color:var(--muted); font-size:12px; }
+  .spacer { flex:1; }
+  button, select { font-family:inherit; font-size:13px; }
+  select { background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    border-radius:7px; padding:6px 9px; }
+  .btn { background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    border-radius:7px; padding:6px 12px; cursor:pointer; transition:.15s; }
+  .btn:hover { border-color:var(--accent); }
+  .btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn.primary:hover { filter:brightness(1.1); }
+  /* Filter bar */
+  .filterbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 20px;
+    background:var(--panel); border-bottom:1px solid var(--border); position:sticky; top:53px; z-index:15; }
+  .filterbar label { font-size:11px; color:var(--muted); display:block; margin-bottom:2px; }
+  .filterbar .fgroup { display:flex; flex-direction:column; }
+  /* Layout */
+  .wrap { padding:18px 20px 60px; }
+  .grid { display:grid; gap:14px; }
+  .kpis { grid-template-columns:repeat(6,1fr); }
+  @media(max-width:1100px){ .kpis{grid-template-columns:repeat(3,1fr);} }
+  @media(max-width:640px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:11px; padding:14px;
+    box-shadow:var(--shadow); }
+  .card h3 { margin:0 0 10px; font-size:13px; font-weight:600; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.4px; }
+  .kpi .val { font-size:24px; font-weight:700; }
+  .kpi .lbl { font-size:11px; color:var(--muted); margin-top:2px; }
+  .kpi .delta { font-size:12px; margin-top:4px; }
+  .up { color:var(--red); } .down { color:var(--green); } .neutral { color:var(--muted); }
+  .two-col { grid-template-columns: 1.6fr 1fr; }
+  @media(max-width:900px){ .two-col{grid-template-columns:1fr;} }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--border); }
+  th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; }
+  tbody tr:hover { background:var(--panel2); }
+  .pill { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+  .pill.crit { background:rgba(248,81,73,.18); color:var(--red); }
+  .pill.high { background:rgba(219,139,26,.18); color:var(--orange); }
+  .pill.med  { background:rgba(79,156,255,.18); color:var(--blue); }
+  .pill.low  { background:rgba(110,118,129,.18); color:var(--gray); }
+  .pill.ok   { background:rgba(46,160,67,.18); color:var(--green); }
+  .chip { display:inline-block; padding:1px 7px; border-radius:5px; background:var(--panel2);
+    border:1px solid var(--border); font-size:11px; color:var(--muted); }
+  .mono { font-variant-numeric: tabular-nums; }
+  /* charts */
+  .chart-svg { width:100%; height:260px; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:6px; font-size:12px; color:var(--muted); }
+  .legend span { display:inline-flex; align-items:center; gap:5px; }
+  .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .toggle-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  .toggle { font-size:11px; padding:3px 9px; border-radius:20px; border:1px solid var(--border);
+    background:var(--panel2); color:var(--muted); cursor:pointer; user-select:none; }
+  .toggle.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  /* AI */
+  .ai-box { background:var(--panel2); border:1px solid var(--border); border-radius:9px; padding:12px; margin-top:8px; }
+  .ai-box .field { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-top:8px; }
+  .ai-box .txt { font-size:13px; line-height:1.5; margin-top:3px; }
+  .conf { font-weight:700; }
+  .row-actions { display:flex; gap:8px; align-items:center; }
+  .sku-pick { width:100%; }
+  .tabbar { display:flex; gap:4px; margin-bottom:14px; }
+  .tab { padding:7px 14px; border-radius:8px 8px 0 0; cursor:pointer; color:var(--muted);
+    border:1px solid transparent; font-size:13px; }
+  .tab.active { color:var(--text); background:var(--panel); border-color:var(--border); border-bottom-color:var(--panel); }
+  .tabpanel { display:none; }
+  .tabpanel.active { display:block; }
+  .loading { color:var(--muted); padding:20px; text-align:center; }
+  .err { color:var(--red); padding:10px; }
+  .evidence { font-size:12px; color:var(--muted); background:var(--bg); border:1px solid var(--border);
+    border-radius:7px; padding:8px; margin-top:6px; white-space:pre-wrap; max-height:160px; overflow:auto; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 HMIP Price Intelligence</h1>
+  <span class="sub">Workspace v2.0 · Spec-driven</span>
+  <div class="spacer"></div>
+  <button class="btn" id="seedBtn" title="Tạo dữ liệu thị trường mẫu">⟳ Seed dữ liệu</button>
+  <button class="btn" id="themeBtn">🌓 Theme</button>
+  <a class="btn" href="/" style="text-decoration:none">← Monitor cũ</a>
+</header>
+
+<div class="filterbar">
+  <div class="fgroup"><label>Brand</label><select id="f_brand"></select></div>
+  <div class="fgroup"><label>Sản phẩm</label><select id="f_product"></select></div>
+  <div class="fgroup"><label>Kênh</label><select id="f_channel"></select></div>
+  <div class="fgroup"><label>Vùng</label><select id="f_region"></select></div>
+  <div class="fgroup"><label>Kỳ</label>
+    <select id="f_period">
+      <option value="7D">7 ngày</option>
+      <option value="30D">30 ngày</option>
+      <option value="90D" selected>90 ngày</option>
+      <option value="6M">6 tháng</option>
+      <option value="12M">12 tháng</option>
+    </select>
+  </div>
+  <div class="fgroup"><label>&nbsp;</label><button class="btn primary" id="applyBtn">Áp dụng</button></div>
+</div>
+
+<div class="wrap">
+  <!-- KPI -->
+  <div class="grid kpis" id="kpis"><div class="loading">Đang tải KPI…</div></div>
+
+  <!-- Trend + Index -->
+  <div class="grid two-col" style="margin-top:14px">
+    <div class="card">
+      <h3>📈 Price Trend</h3>
+      <div class="toggle-row" id="trendToggles">
+        <span class="toggle on" data-s="sku_price">SKU</span>
+        <span class="toggle on" data-s="market_avg">Thị trường</span>
+        <span class="toggle" data-s="brand_avg">Brand</span>
+        <span class="toggle" data-s="regular_price">Regular</span>
+        <span class="toggle" data-s="promotion_price">Promotion</span>
+      </div>
+      <div id="trendChart"></div>
+      <div class="legend" id="trendLegend"></div>
+    </div>
+    <div class="card">
+      <h3>🧭 Price Index (theo Brand)</h3>
+      <div id="indexChart"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">100 = tham chiếu thị trường (median). &gt;100 cao hơn, &lt;100 thấp hơn.</div>
+    </div>
+  </div>
+
+  <!-- Competitor + Channel -->
+  <div class="grid two-col" style="margin-top:14px">
+    <div class="card">
+      <h3>⚔️ Competitor Comparison <span class="chip" id="compUniv"></span></h3>
+      <table id="compTable"><thead><tr><th>Sản phẩm</th><th>Brand</th><th>Giá TB</th><th>Index</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <h3>🛒 Channel Comparison</h3>
+      <table id="chTable"><thead><tr><th>Kênh</th><th>Giá TB</th><th>Index</th><th>n</th></tr></thead><tbody></tbody></table>
+      <div id="chLowHigh" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- Region + Positioning -->
+  <div class="grid two-col" style="margin-top:14px">
+    <div class="card">
+      <h3>🌏 Regional Pricing</h3>
+      <table id="regTable"><thead><tr><th>Vùng</th><th>Tỉnh</th><th>Giá TB</th><th>Index</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <h3>🎯 Price Positioning Matrix</h3>
+      <div id="posChart" style="height:260px"></div>
+      <div class="legend">X = Price Index · Y = Market Presence (số kênh)</div>
+    </div>
+  </div>
+
+  <!-- Promotions + Events -->
+  <div class="grid two-col" style="margin-top:14px">
+    <div class="card">
+      <h3>🏷️ Promotion Intelligence</h3>
+      <div id="promoSummary" class="row-actions" style="flex-wrap:wrap;gap:8px"></div>
+      <table id="promoTable" style="margin-top:8px"><thead><tr><th>Sản phẩm</th><th>Loại</th><th>Giảm</th><th>Giá KM</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card">
+      <h3>⚡ Price Events</h3>
+      <div id="eventsList" style="max-height:300px;overflow:auto"></div>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="card" style="margin-top:14px">
+    <h3>🔔 Price Alert Center</h3>
+    <div id="alertsList" class="grid" style="gap:8px"></div>
+  </div>
+
+  <!-- SKU Explorer + AI -->
+  <div class="card" style="margin-top:14px">
+    <h3>🔬 SKU Explorer + AI Analyst</h3>
+    <div class="row-actions" style="margin-bottom:10px">
+      <select id="skuPick" class="sku-pick"></select>
+      <button class="btn" id="skuLoad">Xem SKU</button>
+    </div>
+    <div id="skuResult"></div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div class="row-actions">
+        <input id="aiQ" class="sku-pick" placeholder="Hỏi AI Analyst, ví dụ: Tại sao giá Tiger tăng?" style="flex:1" />
+        <button class="btn primary" id="aiAskBtn">Hỏi AI</button>
+      </div>
+      <div id="aiResult"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "";
+let state = { filters:{}, trendSeries:["sku_price","market_avg"] };
+const $ = s => document.querySelector(s);
+const fmt = n => n==null ? "—" : new Intl.NumberFormat('vi-VN').format(Math.round(n)) + " ₫";
+const pct = n => n==null ? "—" : (n>=0?"+":"") + n.toFixed(1) + "%";
+const esc = s => (s??"").toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+async function api(path, opts){
+  const r = await fetch(API+path, opts);
+  if(!r.ok){ throw new Error(await r.text()); }
+  return r.json();
+}
+
+// ---- Theme ----
+const theme = localStorage.getItem('hmip-pi-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+$('#themeBtn').onclick = () => {
+  const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('hmip-pi-theme', t);
+};
+
+// ---- Catalog / filters ----
+async function loadCatalog(){
+  const c = await api('/api/price-intelligence/catalog');
+  fill('#f_brand', c.brands, 'Tất cả brand');
+  fill('#f_product', c.products, 'Tất cả sản phẩm');
+  fill('#f_channel', c.channels, 'Tất cả kênh');
+  fill('#f_region', c.regions, 'Tất cả vùng', 'province');
+  // SKU picker
+  const sp = $('#skuPick'); sp.innerHTML='';
+  c.products.forEach(p=>{ const o=document.createElement('option'); o.value=p.id; o.textContent=p.name; sp.appendChild(o); });
+}
+function fill(sel, items, allLabel, textKey){
+  const s=$(sel); s.innerHTML='';
+  const o0=document.createElement('option'); o0.value=''; o0.textContent=allLabel; s.appendChild(o0);
+  items.forEach(it=>{ const o=document.createElement('option'); o.value=it.id;
+    o.textContent = textKey? (it[textKey]||it.name) : it.name; s.appendChild(o); });
+}
+
+function readFilters(){
+  return {
+    product_id: $('#f_product').value,
+    brand_id: $('#f_brand').value,
+    channel_id: $('#f_channel').value,
+    region_id: $('#f_region').value,
+    period: $('#f_period').value,
+  };
+}
+
+// ---- Seed ----
+$('#seedBtn').onclick = async () => {
+  $('#seedBtn').textContent='Đang seed…';
+  try { const r = await api('/api/price-intelligence/seed', {method:'POST'});
+    alert('Seed xong: '+JSON.stringify(r)); await loadAll();
+  } catch(e){ alert('Lỗi seed: '+e.message); } finally { $('#seedBtn').textContent='⟳ Seed dữ liệu'; }
+};
+
+// ---- Refresh all ----
+async function loadAll(){
+  const f = readFilters();
+  // 1) workspace
+  let ws;
+  try { ws = await api('/api/price-intelligence/workspace?'+qs(f)); }
+  catch(e){ $('#kpis').innerHTML='<div class="err">Lỗi tải dữ liệu: '+esc(e.message)+'<br>Thử bấm "Seed dữ liệu" trước.</div>'; return; }
+  renderKPIs(ws.kpi);
+  renderTrend(ws.trend);
+  renderIndex(ws.index);
+  renderCompetitor(ws.competitor);
+  renderChannel(ws.channel);
+  renderRegion(ws.region);
+  renderPositioning(ws.positioning);
+  renderPromo(ws.promotions);
+  renderEvents(ws.events);
+  renderAlerts(ws.alerts);
+}
+function qs(f){ return new URLSearchParams(f).toString(); }
+
+// ---- KPIs ----
+function renderKPIs(k){
+  const dCls = (k.price_change_pct==null)?'neutral':(k.price_change_pct>0?'up':'down');
+  $('#kpis').innerHTML = [
+    kpi('Giá TB', fmt(k.avg_price)),
+    kpi('Trung vị', fmt(k.median_price)),
+    kpi('Thấp nhất', fmt(k.min_price)),
+    kpi('Cao nhất', fmt(k.max_price)),
+    kpi('Biến động', pct(k.price_change_pct), dCls),
+    kpi('Price Index', k.price_index==null?'—':k.price_index.toFixed(1)),
+  ].join('');
+}
+function kpi(lbl,val,cls){
+  return `<div class="card kpi"><div class="val ${cls||''}">${val}</div><div class="lbl">${lbl}</div></div>`;
+}
+
+// ---- SVG line chart ----
+function lineChart(container, series, opts){
+  // series: {name:[{t,v}], ...}; opts:{colors, width,height}
+  const W=opts.width||760, H=opts.height||260, pad=38;
+  const all=[];
+  Object.values(series).forEach(arr=>arr.forEach(p=>all.push(p.v)));
+  // multi-key series (brand_avg) flatten
+  Object.values(series).forEach(arr=>{ if(arr[0]&&arr[0].v!==undefined) {} });
+  const mins=Math.min(...all), maxs=Math.max(...all);
+  const min=Math.min(0,mins), max=maxs*1.05||1;
+  const days = Object.values(series)[0]? Object.values(series)[0].map(p=>p.t):[];
+  const n = days.length;
+  const x = i => pad + (n<=1?0:(W-2*pad)*i/(n-1));
+  const y = v => H-pad - (H-2*pad)*(v-min)/(max-min||1);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart-svg" preserveAspectRatio="none">`;
+  // grid
+  for(let g=0;g<=4;g++){ const gy=pad+(H-2*pad)*g/4; const val=max-(max-min)*g/4;
+    svg+=`<line x1="${pad}" y1="${gy}" x2="${W-pad}" y2="${gy}" stroke="var(--border)" stroke-width="1"/>`;
+    svg+=`<text x="2" y="${gy+4}" fill="var(--muted)" font-size="10">${fmt(val)}</text>`; }
+  const colors = opts.colors || ['#4f9cff','#7c5cff','#2ea043','#db8b1a','#f85149'];
+  let ci=0;
+  Object.entries(series).forEach(([name,arr])=>{
+    if(!arr.length) return;
+    const col=colors[ci%colors.length]; ci++;
+    let path=''; arr.forEach((p,i)=>{ path+=(i?'L':'M')+x(i)+' '+y(p.v); });
+    svg+=`<path d="${path}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>`;
+    // last point
+    const last=arr[arr.length-1];
+    svg+=`<circle cx="${x(arr.length-1)}" cy="${y(last.v)}" r="3" fill="${col}"/>`;
+  });
+  svg+=`</svg>`;
+  $(container).innerHTML=svg;
+}
+
+function renderTrend(t){
+  const series={};
+  const colors={'sku_price':'#4f9cff','market_avg':'#7c5cff','brand_avg':'#2ea043','regular_price':'#db8b1a','promotion_price':'#f85149'};
+  const onSeries = state.trendSeries;
+  Object.keys(t.series||{}).forEach(k=>{ if(onSeries.includes(k)) series[k]=t.series[k]; });
+  if(Object.keys(series).length===0){ $('#trendChart').innerHTML='<div class="loading">Chọn ít nhất 1 series</div>'; $('#trendLegend').innerHTML=''; return; }
+  // flatten brand_avg (has brand key) into single? keep as market_avg if present
+  lineChart('#trendChart', series, {colors:Object.values(colors).filter((c,i)=>onSeries.includes(Object.keys(colors)[i]))});
+  $('#trendLegend').innerHTML = onSeries.map(k=>`<span><i class="dot" style="background:${colors[k]}"></i>${labelOf(k)}</span>`).join('');
+}
+function labelOf(k){ return {sku_price:'SKU',market_avg:'Thị trường',brand_avg:'Brand',regular_price:'Regular',promotion_price:'Promotion'}[k]||k; }
+
+$('#trendToggles').addEventListener('click', e=>{
+  const t=e.target.closest('.toggle'); if(!t) return;
+  const s=t.dataset.s; t.classList.toggle('on');
+  if(t.classList.contains('on')){ if(!state.trendSeries.includes(s)) state.trendSeries.push(s); }
+  else { state.trendSeries=state.trendSeries.filter(x=>x!==s); }
+  loadAll();
+});
+
+// ---- Index (horizontal bars) ----
+function renderIndex(idx){
+  const brands=(idx.brands||[]).slice(0,12);
+  if(!brands.length){ $('#indexChart').innerHTML='<div class="loading">—</div>'; return; }
+  const maxI=Math.max(...brands.map(b=>b.price_index),100);
+  let html='';
+  brands.forEach(b=>{
+    const w=Math.max(2,(b.price_index/maxI)*100);
+    const col=b.price_index>=105?'var(--red)':(b.price_index<=95?'var(--green)':'var(--accent)');
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+      <div style="width:120px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.brand)}</div>
+      <div style="flex:1;background:var(--panel2);border-radius:5px;height:16px;position:relative">
+        <div style="width:${w}%;background:${col};height:100%;border-radius:5px"></div>
+      </div>
+      <div class="mono" style="width:44px;text-align:right;font-size:12px">${b.price_index.toFixed(1)}</div>
+    </div>`;
+  });
+  $('#indexChart').innerHTML=html;
+}
+
+// ---- Tables ----
+function renderCompetitor(c){
+  $('#compUniv').textContent = c.comparable_universe?('Universe: '+c.comparable_universe):'';
+  const tb=$('#compTable tbody'); tb.innerHTML='';
+  (c.rows||[]).forEach(r=>{
+    const col=r.price_index>=105?'var(--red)':(r.price_index<=95?'var(--green)':'var(--text)');
+    tb.innerHTML+=`<tr><td>${esc(r.name)}</td><td>${esc(r.brand)}</td><td class="mono">${fmt(r.avg_price)}</td><td class="mono" style="color:${col}">${r.price_index}</td></tr>`;
+  });
+}
+function renderChannel(ch){
+  const tb=$('#chTable tbody'); tb.innerHTML='';
+  (ch.channels||[]).forEach(r=>{
+    const col=r.price_index>=105?'var(--red)':(r.price_index<=95?'var(--green)':'var(--text)');
+    tb.innerHTML+=`<tr><td>${esc(r.channel)}</td><td class="mono">${fmt(r.avg_price)}</td><td class="mono" style="color:${col}">${r.price_index}</td><td class="mono">${r.n}</td></tr>`;
+  });
+  if(ch.lowest_channel&&ch.highest_channel){
+    $('#chLowHigh').innerHTML=`Kênh rẻ nhất: <b>${esc(ch.lowest_channel.channel)}</b> (${fmt(ch.lowest_channel.avg_price)}) · Cao nhất: <b>${esc(ch.highest_channel.channel)}</b> (${fmt(ch.highest_channel.avg_price)})`;
+  }
+}
+function renderRegion(rg){
+  const tb=$('#regTable tbody'); tb.innerHTML='';
+  (rg.regions||[]).forEach(r=>{
+    const col=r.price_index>=105?'var(--red)':(r.price_index<=95?'var(--green)':'var(--text)');
+    tb.innerHTML+=`<tr><td>${esc(r.region)}</td><td>${esc(r.province)}</td><td class="mono">${fmt(r.avg_price)}</td><td class="mono" style="color:${col}">${r.price_index}</td></tr>`;
+  });
+}
+function renderPromo(p){
+  $('#promoSummary').innerHTML = [
+    chip('Tổng KM: '+p.total_promotions),
+    chip('TB giảm: '+(p.avg_discount_pct||0)+'%'),
+    chip('Sâu nhất: '+(p.max_discount_pct||0)+'%'),
+  ].join('');
+  const tb=$('#promoTable tbody'); tb.innerHTML='';
+  (p.promotions||[]).slice(0,12).forEach(r=>{
+    tb.innerHTML+=`<tr><td>${esc(r.product)}</td><td><span class="chip">${esc(r.type)}</span></td><td class="mono">-${r.discount_pct}%</td><td class="mono">${fmt(r.promotion_price)}</td></tr>`;
+  });
+}
+function chip(t){ return `<span class="chip">${t}</span>`; }
+
+function renderEvents(evs){
+  const box=$('#eventsList'); box.innerHTML='';
+  if(!evs.length){ box.innerHTML='<div class="loading">Không có event</div>'; return; }
+  evs.forEach(e=>{
+    const up=e.change_percent>=0;
+    const dir=up?'↑':'↓';
+    box.innerHTML+=`<div class="card" style="margin-bottom:6px;padding:10px">
+      <div class="row-actions"><span class="pill ${sevOf(e.event_type)}">${esc(e.event_type)}</span>
+      <b style="flex:1">${esc(e.product_name)}</b>
+      <span class="${up?'up':'down'} mono">${dir} ${Math.abs(e.change_percent)}%</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">
+        ${fmt(e.old_price)} → ${fmt(e.new_price)} · ${esc(e.channel_id)} / ${esc(e.region_id)} · ${esc((e.timestamp||'').slice(0,10))}
+        · sig: ${esc(e.significance)}</div>
+      <button class="btn" style="margin-top:6px;font-size:11px" onclick="askEvent('${esc(e.event_id)}')">🤖 AI phân tích</button>
+    </div>`;
+  });
+}
+function sevOf(t){ if(t.includes('INCREASE')||t.includes('DECREASE'))return 'high'; if(t.includes('PROMO'))return 'low'; return 'med'; }
+
+function renderAlerts(als){
+  const box=$('#alertsList'); box.innerHTML='';
+  if(!als.length){ box.innerHTML='<div class="loading">Không có alert</div>'; return; }
+  als.forEach(a=>{
+    const sev=a.severity.toLowerCase();
+    box.innerHTML+=`<div class="card" style="padding:10px;border-left:3px solid var(--${sev==='critical'?'red':sev==='high'?'orange':sev==='medium'?'blue':'gray'})">
+      <div class="row-actions"><span class="pill ${sev}">${esc(a.severity)}</span>
+      <b style="flex:1">${esc(a.product_name||a.sku_id||'')}</b></div>
+      <div style="font-size:12px;margin-top:4px">${esc(a.message)}</div></div>`;
+  });
+}
+
+// ---- Positioning scatter ----
+function renderPositioning(p){
+  const pts=p.points||[];
+  const W=760,H=260,pad=40;
+  const idxs=pts.map(p=>p.price_index); const minI=Math.min(...idxs,80), maxI=Math.max(...idxs,120);
+  const pres=pts.map(p=>p.presence); const maxP=Math.max(...pres,1);
+  const x=v=>pad+(W-2*pad)*(v-minI)/(maxI-minI||1);
+  const y=v=>H-pad-(H-2*pad)*v/maxP;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart-svg" preserveAspectRatio="none">`;
+  svg+=`<line x1="${x(100)}" y1="${pad}" x2="${x(100)}" y2="${H-pad}" stroke="var(--accent)" stroke-dasharray="4 4"/>`;
+  svg+=`<text x="${x(100)+4}" y="${pad+10}" fill="var(--accent)" font-size="10">Index 100</text>`;
+  pts.forEach(p=>{
+    const col=p.price_index>=105?'var(--red)':(p.price_index<=95?'var(--green)':'var(--accent)');
+    svg+=`<circle cx="${x(p.price_index)}" cy="${y(p.presence)}" r="${4+p.presence}" fill="${col}" fill-opacity="0.6" stroke="${col}"/>`;
+    svg+=`<text x="${x(p.price_index)+6}" y="${y(p.presence)+3}" fill="var(--text)" font-size="9">${esc(p.brand)}</text>`;
+  });
+  svg+=`</svg>`;
+  $('#posChart').innerHTML=svg;
+}
+
+// ---- SKU Explorer ----
+$('#skuLoad').onclick = async ()=>{
+  const pid=$('#skuPick').value; if(!pid) return;
+  $('#skuResult').innerHTML='<div class="loading">Đang tải…</div>';
+  const d=await api('/api/prices/sku/'+pid);
+  if(d.status==='error'){ $('#skuResult').innerHTML='<div class="err">'+esc(d.message)+'</div>'; return; }
+  const pr=d.product;
+  let html=`<div class="row-actions" style="flex-wrap:wrap;gap:10px;margin-bottom:8px">
+    <div><div class="kpi"><div class="val">${esc(pr.product_name)}</div><div class="lbl">${esc(pr.brand_id)} · ${esc(pr.pack_size||'')}</div></div></div>
+  </div>`;
+  // history chart
+  const series={};
+  Object.entries(d.history.series||{}).forEach(([k,arr])=>{ if(['sku_price','market_avg','brand_avg'].includes(k)) series[k]=arr; });
+  html+=`<div id="skuHist"></div>`;
+  $('#skuResult').innerHTML=html;
+  lineChart('#skuHist', series, {});
+  // competitor + channel mini
+  html+=`<div class="grid two-col" style="margin-top:10px">
+    <div><h3 style="font-size:12px;color:var(--muted)">So với đối thủ (${esc(d.competitor.comparable_universe||'')})</h3>
+    <table><thead><tr><th>Sản phẩm</th><th>Giá TB</th><th>Index</th></tr></thead><tbody>
+    ${(d.competitor.rows||[]).map(r=>`<tr><td>${esc(r.name)}</td><td class="mono">${fmt(r.avg_price)}</td><td class="mono">${r.price_index}</td></tr>`).join('')}</tbody></table></div>
+    <div><h3 style="font-size:12px;color:var(--muted)">Theo kênh</h3>
+    <table><thead><tr><th>Kênh</th><th>Giá TB</th><th>Index</th></tr></thead><tbody>
+    ${(d.channel.channels||[]).map(r=>`<tr><td>${esc(r.channel)}</td><td class="mono">${fmt(r.avg_price)}</td><td class="mono">${r.price_index}</td></tr>`).join('')}</tbody></table></div>
+  </div>`;
+  // events
+  if(d.events&&d.events.length){
+    html+=`<div style="margin-top:10px"><h3 style="font-size:12px;color:var(--muted)">Price Events gần đây</h3>`+
+      d.events.slice(0,5).map(e=>`<div class="chip" style="margin:2px">${esc(e.event_type)} ${Math.abs(e.change_percent)}% · ${esc((e.timestamp||'').slice(0,10))}</div>`).join('')+`</div>`;
+  }
+  $('#skuResult').innerHTML=html;
+};
+
+// ---- AI Analyst ----
+async function askEvent(eventId){
+  $('#aiResult').innerHTML='<div class="loading">AI đang phân tích…</div>';
+  try{
+    const r=await api('/api/ai/price-analysis',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({event_id:eventId})});
+    showAI(r);
+  }catch(e){ $('#aiResult').innerHTML='<div class="err">'+esc(e.message)+'</div>'; }
+}
+$('#aiAskBtn').onclick=async()=>{
+  const q=$('#aiQ').value.trim(); if(!q) return;
+  const pid=$('#skuPick').value||null;
+  $('#aiResult').innerHTML='<div class="loading">AI đang suy nghĩ…</div>';
+  try{
+    const r=await api('/api/ai/price-analysis',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:q,product_id:pid})});
+    showAI(r);
+  }catch(e){ $('#aiResult').innerHTML='<div class="err">'+esc(e.message)+'</div>'; }
+};
+function showAI(r){
+  const conf=r.confidence!=null?Math.round(r.confidence*100):'?';
+  $('#aiResult').innerHTML=`<div class="ai-box">
+    <div class="field">FACT</div><div class="txt">${esc(r.fact)}</div>
+    <div class="field">EVIDENCE (từ DB)</div><div class="evidence">${esc(r.evidence)}</div>
+    <div class="field">INFERENCE</div><div class="txt">${esc(r.inference)}</div>
+    <div class="field">RECOMMENDATION</div><div class="txt">${esc(r.recommendation)}</div>
+    <div class="row-actions" style="margin-top:8px">
+      <span class="pill ok">Confidence: <span class="conf">${conf}%</span></span>
+      <span class="chip">model: ${esc(r.model)}</span>
+      <span class="chip">v${esc(r.prompt_version||'')}</span>
+    </div>
+  </div>`;
+}
+
+// ---- Apply filters ----
+$('#applyBtn').onclick = loadAll;
+
+// ---- init ----
+loadCatalog().then(()=>loadAll()).catch(e=>{
+  $('#kpis').innerHTML='<div class="err">Chưa có dữ liệu. Bấm "Seed dữ liệu" để tạo market data.</div>';
+  console.error(e);
+});
+</script>
+</body>
+</html>

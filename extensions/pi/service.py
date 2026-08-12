@@ -1,0 +1,137 @@
+"""service.py — Price Intelligence orchestration & API payload builders.
+
+Đóng gói toàn bộ pipeline (Spec §6, §64):
+    seed → normalize (trong seed) → detect events → store → analytics → API
+
+Cung cấp các hàm build payload cho FastAPI (api.py) theo spec §40
+(endpoints /api/price-intelligence/*, /api/prices/*, /api/ai/*).
+
+Không sửa code core/domains. Chỉ gọi extensions.pi.* (tầng bọc ngoài).
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from extensions.pi import pi_store, seed, analytics, events, ai_analyst
+
+
+def ensure_ready(path: str | None = None) -> dict[str, Any]:
+    """Đảm bảo DB PI đã init + có dữ liệu. Nếu rỗng -> seed."""
+    pi_store.init_pi_db(path)
+    obs = pi_store.count_rows("pi_observations", path=path)
+    if obs == 0:
+        return seed.seed_full(path=path)
+    return {"status": "already_seeded", "observations": obs}
+
+
+def rebuild(path: str | None = None) -> dict[str, Any]:
+    """Xoá + seed lại + detect events. Dùng khi muốn dữ liệu mới."""
+    res = seed.seed_full(path=path)
+    det = events.detect_events(rerun=True, path=path)
+    return {**res, **det}
+
+
+def overview(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
+    return analytics.kpi_overview(filters, path=path)
+
+
+def trend(filters: dict[str, Any] | None = None, series: list[str] | None = None,
+          path: str | None = None) -> dict[str, Any]:
+    return analytics.price_trend(filters, series, path=path)
+
+
+def index(filters: dict[str, Any] | None = None, method: str = "median",
+          path: str | None = None) -> dict[str, Any]:
+    return analytics.price_index_by_brand(filters, method, path=path)
+
+
+def positioning(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
+    return analytics.positioning_matrix(filters, path=path)
+
+
+def competitor(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
+    return analytics.competitor_comparison(filters, path=path)
+
+
+def channel(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
+    return analytics.channel_comparison(filters, path=path)
+
+
+def region(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
+    return analytics.regional_pricing(filters, path=path)
+
+
+def promotions(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
+    return analytics.promotion_intelligence(filters, path=path)
+
+
+def price_events(filters: dict[str, Any] | None = None, limit: int = 100,
+                path: str | None = None) -> list[dict[str, Any]]:
+    return events.list_events(filters, limit, path=path)
+
+
+def alerts(severity: str | None = None, limit: int = 100,
+           path: str | None = None) -> list[dict[str, Any]]:
+    return events.list_alerts(severity, limit, path=path)
+
+
+def sku_explorer(sku_id: str, path: str | None = None) -> dict[str, Any]:
+    """SKU Explorer payload (Spec §18, §37): header + history + competitor +
+    channel + promotion + events + (AI hook riêng).
+
+    `sku_id` ở đây là product_id (UI truyền product_id, ví dụ 'P123').
+    Nếu truyền dạng 'SKU-P123' sẽ tự strip prefix.
+    """
+    product_id = sku_id
+    if product_id.startswith("SKU-"):
+        product_id = product_id[4:]
+    meta = pi_store.fetch_one(
+        "SELECT p.*, b.name AS brand FROM pi_products p "
+        "JOIN pi_brands b ON b.brand_id = p.brand_id WHERE p.product_id = ?",
+        (product_id,), path=path)
+    if not meta:
+        return {"status": "error", "message": "product not found"}
+    history = analytics.price_trend(filters={"product_id": product_id, "period": "ALL"},
+                                    series=["sku_price", "market_avg", "brand_avg"], path=path)
+    comp = competitor(filters={"product_id": product_id}, path=path)
+    ch = channel(filters={"product_id": product_id}, path=path)
+    promo = promotions(filters={"product_id": product_id}, path=path)
+    evs = price_events(filters={"product_id": product_id}, limit=20, path=path)
+    return {
+        "product": dict(meta),
+        "history": history,
+        "competitor": comp,
+        "channel": ch,
+        "promotions": promo,
+        "events": evs,
+    }
+
+
+def ai_analyze(event_id: str, path: str | None = None) -> dict[str, Any]:
+    return ai_analyst.analyze_event(event_id, path=path)
+
+
+def ai_ask(question: str, product_id: str | None = None,
+           path: str | None = None) -> dict[str, Any]:
+    return ai_analyst.ask_question(question, product_id, path=path)
+
+
+def get_catalog(path: str | None = None) -> dict[str, Any]:
+    return analytics.catalog(path=path)
+
+
+def full_workspace(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
+    """Gom tất cả cho dashboard một lần gọi (giảm số round-trip)."""
+    return {
+        "kpi": overview(filters, path=path),
+        "trend": trend(filters, path=path),
+        "index": index(filters, path=path),
+        "competitor": competitor(filters, path=path),
+        "channel": channel(filters, path=path),
+        "region": region(filters, path=path),
+        "positioning": positioning(filters, path=path),
+        "promotions": promotions(filters, path=path),
+        "events": price_events(filters, limit=30, path=path),
+        "alerts": alerts(limit=30, path=path),
+    }
