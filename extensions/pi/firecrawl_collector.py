@@ -128,10 +128,15 @@ def collect_realtime_firecrawl(channel: str = "TIKI", limit: int | None = None,
         total += 1
         name = str(meta["product_name"])
         pp = col.collect(pid, name)
+        # Retry 1 lần nếu fail (tránh Firecrawl transient)
+        if not pp:
+            time.sleep(_REQ_GAP_S)
+            pp = col.collect(pid, name)
         if pp:
             store_price_point(pp, path=path)
             collected += 1
         else:
             failed += 1
-        time.sleep(_REQ_GAP_S)
+            log.warning("Firecrawl no price for %s (%s)", pid, name)
+        time.sleep(_REQ_GAP_S * 2)  # Tiki/Firecrawl rate-limit: gap dài hơn
     return {"channel": "firecrawl", "collected": collected, "failed": failed, "total": total}
