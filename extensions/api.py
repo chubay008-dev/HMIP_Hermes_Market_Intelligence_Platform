@@ -385,6 +385,23 @@ def pi_trend(
     )
 
 
+@app.get("/api/prices/index-trend")
+def pi_index_trend(
+    product_id: str | None = None, brand_id: str | None = None,
+    channel_id: str | None = None, region_id: str | None = None,
+    period: str | None = "90D",
+) -> dict[str, Any]:
+    """Price Index time-series (Roadmap Bước 2 / v3.1 §2).
+
+    Baseline = giá trung bình ngày đầu window (index=100). Trả series daily
+    để vẽ biểu đồ xu hướng giá.
+    """
+    from extensions.pi import analytics
+    return analytics.price_index_trend(
+        {"product_id": product_id, "brand_id": brand_id, "channel_id": channel_id,
+         "region_id": region_id, "period": period})
+
+
 @app.get("/api/prices/index")
 def pi_index(
     product_id: str | None = None, channel_id: str | None = None,

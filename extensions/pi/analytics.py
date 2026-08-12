@@ -286,6 +286,57 @@ def competitor_comparison(filters: dict[str, Any] | None = None,
     }
 
 
+# ---------------------------------------------------------------------------
+# Price Index time-series (Roadmap Bước 2 / v3.1 §2)
+# Baseline = giá trung bình ngày đầu tiên của window; index[t] = price[t]/baseline*100
+# ---------------------------------------------------------------------------
+
+def price_index_trend(filters: dict[str, Any] | None = None,
+                     path: str | None = None) -> dict[str, Any]:
+    """Tính Price Index theo thời gian (time-series) để so sánh xu hướng.
+
+    Baseline mặc định = giá trung bình ngày đầu của window (index=100).
+    Trả series daily: mỗi điểm {t, index, price}.
+
+    Khớp v3.1 §2 Price Index methodology: chuẩn hóa theo thời gian thay vì
+    chỉ snapshot. Dùng để vẽ biểu đồ xu hướng giá (tăng/giảm % theo thời gian).
+    """
+    f = filters or {}
+    where, params = _where_clause(f)
+    rows = pi_store.fetch_all(
+        f"""SELECT o.observed_at, o.effective_price, o.normalized_price
+            FROM pi_observations o {where}""",
+        params, path=path,
+    )
+    if not rows:
+        return {"baseline_date": None, "baseline_price": None, "series": [], "points": 0}
+
+    # aggregate by day
+    by_day: dict[str, list[float]] = {}
+    for r in rows:
+        day = r["observed_at"][:10]
+        by_day.setdefault(day, []).append(float(r["effective_price"]))
+    days = sorted(by_day.keys())
+    daily_avg = {d: statistics.mean(v) for d, v in by_day.items()}
+
+    baseline_price = daily_avg[days[0]]  # ngày đầu window
+    series = []
+    for d in days:
+        price = daily_avg[d]
+        idx = round(price / baseline_price * 100, 2) if baseline_price else 100.0
+        series.append({"t": d, "index": idx, "price": round(price, 2)})
+
+    # biến động tổng thể
+    change_pct = round((series[-1]["index"] - 100), 2) if series else None
+    return {
+        "baseline_date": days[0],
+        "baseline_price": round(baseline_price, 2),
+        "change_pct_from_baseline": change_pct,
+        "series": series,
+        "points": len(series),
+    }
+
+
 def price_index_for_value(value: float, ref: float) -> float:
     return round(value / ref * 100, 2) if ref else 100.0
 
