@@ -29,3 +29,13 @@ services:
         generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên (dùng login web)
       - key: HMIP_PI_DB_PATH
         value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → auto-seed lại)
+      - key: HMIP_PI_COLLECT_MIN
+        value: "30"                     # quét Tiki định kỳ mỗi 30 phút (B)
+      - key: TELEGRAM_HMIP_MARKET_BOT
+        sync: false                     # bạn điền token bot HMIP (Discord/Telegram alert)
+      - key: TELEGRAM_CHAT_ID
+        value: "8891619372"              # chat ID nhận alert Telegram
+      - key: DISCORD_BOT_TOKEN
+        sync: false                     # Discord bot token đẩy alert
+      - key: DISCORD_HOME_CHANNEL
+        sync: false                     # Discord channel ID nhận alert

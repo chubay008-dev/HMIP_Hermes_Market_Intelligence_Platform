@@ -18,12 +18,15 @@ lặp. Change detection so sánh với BASELINE = trung bình 7 ngày trước
 from __future__ import annotations
 
 import hashlib
+import logging
 import statistics
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from extensions.pi import pi_store
 from extensions.pi.models import DEFAULT_THRESHOLDS, Severity, now_iso
+
+log = logging.getLogger("hmip.events")
 
 
 def _severity_for(change_abs: float, thresholds: dict[str, float] | None = None) -> tuple[str, str]:
@@ -91,6 +94,7 @@ def detect_events(product_id: str | None = None, rerun: bool = False,
 
     new_events = 0
     new_alerts = 0
+    _pending_alerts: list[dict] = []
     thresholds = DEFAULT_THRESHOLDS
     WINDOW = 7  # dedup window: mỗi (sku,channel,region,type) chỉ 1 event/7 ngày
 
@@ -138,6 +142,24 @@ def detect_events(product_id: str | None = None, rerun: bool = False,
                         severity=sev, created_at=now_iso(), message=alert_msg,
                         dedup_key=dk, path=path):
                         new_alerts += 1
+                        # Thu thập để push ra ngoài (Discord/Telegram)
+                        _pending_alerts.append({
+                            "event_type": etype, "sku_id": cur["sku_id"],
+                            "product_name": cur.get("product_name"),
+                            "channel_id": cur["channel_id"], "region_id": cur["region_id"],
+                            "old_price": round(oldp, 2), "new_price": round(newp, 2),
+                            "change_pct": round(change, 2), "severity": sev,
+                            "timestamp": cur["observed_at"],
+                        })
+
+    # Push CRITICAL alerts ra kênh ngoài (best-effort, không block).
+    if _pending_alerts:
+        try:
+            from extensions.pi import notifier
+            sent = notifier.notify_alerts(_pending_alerts)
+            log.info("Notified alerts: %s", sent)
+        except Exception as exc:
+            log.warning("Notify failed: %s", exc)
 
     return {"status": "detected", "new_events": new_events, "new_alerts": new_alerts}
 

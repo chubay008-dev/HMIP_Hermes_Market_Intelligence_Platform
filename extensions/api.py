@@ -50,6 +50,32 @@ def _auto_scan_job() -> None:
         log.exception("auto-scan lỗi: %s", exc)
 
 
+def _pi_collect_job() -> None:
+    """Job nền (B): quét giá thật từ Tiki định kỳ, detect event + notify."""
+    try:
+        from extensions.pi import collectors as _col
+        from extensions.pi import events as _ev
+        r = _col.collect_realtime(channel="TIKI", limit=None)
+        log.info("PI Tiki collect: %s", r)
+        # Re-detect events/alerts trên data mới (best-effort)
+        _ev.detect_events(path=None)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("PI collect job lỗi: %s", exc)
+
+
+def _start_pi_collect(interval_min: int = 30) -> None:
+    if _auto_scheduler.get_job("hmip_pi_collect"):
+        return
+    _auto_scheduler.add_job(
+        _pi_collect_job,
+        trigger=IntervalTrigger(minutes=interval_min),
+        id="hmip_pi_collect", max_instances=1, coalesce=True,
+        next_run_time=datetime.now() + timedelta(seconds=10),
+    )
+    if not _auto_scheduler.running:
+        _auto_scheduler.start()
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init_db()
@@ -62,6 +88,8 @@ async def lifespan(_app: FastAPI):
     # Tự động bật auto-scan nếu env yêu cầu (mặc định TẮT để user chủ động).
     if os.getenv("HMIP_AUTOSCAN", "off").lower() in ("1", "on", "true", "yes"):
         _start_auto_scan()
+        # Job PI: quét giá thật từ Tiki định kỳ (B) + detect/notify.
+        _start_pi_collect(int(os.getenv("HMIP_PI_COLLECT_MIN", "30")))
     yield
     if _auto_scheduler.running:
         _auto_scheduler.shutdown(wait=False)
