@@ -451,6 +451,19 @@ def pi_ai_analysis(
     raise HTTPException(422, "cần event_id hoặc question")
 
 
+@app.post("/api/prices/collect")
+def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any]:
+    """Quét giá THẬT từ sàn (hiện Tiki hoạt động; Shopee/Lazada cần key).
+
+    Thay thế seed demo bằng data thực. Trả summary {collected, failed, total}.
+    """
+    from extensions.pi import collectors as _col
+    try:
+        return _col.collect_realtime(channel=channel.upper(), limit=limit)
+    except NotImplementedError as exc:
+        raise HTTPException(501, str(exc))
+
+
 # ------------------------------------------------------------- static
 
 if _STATIC_DIR.exists():

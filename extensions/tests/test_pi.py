@@ -113,3 +113,51 @@ def test_ai_question(db):
     assert ans["answer"]
     assert ans["model"]
     assert ans["confidence"] > 0
+
+
+def test_collector_tiki_real(db, monkeypatch):
+    """Hướng A+C: collector Tiki parse + lưu đúng chuẩn (offline mock).
+
+    Test offline: mock Tiki search trả JSON mẫu để không phụ thuộc mạng/
+    rate-limit Tiki. Test gọi mạng thật nằm ở test_collector_tiki_live (skip).
+    """
+    import tempfile, os
+    from extensions.pi import collectors as col, analytics as an
+
+    fake_item = {
+        "name": "Bia Heineken Lager (330ml / Lon) thùng 24 lon",
+        "price": 598800,
+        "list_price": 650000,
+    }
+
+    class FakeTiki(col.TikiCollector):
+        def search(self, query, limit=10):
+            return [fake_item]
+
+    col.COLLECTORS["TIKI"] = FakeTiki
+
+    tdb = tempfile.mktemp(suffix=".db")
+    pp = col.collect_product("TIKI", "P456", "Heineken Lager 330ml")
+    assert pp is not None, "phải parse được item Tiki"
+    assert pp.regular_price == 598800
+    assert pp.promotion_price == 650000  # list > price -> promo
+    col.store_price_point(pp, today="2026-08-12", path=tdb)
+    obs = pi_store.fetch_all("SELECT source, normalized_price FROM pi_observations", path=tdb)
+    assert obs and obs[0]["source"] == "tiki"
+    # chuẩn hóa ra số dương hợp lý (598800/24lon/330ml -> ~756/100ml; promo 650k -> ~8212)
+    assert obs[0]["normalized_price"] > 0
+    k = an.kpi_overview(path=tdb)
+    assert k["observation_count"] >= 1
+    try:
+        col.collect_product("SHOPEE", "P456", "Heineken Lager 330ml")
+        assert False, "Shopee phải raise NotImplementedError"
+    except NotImplementedError:
+        pass
+    os.remove(tdb)
+
+
+@pytest.mark.skip(reason="needs live Tiki (rate-limited); run manually")
+def test_collector_tiki_live():
+    from extensions.pi import collectors as col
+    pp = col.collect_product("TIKI", "P456", "Heineken Lager 330ml")
+    assert pp and pp.regular_price > 0
