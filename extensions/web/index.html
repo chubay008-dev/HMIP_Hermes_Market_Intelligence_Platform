@@ -357,6 +357,7 @@ async function api(path, opts={}){
 /* ---------- apply language + theme ---------- */
 function applyLang(){
   document.documentElement.lang = LANG;
+  document.title = t('title');
   $$('[data-i18n]').forEach(el=>{ const k=el.dataset.i18n; if(T[LANG][k]!==undefined) el.textContent = T[LANG][k]; });
   $('#aiQ').placeholder = t('aiPlaceholder');
   ['#f_dec','#f_dec_a'].forEach(s=>{ const sel=$(s); if(!sel) return;
