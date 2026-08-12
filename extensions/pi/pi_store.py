@@ -503,9 +503,11 @@ def clear_observations(path: str | None = None) -> int:
     """
     if path is None:
         path = DEFAULT_PI_DB_PATH
+    # Đảm bảo schema tồn tại (tránh lỗi 'no such table' nếu DB rỗng/hỏng)
+    init_pi_db(path)
     total = 0
     with _session(path) as c:
-        for tbl in ("pi_alerts", "pi_events", "pi_observations"):
+        for tbl in ("pi_alerts", "pi_price_events", "pi_observations"):
             cur = c.execute(f"DELETE FROM {tbl}").rowcount
             total += cur or 0
     return total
