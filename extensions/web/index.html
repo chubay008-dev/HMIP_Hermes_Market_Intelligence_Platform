@@ -105,6 +105,27 @@
   #login .err{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px}
   #login .btn{width:100%;text-align:center}
   .pill{font-size:11px;padding:2px 9px;border-radius:10px;border:1px solid var(--line);color:var(--dim)}
+  /* ---------- responsive (mobile) ---------- */
+  @media(max-width:900px){
+    .two-col{grid-template-columns:1fr}
+    .chart,.pos{width:100%!important;min-width:0!important}
+    .topbar{flex-wrap:wrap;gap:6px}
+    .topbar .btn{font-size:12px;padding:7px 9px}
+    .seg button{padding:6px 10px;font-size:12px}
+    .ibar{grid-template-columns:120px 1fr 48px;font-size:12px}
+    .ibar .nm{font-size:11px}
+    table{display:block;overflow-x:auto;white-space:nowrap}
+    header{flex-direction:column;align-items:flex-start;gap:8px}
+    .chk-panel{column-count:1}
+    h1{font-size:18px}
+    .map{flex-wrap:wrap}
+  }
+  @media(max-width:520px){
+    .grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+    .ibar{grid-template-columns:90px 1fr 44px}
+    .filters{flex-wrap:wrap}
+    .filters input,.filters select{width:100%!important}
+  }
 </style>
 </head>
 <body>
@@ -185,6 +206,16 @@
     <h2>🎯 <span data-i18n="posTitle">Ma trận định vị giá</span></h2>
     <div class="sub" data-i18n="posNote" style="font-size:12px;margin-bottom:8px">Bong bóng = số cảnh báo · X = chỉ số giá · Y = số SKU</div>
     <div class="chart-wrap"><svg id="pos" class="chart" viewBox="0 0 800 320" preserveAspectRatio="none" style="min-width:480px"></svg></div>
+  </section>
+  <section>
+    <h2>🌏 <span data-i18n="regTitle">Giá theo vùng (Regional Pricing)</span></h2>
+    <div class="sub" data-i18n="regNote" style="font-size:12px;margin-bottom:8px">Giá trung bình mỗi tỉnh/thành phố · heatmap so với giá thị trường</div>
+    <div class="heat" id="regHeat"></div>
+  </section>
+  <section>
+    <h2>🏷️ <span data-i18n="promoTitle">Promotion / Price Events</span></h2>
+    <div class="sub" data-i18n="promoNote" style="font-size:12px;margin-bottom:8px">Sự kiện biến động giá mạnh nhất (từ lịch sử thật) · mới nhất trước</div>
+    <div id="promo"></div>
   </section>
 </div>
 
@@ -267,6 +298,11 @@ const T = {
     aiGreeting:"Xin chào! Hãy hỏi về một sản phẩm hoặc thương hiệu, ví dụ: \"Tại sao Tiger tăng giá?\" hoặc \"So sánh Heineken và Tiger\".",
     aiNoMatch:"Không tìm thấy sản phẩm/thương hiệu khớp từ khóa. Các thương hiệu có sẵn: ",
     posHi:"CAO", posLo:"THẤP", posXlab:"CHỈ SỐ GIÁ", posYlab:"SỐ SKU",
+    regTitle:"Giá theo vùng (Regional Pricing)", regNote:"Giá trung bình mỗi tỉnh/thành phố · heatmap so với giá thị trường",
+    regCol:"Vùng", regAvg:"Giá TB", regIdx:"Chỉ số", regSku:"Số SP", regHi:"Cao nhất",
+    promoTitle:"Promotion / Price Events", promoNote:"Sự kiện biến động giá mạnh nhất (từ lịch sử thật) · mới nhất trước",
+    promoDate:"Ngày", promoEvent:"Sự kiện", promoProd:"Sản phẩm", promoChange:"Biến động", promoType:"Loại",
+    promoNoEvent:"Chưa đủ lịch sử để phát hiện sự kiện giá.",
     observed:"QUAN SÁT", drivers:"NGUYÊN NHÂN GẢI (suy luận)", conf:"ĐỘ TIN CẬY", evid:"BẰNG CHỨNG",
   },
   en:{
@@ -293,6 +329,11 @@ const T = {
     aiGreeting:"Hello! Ask about a product or brand, e.g. \"Why did Tiger rise?\" or \"Compare Heineken and Tiger\".",
     aiNoMatch:"No matching product/brand found. Available brands: ",
     posHi:"HIGH", posLo:"LOW", posXlab:"PRICE INDEX", posYlab:"SKU COUNT",
+    regTitle:"Regional Pricing", regNote:"Average price per province/city · heatmap vs market price",
+    regCol:"Region", regAvg:"Avg price", regIdx:"Index", regSku:"# SKUs", regHi:"Highest",
+    promoTitle:"Promotion / Price Events", promoNote:"Strongest price moves (from real history) · newest first",
+    promoDate:"Date", promoEvent:"Event", promoProd:"Product", promoChange:"Change", promoType:"Type",
+    promoNoEvent:"Not enough history to detect price events.",
     observed:"OBSERVED", drivers:"LIKELY DRIVERS (inference)", conf:"CONFIDENCE", evid:"EVIDENCE",
   },
   zh:{
@@ -319,6 +360,11 @@ const T = {
     aiGreeting:"你好!请询问产品或品牌,例如:\"Tiger 为何涨价?\"或\"对比 Heineken 与 Tiger\"。",
     aiNoMatch:"未找到匹配的产品/品牌。可用品牌: ",
     posHi:"高", posLo:"低", posXlab:"价格指数", posYlab:"SKU数",
+    regTitle:"区域价格 (Regional Pricing)", regNote:"各省市平均价 · 与市场价对比热力图",
+    regCol:"区域", regAvg:"均价", regIdx:"指数", regSku:"SKU数", regHi:"最高",
+    promoTitle:"促销 / 价格事件", promoNote:"最强价格变动(来自真实历史) · 最新在前",
+    promoDate:"日期", promoEvent:"事件", promoProd:"产品", promoChange:"变动", promoType:"类型",
+    promoNoEvent:"历史数据不足,无法检测价格事件。",
     observed:"观察", drivers:"可能原因(推断)", conf:"置信度", evid:"证据",
   }
 };
@@ -592,10 +638,62 @@ function fillBrandFilters(){
   $('#f_brand').innerHTML=opts; $('#f_brand_a').innerHTML=opts;
 }
 
+/* ---------- Regional Pricing (heatmap từ province) ---------- */
+function renderRegion(){
+  const rows = LATEST.filter(p=>p.price!=null && p.province);
+  if(!rows.length){ $('#regHeat').innerHTML = `<div class="sub">—</div>`; return; }
+  const byProv = {};
+  rows.forEach(p=>{ (byProv[p.province] ??= []).push(p.price); });
+  const data = Object.entries(byProv).map(([prov,arr])=>{
+    const avg = arr.reduce((a,b)=>a+b,0)/arr.length;
+    return {prov, avg, n:arr.length, hi:Math.max(...arr)};
+  });
+  const market = rows.reduce((a,b)=>a+b.price,0)/rows.length;
+  data.forEach(d=> d.idx = d.avg/market*100);
+  data.sort((a,b)=>b.avg-a.avg);
+  const maxIdx = Math.max(...data.map(d=>d.idx));
+  $('#regHeat').innerHTML = `<table><thead><tr>
+    <th>${t('regCol')}</th><th>${t('regAvg')}</th><th>${t('regIdx')}</th><th>${t('regSku')}</th><th style="width:40%">${t('regHi')}</th>
+  </tr></thead><tbody>${data.map(d=>{
+    const w=Math.max(6, d.idx/maxIdx*100);
+    const col=d.idx>105?'var(--red)':(d.idx<95?'var(--green)':'var(--cyan)');
+    return `<tr><td>${d.prov}</td><td class="mono">${fmt(d.avg)}</td>
+      <td class="mono" style="color:${col}">${d.idx.toFixed(1)}</td><td class="sub">${d.n}</td>
+      <td><div class="track"><div class="fill" style="width:${w}%;background:${col}"></div></div>
+      <span class="sub mono">${fmt(d.hi)}</span></td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+/* ---------- Promotion / Price Events (từ lịch sử thật) ---------- */
+function renderPromo(){
+  const events = [];
+  LATEST.forEach(p=>{
+    const h = (CHART && CHART.products && CHART.products[p.id] && CHART.products[p.id].points) || [];
+    if(h.length<2) return;
+    const first=h[0], last=h[h.length-1];
+    const change = first.price? (last.price-first.price)/first.price*100 : 0;
+    if(Math.abs(change)>=3){
+      events.push({pid:p.id, name:p.name, brand:p.brand, change, t:last.t, decision:last.decision});
+    }
+  });
+  events.sort((a,b)=>Math.abs(b.change)-Math.abs(a.change));
+  if(!events.length){ $('#promo').innerHTML = `<div class="sub">${t('promoNoEvent')}</div>`; return; }
+  $('#promo').innerHTML = `<table><thead><tr>
+    <th>${t('promoDate')}</th><th>${t('promoProd')}</th><th>${t('promoChange')}</th><th>${t('promoType')}</th>
+  </tr></thead><tbody>${events.slice(0,30).map(e=>{
+    const up=e.change>0, type=up?(e.change>=10?'ESCALATE':(e.change>=5?'ALERT':'HUMAN_REVIEW')):'PROMOTION';
+    const col=up?'var(--red)':'var(--green)';
+    return `<tr><td class="sub">${when(e.t)}</td><td>${e.name} <span class="sub">(${e.brand})</span></td>
+      <td class="mono ${up?'up':'down'}">${pct(e.change)}</td>
+      <td><span class="tag ${type}">${type==='PROMOTION'?'🏷 '+type:decLabel(type)}</span></td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
 /* ---------- render all ---------- */
 function renderAll(){
   renderStats(); fillBrandFilters(); buildProdChecks();
   renderIndex(); renderBrandCmp(); renderPos();
+  renderRegion(); renderPromo();
   renderLatest(); renderAlerts(); renderChart(CHART);
 }
 
@@ -607,7 +705,8 @@ async function load(){
     ]);
     LATEST=latest; ALERTS=alerts;
     $('#mode').textContent = health.collect_mode;
-    renderAll(); renderChart(chart);
+    CHART = chart || CHART;
+    renderAll(); renderChart(chart); renderPromo();
   }catch(e){ if(e.message!=='no-token') toast('Lỗi tải dữ liệu: '+e.message); }
 }
 

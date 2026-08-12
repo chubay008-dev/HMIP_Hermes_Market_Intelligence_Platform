@@ -54,11 +54,17 @@ def init_db(path: str | None = None) -> None:
                 decision TEXT,
                 delta_percent REAL,
                 source_url TEXT,
+                province TEXT,
                 FOREIGN KEY (product_id) REFERENCES products(id)
             );
             CREATE INDEX IF NOT EXISTS idx_pp_product ON price_points(product_id);
             """
         )
+        # migration: add province column if older DB lacks it
+        try:
+            conn.execute("ALTER TABLE price_points ADD COLUMN province TEXT")
+        except sqlite3.OperationalError:
+            pass  # already exists
         conn.commit()
     finally:
         conn.close()
@@ -106,6 +112,7 @@ def record_price_point(
     decision: str | None,
     delta_percent: float | None,
     source_url: str | None,
+    province: str | None = None,
     path: str | None = None,
 ) -> int:
     if path is None:
@@ -115,9 +122,9 @@ def record_price_point(
         cur = c.execute(
             """INSERT INTO price_points
                (product_id, price, currency, captured_at, decision,
-                delta_percent, source_url)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (product_id, price, currency, now, decision, delta_percent, source_url),
+                delta_percent, source_url, province)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (product_id, price, currency, now, decision, delta_percent, source_url, province),
         )
         return int(cur.lastrowid)
 
@@ -307,7 +314,7 @@ def get_latest(path: str | None = None) -> list[dict[str, Any]]:
             """
             SELECT p.id, p.name, p.brand, p.source,
                    pp.price, pp.currency, pp.captured_at,
-                   pp.decision, pp.delta_percent
+                   pp.decision, pp.delta_percent, pp.province
             FROM products p
             LEFT JOIN price_points pp ON pp.product_id = p.id
             WHERE pp.id = (SELECT MAX(id) FROM price_points
