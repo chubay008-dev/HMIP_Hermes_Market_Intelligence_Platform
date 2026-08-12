@@ -1,39 +1,53 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HMIP — Giám sát giá thị trường</title>
+<title>HMIP — Price Intelligence</title>
 <style>
   :root{
     --bg:#0b0f14; --panel:#141d26; --panel2:#1b2631; --line:#243542;
     --tx:#ecf0f1; --dim:#8fa3b0; --cyan:#5dade2; --yellow:#f4d03f;
     --green:#82c99a; --orange:#e59866; --red:#e74c6c;
+    --shadow:0 4px 18px rgba(0,0,0,.35);
+  }
+  html[data-theme="light"]{
+    --bg:#eef2f6; --panel:#ffffff; --panel2:#f3f6f9; --line:#d6dfe7;
+    --tx:#16212c; --dim:#5c7081; --cyan:#1f7fb8; --yellow:#b58900;
+    --green:#1e8a4c; --orange:#c2691d; --red:#c0304f;
+    --shadow:0 4px 18px rgba(20,40,60,.12);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--tx);font:14px/1.55 "Segoe UI",system-ui,sans-serif;padding:24px}
-  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+  body{background:var(--bg);color:var(--tx);font:14px/1.55 "Segoe UI",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:20px;transition:background .2s,color .2s}
+  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
   h1{font-size:19px;color:var(--yellow);letter-spacing:.3px}
   .sub{color:var(--dim);font-size:12px;margin-top:3px}
+  .topbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:var(--panel2);color:var(--tx);border:1px solid var(--cyan);
-       padding:9px 16px;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s}
+       padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px;transition:.15s}
   .btn:hover{background:var(--cyan);color:#08131c}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn.alt{border-color:var(--dim)}
   .btn.sm{padding:5px 11px;font-size:12px}
   .btn.active{background:var(--cyan);color:#08131c}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:22px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:16px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .seg button{background:transparent;color:var(--dim);border:none;padding:6px 11px;cursor:pointer;font-size:12px}
+  .seg button.on{background:var(--cyan);color:#08131c;font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:14px;box-shadow:var(--shadow)}
   .card .k{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
-  .card .v{font-size:26px;font-weight:600;margin-top:7px}
-  section{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:18px;margin-bottom:20px}
-  h2{font-size:14px;color:var(--yellow);margin-bottom:14px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .card .v{font-size:25px;font-weight:600;margin-top:6px}
+  .card .s{font-size:12px;color:var(--dim);margin-top:3px}
+  section{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:16px;margin-bottom:18px;box-shadow:var(--shadow)}
+  h2{font-size:14px;color:var(--yellow);margin-bottom:12px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  h2 .note{color:var(--dim);font-weight:400;font-size:12px}
   table{width:100%;border-collapse:collapse;font-size:13px}
   th{text-align:left;color:var(--dim);font-weight:500;font-size:11px;text-transform:uppercase;
-     letter-spacing:.5px;padding:9px 10px;border-bottom:1px solid var(--line)}
-  td{padding:11px 10px;border-bottom:1px solid #1b2733}
+     letter-spacing:.5px;padding:9px 10px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+  td{padding:10px;border-bottom:1px solid #1b2733}
+  html[data-theme="light"] td{border-bottom-color:#e3e9ef}
   tr:last-child td{border-bottom:none}
-  tr:hover td{background:#18222c}
+  tr:hover td{background:rgba(93,173,226,.07)}
   .tag{display:inline-block;padding:3px 10px;border-radius:11px;font-size:11px;font-weight:600}
   .IGNORE{background:rgba(143,163,176,.16);color:var(--dim)}
   .ALERT{background:rgba(229,152,102,.17);color:var(--orange)}
@@ -41,100 +55,116 @@
   .HUMAN_REVIEW{background:rgba(244,208,63,.15);color:var(--yellow)}
   .up{color:var(--red)} .down{color:var(--green)}
   .mono{font-family:Consolas,"SF Mono",monospace}
-  .empty{color:var(--dim);text-align:center;padding:26px;font-style:italic}
+  .empty{color:var(--dim);text-align:center;padding:24px;font-style:italic}
   #toast{position:fixed;right:22px;bottom:22px;background:var(--panel2);
          border:1px solid var(--cyan);border-radius:7px;padding:13px 18px;
-         opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;max-width:380px}
+         opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;max-width:380px;z-index:60}
   #toast.show{opacity:1;transform:none}
-  /* chart */
   .chart-wrap{position:relative;width:100%;overflow-x:auto}
-  svg.chart{width:100%;min-width:600px;height:320px;background:#0e151c;border-radius:7px}
+  svg.chart{width:100%;min-width:600px;height:320px;background:var(--panel2);border-radius:7px;border:1px solid var(--line)}
   .axis{stroke:var(--line);stroke-width:1}
   .axis-label{fill:var(--dim);font-size:10px}
   .pt{fill:var(--cyan)}
   .line{fill:none;stroke-width:2}
-  .map{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .map{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
   .map .lg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim);cursor:pointer;user-select:none}
   .map .lg.off{opacity:.4;text-decoration:line-through}
   .map .sw{width:12px;height:12px;border-radius:3px}
-  /* filter bar */
-  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
   .filters select,.filters input{padding:7px 10px;border-radius:6px;border:1px solid var(--line);
        background:var(--bg);color:var(--tx);font-size:13px}
-  .filters .sub{margin-right:2px}
   .chk-panel{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;max-height:140px;overflow-y:auto}
   .chk{border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;user-select:none;font-size:12px;display:flex;align-items:center;gap:6px}
   .chk input{accent-color:var(--cyan)}
   .grp-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
   .grp-btn{font-size:11px;padding:4px 10px;border:1px solid var(--line);border-radius:11px;cursor:pointer;color:var(--dim)}
   .grp-btn:hover{border-color:var(--cyan);color:var(--tx)}
+  /* index bars */
+  .ibar{display:grid;grid-template-columns:170px 1fr 56px;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+  .ibar .nm{color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ibar .track{height:18px;background:var(--bg);border-radius:5px;position:relative;overflow:hidden;border:1px solid var(--line)}
+  .ibar .fill{height:100%;border-radius:5px;max-width:100%}
+  .ibar .val{text-align:right;font-weight:600}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.two-col{grid-template-columns:1fr}}
+  /* AI analyst */
+  .ai-box{display:flex;flex-direction:column;gap:10px}
+  .ai-msg{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px;white-space:pre-wrap}
+  .ai-msg.ai-q{margin-left:auto;max-width:80%;background:var(--cyan);color:#08131c;border:none}
+  .ai-msg.ai-a{border-left:3px solid var(--yellow)}
+  .ai-row{display:flex;gap:8px}
+  .ai-row input{flex:1;padding:10px 12px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px}
+  .ai-hint{color:var(--dim);font-size:12px}
+  .lab{font-weight:600;color:var(--cyan)}
   /* login */
-  #login{position:fixed;inset:0;background:rgba(8,12,17,.97);display:flex;
-        align-items:center;justify-content:center;z-index:50}
-  #login .box{background:var(--panel);border:1px solid var(--cyan);border-radius:11px;
-        padding:30px 32px;width:340px;max-width:92vw}
+  #login{position:fixed;inset:0;background:rgba(8,12,17,.97);display:flex;align-items:center;justify-content:center;z-index:80}
+  #login .box{background:var(--panel);border:1px solid var(--cyan);border-radius:11px;padding:30px 32px;width:340px;max-width:92vw}
   #login h3{color:var(--yellow);font-size:16px;margin-bottom:6px}
   #login p{color:var(--dim);font-size:12px;margin-bottom:16px}
-  #login input{width:100%;padding:11px 12px;border-radius:7px;border:1px solid var(--line);
-        background:var(--bg);color:var(--tx);font-size:14px;margin-bottom:4px}
+  #login input{width:100%;padding:11px 12px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:14px;margin-bottom:4px}
   #login .err{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px}
   #login .btn{width:100%;text-align:center}
+  .pill{font-size:11px;padding:2px 9px;border-radius:10px;border:1px solid var(--line);color:var(--dim)}
 </style>
 </head>
 <body>
 
 <div id="login">
   <div class="box">
-    <h3>🔐 HMIP — Nhập mã truy cập</h3>
-    <p>Ứng dụng được bảo vệ. Nhập <code>HMIP_API_TOKEN</code> do quản trị viên cung cấp.</p>
+    <h3>🔐 HMIP — <span data-i18n="loginTitle">Nhập mã truy cập</span></h3>
+    <p data-i18n="loginText">Ứng dụng được bảo vệ. Nhập HMIP_API_TOKEN do quản trị viên cung cấp.</p>
     <input id="tok" type="password" placeholder="API token" autofocus>
     <div class="err" id="loginErr"></div>
-    <button class="btn" id="loginBtn">Vào dashboard</button>
+    <button class="btn" id="loginBtn" data-i18n="loginBtn">Vào dashboard</button>
   </div>
 </div>
 
 <header>
   <div>
-    <h1>HMIP — Giám sát giá thị trường</h1>
-    <div class="sub">Chạy trên HMIP workflow kernel · WF-PRC-001 · <span id="mode" class="mono"></span></div>
+    <h1 data-i18n="title">HMIP — Giám sát giá thị trường</h1>
+    <div class="sub"><span data-i18n="subtitle">Chạy trên HMIP workflow kernel · WF-PRC-001 · nguồn: </span><span id="mode" class="mono"></span></div>
   </div>
-  <div style="display:flex;gap:9px">
-    <button class="btn" id="scan">⟳ Quét tất cả</button>
-    <button class="btn alt" id="auto">⏱ Tự động: TẮT</button>
-    <button class="btn alt" id="refresh">Làm mới</button>
-    <button class="btn alt" id="logout">Đăng xuất</button>
+  <div class="topbar">
+    <div class="seg" id="langSeg" title="Language / 语言">
+      <button data-lang="vi">VI</button>
+      <button data-lang="en">EN</button>
+      <button data-lang="zh">中文</button>
+    </div>
+    <button class="btn alt" id="theme" title="Theme">🌙</button>
+    <button class="btn" id="scan" data-i18n="scanAll">⟳ Quét tất cả</button>
+    <button class="btn alt" id="auto" data-i18n="auto">⏱ Tự động: TẮT</button>
+    <button class="btn alt" id="refresh" data-i18n="refresh">Làm mới</button>
+    <button class="btn alt" id="logout" data-i18n="logout">Đăng xuất</button>
   </div>
 </header>
 
 <div class="grid" id="stats"></div>
 
 <section>
-  <h2>➕ Thêm sản phẩm theo dõi</h2>
+  <h2>➕ <span data-i18n="addTitle">Thêm sản phẩm theo dõi</span></h2>
   <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-    <div><div class="sub">Mã SP (vd P789)</div><input id="np_id" placeholder="P789" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
-    <div><div class="sub">Tên sản phẩm</div><input id="np_name" placeholder="Tiger Beer 330ml" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
-    <div><div class="sub">Thương hiệu</div><input id="np_brand" placeholder="Tiger" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
-    <div><div class="sub">Nguồn</div><input id="np_source" placeholder="shopee" value="manual" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px;width:90px"></div>
-    <button class="btn" id="np_add">Thêm</button>
-    <span class="sub" id="np_hint" style="align-self:center">base_price tự động = giá quét đầu</span>
+    <div><div class="sub" data-i18n="code">Mã SP</div><input id="np_id" placeholder="P789" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
+    <div><div class="sub" data-i18n="pname">Tên sản phẩm</div><input id="np_name" placeholder="Tiger Beer 330ml" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
+    <div><div class="sub" data-i18n="brand">Thương hiệu</div><input id="np_brand" placeholder="Tiger" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px"></div>
+    <div><div class="sub" data-i18n="source">Nguồn</div><input id="np_source" value="manual" style="padding:9px 11px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font-size:13px;width:90px"></div>
+    <button class="btn" id="np_add" data-i18n="add">Thêm</button>
+    <span class="sub" id="np_hint" style="align-self:center" data-i18n="hint">base_price tự động = giá quét đầu</span>
   </div>
 </section>
 
 <section>
-  <h2>
-    📈 Biểu đồ lịch sử giá
+  <h2>📈 <span data-i18n="trendTitle">Biểu đồ xu hướng giá</span>
     <span style="margin-left:auto;display:flex;gap:6px" id="rangeBtns">
       <button class="btn sm alt" data-range="1h">1h</button>
       <button class="btn sm alt" data-range="24h">24h</button>
       <button class="btn sm alt" data-range="7d">7d</button>
-      <button class="btn sm alt active" data-range="all">Tất cả</button>
+      <button class="btn sm alt active" data-range="all" data-i18n="rangeAll">Tất cả</button>
     </span>
   </h2>
-  <!-- Panel chọn/bỏ SP & nhóm -->
   <div class="grp-row" id="grpQuick">
-    <span class="grp-btn" data-act="all">Chọn tất cả</span>
-    <span class="grp-btn" data-act="none">Bỏ chọn tất cả</span>
-    <span class="grp-btn" data-act="invert">Đảo ngược</span>
+    <span class="grp-btn" data-act="all" data-i18n="selAll">Chọn tất cả</span>
+    <span class="grp-btn" data-act="none" data-i18n="selNone">Bỏ chọn tất cả</span>
+    <span class="grp-btn" data-act="invert" data-i18n="selInv">Đảo ngược</span>
   </div>
   <div class="chk-panel" id="prodChecks"></div>
   <div class="chart-wrap"><svg id="chart" class="chart" viewBox="0 0 800 320" preserveAspectRatio="none"></svg></div>
@@ -142,42 +172,67 @@
 </section>
 
 <section>
-  <h2>Giá mới nhất
-    <span class="sub" style="font-weight:400">— lọc theo nhóm / quyết định</span>
-  </h2>
+  <h2>📊 <span data-i18n="indexTitle">Chỉ số giá (Price Index)</span> <span class="note" data-i18n="indexSub">100 = Giá trung bình thị trường</span></h2>
+  <div id="priceIndex"></div>
+</section>
+
+<div class="two-col">
+  <section>
+    <h2>🏷 <span data-i18n="brandTitle">So sánh theo thương hiệu</span></h2>
+    <div id="brandCmp"></div>
+  </section>
+  <section>
+    <h2>🎯 <span data-i18n="posTitle">Ma trận định vị giá</span></h2>
+    <div class="sub" data-i18n="posNote" style="font-size:12px;margin-bottom:8px">Bong bóng = số cảnh báo · X = chỉ số giá · Y = số SKU</div>
+    <div class="chart-wrap"><svg id="pos" class="chart" viewBox="0 0 800 320" preserveAspectRatio="none" style="min-width:480px"></svg></div>
+  </section>
+</div>
+
+<section>
+  <h2>💲 <span data-i18n="latestTitle">Giá mới nhất</span> <span class="note" data-i18n="fltNote">— lọc theo thương hiệu / quyết định</span></h2>
   <div class="filters">
-    <span class="sub">Nhóm:</span><select id="f_brand"><option value="">Tất cả</option></select>
-    <span class="sub">Quyết định:</span>
+    <span class="sub" data-i18n="filterBrand">Thương hiệu:</span><select id="f_brand"><option value=""></option></select>
+    <span class="sub" data-i18n="filterDec">Quyết định:</span>
     <select id="f_dec">
-      <option value="">Tất cả</option>
+      <option value=""></option>
       <option value="IGNORE">IGNORE</option>
       <option value="ALERT">ALERT</option>
       <option value="ESCALATE">ESCALATE</option>
       <option value="HUMAN_REVIEW">HUMAN_REVIEW</option>
     </select>
-    <span class="sub">Tìm:</span><input id="f_search" placeholder="tên hoặc mã SP…" style="width:160px">
-    <button class="btn sm alt" id="f_reset">Xóa lọc</button>
+    <span class="sub" data-i18n="filterSearch">Tìm:</span><input id="f_search" placeholder="" style="width:160px">
+    <button class="btn sm alt" id="f_reset" data-i18n="reset">Xóa lọc</button>
   </div>
-  <div id="latest"><div class="empty">Đang tải…</div></div>
+  <div id="latest"></div>
 </section>
 
 <section>
-  <h2>Cảnh báo gần đây <span class="sub" style="font-weight:400">(quyết định ≠ IGNORE)</span>
-    <span class="sub" style="font-weight:400">— lọc theo nhóm / quyết định</span>
-  </h2>
+  <h2>🚨 <span data-i18n="alertTitle">Cảnh báo gần đây</span> <span class="note" data-i18n="fltNote2">(quyết định ≠ IGNORE)</span></h2>
   <div class="filters">
-    <span class="sub">Nhóm:</span><select id="f_brand_a"><option value="">Tất cả</option></select>
-    <span class="sub">Quyết định:</span>
+    <span class="sub" data-i18n="filterBrand">Thương hiệu:</span><select id="f_brand_a"><option value=""></option></select>
+    <span class="sub" data-i18n="filterDec">Quyết định:</span>
     <select id="f_dec_a">
-      <option value="">Tất cả</option>
+      <option value=""></option>
       <option value="ALERT">ALERT</option>
       <option value="ESCALATE">ESCALATE</option>
       <option value="HUMAN_REVIEW">HUMAN_REVIEW</option>
     </select>
-    <span class="sub">Tìm:</span><input id="f_search_a" placeholder="tên hoặc mã SP…" style="width:160px">
-    <button class="btn sm alt" id="f_reset_a">Xóa lọc</button>
+    <span class="sub" data-i18n="filterSearch">Tìm:</span><input id="f_search_a" placeholder="" style="width:160px">
+    <button class="btn sm alt" id="f_reset_a" data-i18n="reset">Xóa lọc</button>
   </div>
-  <div id="alerts"><div class="empty">Đang tải…</div></div>
+  <div id="alerts"></div>
+</section>
+
+<section>
+  <h2>🤖 <span data-i18n="aiTitle">AI Analyst</span></h2>
+  <div class="sub" data-i18n="aiHint" style="margin-bottom:10px">Đặt câu hỏi về sản phẩm / thương hiệu. AI phân tích từ dữ liệu thật (rule-based).</div>
+  <div class="ai-box">
+    <div id="aiChat"></div>
+    <div class="ai-row">
+      <input id="aiQ" data-i18n-ph="aiPlaceholder" placeholder="Hỏi AI: tại sao Tiger tăng giá tuần này?">
+      <button class="btn" id="aiAsk" data-i18n="aiAsk">Phân tích</button>
+    </div>
+  </div>
 </section>
 
 <div id="toast"></div>
@@ -185,291 +240,506 @@
 <script>
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
-const fmt = n => n==null ? '—' : Number(n).toLocaleString('vi-VN',{maximumFractionDigits:0});
+
+/* ---------- i18n ---------- */
+const T = {
+  vi:{
+    title:"HMIP — Giám sát giá thị trường", subtitle:"Chạy trên HMIP workflow kernel · WF-PRC-001 · nguồn: ",
+    scanAll:"⟳ Quét tất cả", auto:"⏱ Tự động: TẮT", autoOn:"⏱ Tự động: BẬT", refresh:"Làm mới", logout:"Đăng xuất",
+    addTitle:"Thêm sản phẩm theo dõi", code:"Mã SP (vd P789)", pname:"Tên sản phẩm", brand:"Thương hiệu", source:"Nguồn",
+    add:"Thêm", hint:"base_price tự động = giá quét đầu",
+    kpiProducts:"Sản phẩm theo dõi", kpiAvg:"Giá trung bình", kpiMedian:"Giá trung vị", kpiMin:"Giá thấp nhất", kpiMax:"Giá cao nhất",
+    kpiEsc:"Khẩn cấp (ESCALATE)", kpiLast:"Lần quét gần nhất",
+    trendTitle:"Biểu đồ xu hướng giá", rangeAll:"Tất cả", selAll:"Chọn tất cả", selNone:"Bỏ chọn tất cả", selInv:"Đảo ngược",
+    indexTitle:"Chỉ số giá (Price Index)", indexSub:"100 = Giá trung bình thị trường",
+    brandTitle:"So sánh theo thương hiệu", posTitle:"Ma trận định vị giá",
+    posNote:"Bong bóng = số cảnh báo · X = chỉ số giá · Y = số SKU",
+    latestTitle:"Giá mới nhất", alertTitle:"Cảnh báo gần đây", fltNote:"— lọc theo thương hiệu / quyết định", fltNote2:"(quyết định ≠ IGNORE)",
+    filterBrand:"Thương hiệu:", filterDec:"Quyết định:", filterSearch:"Tìm:", reset:"Xóa lọc",
+    colProduct:"Sản phẩm", colBrand:"Thương hiệu", colPrice:"Giá hiện tại", colDelta:"Biến động", colDec:"Quyết định",
+    colUpdate:"Cập nhật", colScan:"Quét", colTime:"Thời điểm", colDiff:"Lệch",
+    brandCol:"Thương hiệu", skuCol:"Số SKU", avgCol:"Giá TB", idxCol:"Chỉ số", alertCol:"Cảnh báo", escCol:"Khẩn cấp",
+    aiTitle:"AI Analyst", aiAsk:"Phân tích", aiHint:"Đặt câu hỏi về sản phẩm / thương hiệu. AI phân tích từ dữ liệu thật (rule-based).",
+    aiPlaceholder:"Hỏi AI: tại sao Tiger tăng giá tuần này?",
+    loginTitle:"Nhập mã truy cập", loginText:"Ứng dụng được bảo vệ. Nhập HMIP_API_TOKEN do quản trị viên cung cấp.", loginBtn:"Vào dashboard",
+    noData:"Không có dữ liệu khớp bộ lọc.", emptyChart:"Chưa chọn sản phẩm nào — tick vào ô bên trên", loading:"Đang tải…",
+    dec:{IGNORE:"IGNORE", ALERT:"ALERT", ESCALATE:"ESCALATE", HUMAN_REVIEW:"HUMAN_REVIEW"},
+    aiGreeting:"Xin chào! Hãy hỏi về một sản phẩm hoặc thương hiệu, ví dụ: \"Tại sao Tiger tăng giá?\" hoặc \"So sánh Heineken và Tiger\".",
+    aiNoMatch:"Không tìm thấy sản phẩm/thương hiệu khớp từ khóa. Các thương hiệu có sẵn: ",
+    posHi:"CAO", posLo:"THẤP", posXlab:"CHỈ SỐ GIÁ", posYlab:"SỐ SKU",
+    observed:"QUAN SÁT", drivers:"NGUYÊN NHÂN GẢI (suy luận)", conf:"ĐỘ TIN CẬY", evid:"BẰNG CHỨNG",
+  },
+  en:{
+    title:"HMIP — Market Price Intelligence", subtitle:"Runs on HMIP workflow kernel · WF-PRC-001 · source: ",
+    scanAll:"⟳ Scan all", auto:"⏱ Auto: OFF", autoOn:"⏱ Auto: ON", refresh:"Refresh", logout:"Logout",
+    addTitle:"Add product to track", code:"Product ID (e.g. P789)", pname:"Product name", brand:"Brand", source:"Source",
+    add:"Add", hint:"base_price auto = first scan price",
+    kpiProducts:"Products tracked", kpiAvg:"Average price", kpiMedian:"Median price", kpiMin:"Min price", kpiMax:"Max price",
+    kpiEsc:"Critical (ESCALATE)", kpiLast:"Last scan",
+    trendTitle:"Price trend", rangeAll:"All", selAll:"Select all", selNone:"Clear all", selInv:"Invert",
+    indexTitle:"Price Index", indexSub:"100 = market average price",
+    brandTitle:"Brand comparison", posTitle:"Price positioning matrix",
+    posNote:"Bubble = # alerts · X = price index · Y = # SKUs",
+    latestTitle:"Latest prices", alertTitle:"Recent alerts", fltNote:"— filter by brand / decision", fltNote2:"(decision ≠ IGNORE)",
+    filterBrand:"Brand:", filterDec:"Decision:", filterSearch:"Search:", reset:"Clear",
+    colProduct:"Product", colBrand:"Brand", colPrice:"Current price", colDelta:"Change", colDec:"Decision",
+    colUpdate:"Updated", colScan:"Scan", colTime:"Time", colDiff:"Δ",
+    brandCol:"Brand", skuCol:"SKUs", avgCol:"Avg price", idxCol:"Index", alertCol:"Alerts", escCol:"Critical",
+    aiTitle:"AI Analyst", aiAsk:"Analyze", aiHint:"Ask about a product / brand. AI analyzes real data (rule-based).",
+    aiPlaceholder:"Ask AI: why did Tiger price rise this week?",
+    loginTitle:"Enter access code", loginText:"App is protected. Enter the HMIP_API_TOKEN provided by admin.", loginBtn:"Enter dashboard",
+    noData:"No data matches the filters.", emptyChart:"No product selected — tick a box above", loading:"Loading…",
+    dec:{IGNORE:"IGNORE", ALERT:"ALERT", ESCALATE:"ESCALATE", HUMAN_REVIEW:"HUMAN_REVIEW"},
+    aiGreeting:"Hello! Ask about a product or brand, e.g. \"Why did Tiger rise?\" or \"Compare Heineken and Tiger\".",
+    aiNoMatch:"No matching product/brand found. Available brands: ",
+    posHi:"HIGH", posLo:"LOW", posXlab:"PRICE INDEX", posYlab:"SKU COUNT",
+    observed:"OBSERVED", drivers:"LIKELY DRIVERS (inference)", conf:"CONFIDENCE", evid:"EVIDENCE",
+  },
+  zh:{
+    title:"HMIP — 市场价格情报", subtitle:"运行于 HMIP 工作流内核 · WF-PRC-001 · 来源: ",
+    scanAll:"⟳ 全部扫描", auto:"⏱ 自动: 关", autoOn:"⏱ 自动: 开", refresh:"刷新", logout:"登出",
+    addTitle:"添加监控产品", code:"产品编号 (如 P789)", pname:"产品名称", brand:"品牌", source:"来源",
+    add:"添加", hint:"基准价自动 = 首次扫描价",
+    kpiProducts:"监控产品", kpiAvg:"平均价格", kpiMedian:"中位价格", kpiMin:"最低价格", kpiMax:"最高价格",
+    kpiEsc:"紧急 (ESCALATE)", kpiLast:"最近扫描",
+    trendTitle:"价格趋势图", rangeAll:"全部", selAll:"全选", selNone:"清空", selInv:"反选",
+    indexTitle:"价格指数 (Price Index)", indexSub:"100 = 市场平均价格",
+    brandTitle:"品牌对比", posTitle:"价格定位矩阵",
+    posNote:"气泡 = 警报数 · X = 价格指数 · Y = SKU数",
+    latestTitle:"最新价格", alertTitle:"近期警报", fltNote:"— 按品牌 / 决策筛选", fltNote2:"(决策 ≠ IGNORE)",
+    filterBrand:"品牌:", filterDec:"决策:", filterSearch:"搜索:", reset:"清除",
+    colProduct:"产品", colBrand:"品牌", colPrice:"当前价格", colDelta:"涨跌", colDec:"决策",
+    colUpdate:"更新", colScan:"扫描", colTime:"时间", colDiff:"偏差",
+    brandCol:"品牌", skuCol:"SKU数", avgCol:"均价", idxCol:"指数", alertCol:"警报", escCol:"紧急",
+    aiTitle:"AI 分析师", aiAsk:"分析", aiHint:"询问产品或品牌。AI 基于真实数据(规则式)分析。",
+    aiPlaceholder:"问 AI: Tiger 本周为何涨价?",
+    loginTitle:"输入访问码", loginText:"应用已受保护。请输入管理员提供的 HMIP_API_TOKEN。", loginBtn:"进入面板",
+    noData:"没有符合筛选条件的数据。", emptyChart:"未选择产品 — 勾选上方复选框", loading:"加载中…",
+    dec:{IGNORE:"忽略", ALERT:"警报", ESCALATE:"升级", HUMAN_REVIEW:"人工复核"},
+    aiGreeting:"你好!请询问产品或品牌,例如:\"Tiger 为何涨价?\"或\"对比 Heineken 与 Tiger\"。",
+    aiNoMatch:"未找到匹配的产品/品牌。可用品牌: ",
+    posHi:"高", posLo:"低", posXlab:"价格指数", posYlab:"SKU数",
+    observed:"观察", drivers:"可能原因(推断)", conf:"置信度", evid:"证据",
+  }
+};
+const LOCALE = {vi:"vi-VN", en:"en-US", zh:"zh-CN"};
+let LANG = localStorage.getItem("hmip_lang") || "vi";
+let THEME = localStorage.getItem("hmip_theme") || "dark";
+
+function t(k){ return (T[LANG] && T[LANG][k] !== undefined) ? T[LANG][k] : (T.vi[k] ?? k); }
+function decLabel(d){ return (T[LANG].dec[d]) || d || "—"; }
+
+/* ---------- formatters ---------- */
+const fmt = n => n==null ? '—' : Number(n).toLocaleString(LOCALE[LANG],{maximumFractionDigits:0});
 const pct = n => n==null ? '—' : (n>0?'▲ +':(n<0?'▼ ':'')) + Number(n).toFixed(2) + '%';
-const when = s => s ? new Date(s).toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+const when = s => s ? new Date(s).toLocaleString(LOCALE[LANG],{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+
 const TOK_KEY = 'hmip_token';
 let CUR_RANGE = 'all';
 let LATEST = [], ALERTS = [], CHART = null;
-let SHOWN = new Set();   // product_id đang được chọn hiển thị trên chart
+let SHOWN = new Set();
 
 function toast(msg, ms=3600){
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), ms);
+  const el = $('#toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), ms);
 }
 
 async function api(path, opts={}){
   const tok = localStorage.getItem(TOK_KEY) || '';
-  opts.headers = Object.assign({}, opts.headers,
-    {'Content-Type':'application/json', 'Authorization':'Bearer ' + tok});
+  opts.headers = Object.assign({}, opts.headers, {'Content-Type':'application/json', 'Authorization':'Bearer '+tok});
   const r = await fetch(path, opts);
-  if(r.status === 401){
-    localStorage.removeItem(TOK_KEY);
-    $('#login').style.display = 'flex';
-    throw new Error('Thiếu hoặc sai HMIP_API_TOKEN');
-  }
-  if(!r.ok){
-    let d; try{ d = await r.json(); }catch(_){ d = {detail:r.statusText}; }
-    throw new Error(typeof d.detail==='string' ? d.detail : JSON.stringify(d.detail));
-  }
+  if(r.status === 401){ localStorage.removeItem(TOK_KEY); $('#login').style.display='flex'; throw new Error('no-token'); }
+  if(!r.ok){ let d; try{d=await r.json();}catch(_){d={detail:r.statusText};}
+    throw new Error(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail)); }
   return r.json();
 }
 
-// ---------- chart ----------
+/* ---------- apply language + theme ---------- */
+function applyLang(){
+  document.documentElement.lang = LANG;
+  $$('[data-i18n]').forEach(el=>{ const k=el.dataset.i18n; if(T[LANG][k]!==undefined) el.textContent = T[LANG][k]; });
+  $('#aiQ').placeholder = t('aiPlaceholder');
+  ['#f_dec','#f_dec_a'].forEach(s=>{ const sel=$(s); if(!sel) return;
+    Array.from(sel.options).forEach(o=>{ if(o.value && T[LANG].dec[o.value]) o.textContent = T[LANG].dec[o.value]; }); });
+  $('#theme').textContent = THEME==='dark' ? '🌙' : '☀️';
+  $$('#langSeg button').forEach(b=> b.classList.toggle('on', b.dataset.lang===LANG));
+  // re-render data-driven views only if data already loaded
+  if(LATEST.length || ALERTS.length || CHART){ renderAll(); }
+}
+function applyTheme(){ document.documentElement.setAttribute('data-theme', THEME); $('#theme').textContent = THEME==='dark'?'🌙':'☀️'; }
+
+/* ---------- chart ---------- */
 const PALETTE = ['#5dade2','#e59866','#82c99a','#f4d03f','#e74c6c','#a569bd','#48c9b0','#e67e22'];
+function colorOf(pid){ const i=(LATEST.findIndex(p=>p.id===pid)+LATEST.length)%PALETTE.length; return PALETTE[i]; }
 
 function buildProdChecks(){
   const box = $('#prodChecks');
-  if(!LATEST.length){ box.innerHTML=''; return; }
-  // init SHOWN = tất cả nếu rỗng
-  if(SHOWN.size===0) LATEST.forEach(p=>SHOWN.add(p.id));
-  box.innerHTML = LATEST.map(p=>`
+  const vis = filteredLatest();
+  if(!vis.length){ box.innerHTML=''; return; }
+  if(SHOWN.size===0) vis.forEach(p=>SHOWN.add(p.id));
+  // also clear SHOWN entries no longer visible
+  SHOWN.forEach(id=>{ if(!vis.find(p=>p.id===id)) SHOWN.delete(id); });
+  box.innerHTML = vis.map(p=>`
     <label class="chk"><input type="checkbox" data-pid="${p.id}" ${SHOWN.has(p.id)?'checked':''}>
       <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colorOf(p.id)}"></span>
       ${p.name??p.id} <span class="sub">(${p.brand??''})</span></label>`).join('');
   box.querySelectorAll('input[type=checkbox]').forEach(c=>{
-    c.onchange = () => {
-      c.checked ? SHOWN.add(c.dataset.pid) : SHOWN.delete(c.dataset.pid);
-      renderChart(CHART);
-    };
+    c.onchange = () => { c.checked ? SHOWN.add(c.dataset.pid) : SHOWN.delete(c.dataset.pid); renderChart(CHART); };
   });
 }
 
-function colorOf(pid){
-  const i = (LATEST.findIndex(p=>p.id===pid) + LATEST.length) % PALETTE.length;
-  return PALETTE[i];
-}
-
 function renderChart(data){
-  CHART = data;
+  if(data) CHART = data;
   const svg = $('#chart');
-  const W=800, H=320, PAD_L=55, PAD_R=15, PAD_T=15, PAD_B=30;
-  const pw = W-PAD_L-PAD_R, ph = H-PAD_T-PAD_B;
+  const W=800,H=320,PAD_L=55,PAD_R=15,PAD_T=15,PAD_B=30;
+  const pw=W-PAD_L-PAD_R, ph=H-PAD_T-PAD_B;
   const all = Object.entries(data.products||{}).filter(([pid])=>SHOWN.has(pid));
   if(!all.length || all.every(([,v])=>!v.points.length)){
-    svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#8fa3b0" font-size="13" text-anchor="middle">Chưa chọn sản phẩm nào — tick vào ô bên trên</text>`;
-    $('#chartLegend').innerHTML='';
-    return;
+    svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="var(--dim)" font-size="13" text-anchor="middle">${t('emptyChart')}</text>`;
+    $('#chartLegend').innerHTML=''; return;
   }
-  let allP=[], allT=[];
+  let allP=[],allT=[];
   all.forEach(([pid,v])=> v.points.forEach(p=>{ allP.push(p.price); allT.push(new Date(p.t).getTime()); }));
   let minP=Math.min(...allP), maxP=Math.max(...allP);
   if(minP===maxP){ minP*=0.98; maxP*=1.02; }
   const pad=(maxP-minP)*0.1; minP-=pad; maxP+=pad;
   const tMin=Math.min(...allT), tMax=Math.max(...allT);
-  const t0 = tMin===tMax ? tMin-3600e3 : tMin, t1 = tMax;
-  const x = t => PAD_L + (t1===t0 ? pw/2 : ((t-t0)/(t1-t0))*pw);
+  const t0=tMin===tMax?tMin-3600e3:tMin, t1=tMax;
+  const x = t => PAD_L + (t1===t0?pw/2:((t-t0)/(t1-t0))*pw);
   const y = p => PAD_T + (1-(p-minP)/(maxP-minP))*ph;
-
-  let s = '';
+  let s='';
   for(let i=0;i<=4;i++){
-    const yy=PAD_T+ph*i/4; const val=maxP-(maxP-minP)*i/4;
+    const yy=PAD_T+ph*i/4, val=maxP-(maxP-minP)*i/4;
     s+=`<line class="axis" x1="${PAD_L}" y1="${yy}" x2="${W-PAD_R}" y2="${yy}"/>`;
     s+=`<text class="axis-label" x="${PAD_L-6}" y="${yy+3}" text-anchor="end">${fmt(val)}</text>`;
   }
   s+=`<text class="axis-label" x="${PAD_L}" y="${H-10}">${when(new Date(t0).toISOString())}</text>`;
   s+=`<text class="axis-label" x="${W-PAD_R}" y="${H-10}" text-anchor="end">${when(new Date(t1).toISOString())}</text>`;
-
   all.forEach(([pid,v])=>{
-    const col = colorOf(pid);
-    if(v.points.length<2){
-      const p=v.points[0]; if(!p) return;
-      s+=`<circle class="pt" cx="${x(new Date(p.t).getTime())}" cy="${y(p.price)}" r="3.5" fill="${col}"/>`;
-      return;
-    }
+    const col=colorOf(pid);
+    if(v.points.length<2){ const p=v.points[0]; if(!p) return;
+      s+=`<circle class="pt" cx="${x(new Date(p.t).getTime())}" cy="${y(p.price)}" r="3.5" fill="${col}"/>`; return; }
     const pts=v.points.map(p=>`${x(new Date(p.t).getTime())},${y(p.price)}`).join(' ');
     s+=`<polyline class="line" points="${pts}" style="stroke:${col}"/>`;
     v.points.forEach(p=>{ s+=`<circle class="pt" cx="${x(new Date(p.t).getTime())}" cy="${y(p.price)}" r="3" fill="${col}"/>`; });
   });
   svg.innerHTML=s;
-
   $('#chartLegend').innerHTML = all.map(([pid,v])=>{
     const col=colorOf(pid);
     return `<div class="lg" data-pid="${pid}"><span class="sw" style="background:${col}"></span>${v.name||pid}</div>`;
   }).join('');
-  $('#chartLegend').querySelectorAll('.lg').forEach(l=>{
-    l.onclick = () => { SHOWN.delete(l.dataset.pid); syncChecks(); renderChart(CHART); };
-  });
+  $('#chartLegend').querySelectorAll('.lg').forEach(l=>{ l.onclick=()=>{ SHOWN.delete(l.dataset.pid); syncChecks(); renderChart(CHART); }; });
 }
+function syncChecks(){ $$('#prodChecks input').forEach(c=> c.checked = SHOWN.has(c.dataset.pid)); }
 
-function syncChecks(){
-  $$('#prodChecks input').forEach(c=> c.checked = SHOWN.has(c.dataset.pid));
-}
-
-// ---------- tables ----------
-function renderStats(latest, alerts){
-  const esc = alerts.filter(a=>a.decision==='ESCALATE').length;
-  const al  = alerts.filter(a=>a.decision==='ALERT').length;
-  $('#stats').innerHTML = `
-    <div class="card"><div class="k">Sản phẩm theo dõi</div><div class="v">${latest.length}</div></div>
-    <div class="card"><div class="k">Cảnh báo (ALERT)</div><div class="v" style="color:var(--orange)">${al}</div></div>
-    <div class="card"><div class="k">Khẩn cấp (ESCALATE)</div><div class="v" style="color:var(--red)">${esc}</div></div>
-    <div class="card"><div class="k">Lần quét gần nhất</div><div class="v" style="font-size:15px">${when(latest[0]?.captured_at)}</div></div>`;
-}
-function filterLatest(){
+/* ---------- global filter ---------- */
+function gFilter(){
   const b=$('#f_brand').value, d=$('#f_dec').value, s=$('#f_search').value.trim().toLowerCase();
+  return {b,d,s};
+}
+function filteredLatest(){
+  const {b,d,s} = gFilter();
   return LATEST.filter(r=>
     (!b || (r.brand||'')===b) &&
     (!d || (r.decision??'IGNORE')===d) &&
     (!s || (r.name??'').toLowerCase().includes(s) || (r.id||'').toLowerCase().includes(s))
   );
 }
-function renderLatest(rows){
-  const data = rows || filterLatest();
-  if(!data.length){ $('#latest').innerHTML='<div class="empty">Không có dữ liệu khớp bộ lọc.</div>'; return; }
-  $('#latest').innerHTML = `<table><thead><tr>
-      <th>Sản phẩm</th><th>Thương hiệu</th><th>Giá hiện tại</th>
-      <th>Biến động</th><th>Quyết định</th><th>Cập nhật</th><th></th>
-    </tr></thead><tbody>${data.map(r=>`
-      <tr>
-        <td><strong>${r.name??r.id}</strong><div class="sub mono">${r.id}</div></td>
-        <td>${r.brand??'—'}</td>
-        <td class="mono">${fmt(r.price)} ${r.currency??''}</td>
-        <td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
-        <td><span class="tag ${r.decision??'IGNORE'}">${r.decision??'—'}</span></td>
-        <td class="sub">${when(r.captured_at)}</td>
-        <td><button class="btn sm" onclick="runOne('${r.id}')">Quét</button></td>
-      </tr>`).join('')}</tbody></table>`;
-}
-function filterAlerts(){
-  const b=$('#f_brand_a').value, d=$('#f_dec_a').value, s=$('#f_search_a').value.trim().toLowerCase();
+function filteredAlerts(){
+  const {b,d,s} = gFilter();
   return ALERTS.filter(r=>
     (!b || (r.brand||r.product_brand||'')===b) &&
     (!d || (r.decision??'')===d) &&
     (!s || (r.product_name??'').toLowerCase().includes(s) || (r.product_id||'').toLowerCase().includes(s))
   );
 }
-function renderAlerts(rows){
-  const data = rows || filterAlerts();
-  if(!data.length){ $('#alerts').innerHTML='<div class="empty">Không có cảnh báo khớp bộ lọc.</div>'; return; }
+
+/* ---------- KPI ---------- */
+function renderStats(){
+  const vis = filteredLatest();
+  const prices = vis.map(p=>p.price).filter(n=>n!=null);
+  const avg = prices.length? prices.reduce((a,b)=>a+b,0)/prices.length : null;
+  const med = prices.length? [...prices].sort((a,b)=>a-b)[Math.floor(prices.length/2)] : null;
+  const min = prices.length? Math.min(...prices): null;
+  const max = prices.length? Math.max(...prices): null;
+  const esc = vis.filter(p=>p.decision==='ESCALATE').length;
+  const last = vis.map(p=>p.captured_at).filter(Boolean).sort().slice(-1)[0];
+  $('#stats').innerHTML = `
+    <div class="card"><div class="k">${t('kpiProducts')}</div><div class="v">${vis.length}</div></div>
+    <div class="card"><div class="k">${t('kpiAvg')}</div><div class="v">${avg==null?'—':fmt(avg)}</div></div>
+    <div class="card"><div class="k">${t('kpiMedian')}</div><div class="v">${med==null?'—':fmt(med)}</div></div>
+    <div class="card"><div class="k">${t('kpiMin')}</div><div class="v" style="color:var(--green)">${min==null?'—':fmt(min)}</div></div>
+    <div class="card"><div class="k">${t('kpiMax')}</div><div class="v" style="color:var(--orange)">${max==null?'—':fmt(max)}</div></div>
+    <div class="card"><div class="k">${t('kpiEsc')}</div><div class="v" style="color:var(--red)">${esc}</div><div class="s">${when(last)}</div></div>`;
+}
+
+/* ---------- Price Index (per brand avg) ---------- */
+function renderIndex(){
+  const vis = filteredLatest();
+  if(!vis.length){ $('#priceIndex').innerHTML=`<div class="empty">${t('noData')}</div>`; return; }
+  const marketAvg = vis.reduce((a,b)=>a+(b.price||0),0)/vis.length;
+  // group by brand
+  const byBrand = {};
+  vis.forEach(p=>{ const k=p.brand||'—'; (byBrand[k]=byBrand[k]||[]).push(p.price||0); });
+  const rows = Object.entries(byBrand).map(([br,prices])=>{
+    const a = prices.reduce((x,y)=>x+y,0)/prices.length;
+    return {br, a, idx: marketAvg? a/marketAvg*100 : 100};
+  }).sort((x,y)=>y.idx-x.idx);
+  const maxIdx = Math.max(...rows.map(r=>r.idx), 140);
+  $('#priceIndex').innerHTML = rows.map(r=>{
+    const w = Math.min(100, r.idx/maxIdx*100);
+    const col = r.idx>105?'var(--red)':(r.idx<95?'var(--green)':'var(--cyan)');
+    return `<div class="ibar"><div class="nm">${r.br}</div>
+      <div class="track"><div class="fill" style="width:${w}%;background:${col}"></div></div>
+      <div class="val" style="color:${col}">${r.idx.toFixed(1)}</div></div>`;
+  }).join('') + `<div class="sub" style="margin-top:8px">${t('indexSub')} · ${t('kpiAvg')}: ${fmt(marketAvg)}</div>`;
+}
+
+/* ---------- Brand comparison table ---------- */
+function renderBrandCmp(){
+  const vis = filteredLatest();
+  if(!vis.length){ $('#brandCmp').innerHTML=`<div class="empty">${t('noData')}</div>`; return; }
+  const groups = {};
+  vis.forEach(p=>{ const k=p.brand||'—'; (groups[k]=groups[k]||[]).push(p); });
+  const rows = Object.entries(groups).map(([br,items])=>{
+    const a = items.reduce((x,y)=>x+(y.price||0),0)/items.length;
+    const marketAvg = vis.reduce((x,y)=>x+(y.price||0),0)/vis.length;
+    const idx = marketAvg? a/marketAvg*100:100;
+    const al = items.filter(i=>i.decision==='ALERT').length;
+    const es = items.filter(i=>i.decision==='ESCALATE').length;
+    return {br, sku:items.length, a, idx, al, es};
+  }).sort((x,y)=>y.a-x.a);
+  $('#brandCmp').innerHTML = `<table><thead><tr>
+    <th>${t('brandCol')}</th><th>${t('skuCol')}</th><th>${t('avgCol')}</th><th>${t('idxCol')}</th><th>${t('alertCol')}</th><th>${t('escCol')}</th>
+    </tr></thead><tbody>${rows.map(r=>`<tr>
+      <td><strong>${r.br}</strong></td><td>${r.sku}</td>
+      <td class="mono">${fmt(r.a)}</td>
+      <td class="mono" style="color:${r.idx>105?'var(--red)':(r.idx<95?'var(--green)':'var(--cyan)')}">${r.idx.toFixed(1)}</td>
+      <td style="color:var(--orange)">${r.al}</td><td style="color:var(--red)">${r.es}</td></tr>`).join('')}</tbody></table>`;
+}
+
+/* ---------- Positioning matrix (brand X=index, Y=sku, bubble=alerts) ---------- */
+function renderPos(){
+  const svg=$('#pos'); const W=800,H=320,PAD=46;
+  const vis = filteredLatest();
+  if(!vis.length){ svg.innerHTML=`<text x="${W/2}" y="${H/2}" fill="var(--dim)" font-size="13" text-anchor="middle">${t('noData')}</text>`; return; }
+  const groups={};
+  vis.forEach(p=>{ const k=p.brand||'—'; (groups[k]=groups[k]||[]).push(p); });
+  const pts = Object.entries(groups).map(([br,items])=>{
+    const a=items.reduce((x,y)=>x+(y.price||0),0)/items.length;
+    const marketAvg=vis.reduce((x,y)=>x+(y.price||0),0)/vis.length;
+    const idx=marketAvg? a/marketAvg*100:100;
+    const alerts=items.filter(i=>i.decision&&i.decision!=='IGNORE').length;
+    return {br, idx, sku:items.length, alerts};
+  });
+  const idxs=pts.map(p=>p.idx), skus=pts.map(p=>p.sku);
+  const iMin=Math.min(...idxs,80), iMax=Math.max(...idxs,120);
+  const sMin=Math.min(...skus,1), sMax=Math.max(...skus,2);
+  const aMin=Math.min(...pts.map(p=>p.alerts),0), aMax=Math.max(...pts.map(p=>p.alerts),1);
+  const X=i=> PAD + (iMax===iMin?0.5:((i-iMin)/(iMax-iMin)))*(W-2*PAD);
+  const Y=s=> H-PAD - (sMax===sMin?0.5:((s-sMin)/(sMax-sMin)))*(H-2*PAD);
+  let s='';
+  // grid
+  for(let g=0;g<=4;g++){ const yy=PAD+(H-2*PAD)*g/4; s+=`<line class="axis" x1="${PAD}" y1="${yy}" x2="${W-PAD}" y2="${yy}"/>`; }
+  // midline 100
+  if(100>=iMin&&100<=iMax){ const mx=X(100); s+=`<line x1="${mx}" y1="${PAD}" x2="${mx}" y2="${H-PAD}" stroke="var(--yellow)" stroke-dasharray="4 4" stroke-width="1"/>`;
+    s+=`<text class="axis-label" x="${mx+3}" y="${PAD-4}">100</text>`; }
+  // axes labels
+  s+=`<text class="axis-label" x="${W/2}" y="${H-10}" text-anchor="middle">${t('posXlab')} →</text>`;
+  s+=`<text class="axis-label" x="12" y="${H/2}" text-anchor="middle" transform="rotate(-90 12 ${H/2})">${t('posYlab')}</text>`;
+  s+=`<text class="axis-label" x="${W-PAD}" y="${PAD-6}">${t('posHi')}</text>`;
+  s+=`<text class="axis-label" x="${PAD}" y="${PAD-6}">${t('posLo')}</text>`;
+  pts.forEach(p=>{
+    const cx=X(p.idx), cy=Y(p.sku);
+    const r = 8 + (aMax===aMin?0:(p.alerts-aMin)/(aMax-aMin))*22;
+    const col = p.idx>105?'var(--red)':(p.idx<95?'var(--green)':'var(--cyan)');
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" fill-opacity="0.32" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<text x="${cx}" y="${cy+3}" text-anchor="middle" font-size="9" fill="var(--tx)">${p.br}</text>`;
+  });
+  svg.innerHTML=s;
+}
+
+/* ---------- Latest & Alerts tables ---------- */
+function renderLatest(){
+  const data = filteredLatest();
+  if(!data.length){ $('#latest').innerHTML=`<div class="empty">${t('noData')}</div>`; return; }
+  $('#latest').innerHTML = `<table><thead><tr>
+    <th>${t('colProduct')}</th><th>${t('colBrand')}</th><th>${t('colPrice')}</th>
+    <th>${t('colDelta')}</th><th>${t('colDec')}</th><th>${t('colUpdate')}</th><th></th></tr></thead><tbody>${data.map(r=>`
+    <tr><td><strong>${r.name??r.id}</strong><div class="sub mono">${r.id}</div></td>
+    <td>${r.brand??'—'}</td><td class="mono">${fmt(r.price)} ${r.currency??''}</td>
+    <td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
+    <td><span class="tag ${r.decision??'IGNORE'}">${decLabel(r.decision)}</span></td>
+    <td class="sub">${when(r.captured_at)}</td>
+    <td><button class="btn sm" onclick="runOne('${r.id}')">${t('colScan')}</button></td></tr>`).join('')}</tbody></table>`;
+}
+function renderAlerts(){
+  const data = filteredAlerts();
+  if(!data.length){ $('#alerts').innerHTML=`<div class="empty">${t('noData')}</div>`; return; }
   $('#alerts').innerHTML = `<table><thead><tr>
-      <th>Thời điểm</th><th>Sản phẩm</th><th>Giá</th><th>Lệch</th><th>Quyết định</th>
-    </tr></thead><tbody>${data.slice(0,30).map(r=>`
-      <tr>
-        <td class="sub">${when(r.captured_at)}</td>
-        <td>${r.product_name??r.product_id}</td>
-        <td class="mono">${fmt(r.price)}</td>
-        <td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
-        <td><span class="tag ${r.decision}">${r.decision}</span></td>
-      </tr>`).join('')}</tbody></table>`;
+    <th>${t('colTime')}</th><th>${t('colProduct')}</th><th>${t('colPrice')}</th><th>${t('colDiff')}</th><th>${t('colDec')}</th>
+    </tr></thead><tbody>${data.slice(0,40).map(r=>`
+    <tr><td class="sub">${when(r.captured_at)}</td><td>${r.product_name??r.product_id}</td>
+    <td class="mono">${fmt(r.price)}</td><td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
+    <td><span class="tag ${r.decision}">${decLabel(r.decision)}</span></td></tr>`).join('')}</tbody></table>`;
 }
-
 function fillBrandFilters(){
-  const brands = [...new Set(LATEST.map(p=>p.brand).filter(Boolean))].sort();
-  const opts = '<option value="">Tất cả</option>' + brands.map(b=>`<option value="${b}">${b}</option>`).join('');
-  $('#f_brand').innerHTML = opts;
-  $('#f_brand_a').innerHTML = opts;
+  const sel=$('#f_brand');
+  if(sel.options.length>1) return; // chỉ fill 1 lần; giữ lựa chọn người dùng
+  const brands=[...new Set(LATEST.map(p=>p.brand).filter(Boolean))].sort();
+  const opts='<option value=""></option>'+brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+  $('#f_brand').innerHTML=opts; $('#f_brand_a').innerHTML=opts;
 }
 
+/* ---------- render all ---------- */
+function renderAll(){
+  renderStats(); fillBrandFilters(); buildProdChecks();
+  renderIndex(); renderBrandCmp(); renderPos();
+  renderLatest(); renderAlerts(); renderChart(CHART);
+}
+
+/* ---------- load ---------- */
 async function load(){
   try{
     const [latest, alerts, health, chart] = await Promise.all([
       api('/api/latest'), api('/api/alerts'), api('/api/health'), api('/api/chart?range='+CUR_RANGE)
     ]);
-    LATEST = latest; ALERTS = alerts;
-    $('#mode').textContent = 'nguồn: ' + health.collect_mode;
-    renderStats(latest, alerts);
-    fillBrandFilters();
-    buildProdChecks();
-    renderLatest(); renderAlerts();
-    renderChart(chart);
-  }catch(e){ if(!e.message.includes('TOKEN')) toast('Lỗi tải dữ liệu: ' + e.message); }
+    LATEST=latest; ALERTS=alerts;
+    $('#mode').textContent = health.collect_mode;
+    renderAll(); renderChart(chart);
+  }catch(e){ if(e.message!=='no-token') toast('Lỗi tải dữ liệu: '+e.message); }
 }
 
 async function runOne(pid){
-  try{
-    toast('Đang quét ' + pid + '…');
-    const r = await api('/api/run', {method:'POST', body: JSON.stringify({product_id:pid, source:'manual'})});
-    toast(`${pid}: ${r.decision} · ${fmt(r.price)}đ (${pct(r.delta_percent)})`);
+  try{ toast(t('scanAll').replace('⟳ ','')+' '+pid+'…');
+    const r = await api('/api/run',{method:'POST',body:JSON.stringify({product_id:pid,source:'manual'})});
+    toast(`${pid}: ${r.decision} · ${fmt(r.price)} (${pct(r.delta_percent)})`);
     load();
-  }catch(e){ toast('Quét lỗi: ' + e.message, 5200); }
+  }catch(e){ toast('Lỗi: '+e.message,5200); }
 }
-
 $('#scan').onclick = async () => {
-  const b = $('#scan'); b.disabled = true; b.textContent = 'Đang quét…';
-  try{
-    const r = await api('/api/run-all', {method:'POST'});
-    const n = r.results.filter(x=>x.decision && x.decision!=='IGNORE').length;
-    toast(`Quét xong ${r.scanned} sản phẩm · ${n} cảnh báo`);
+  const b=$('#scan'); b.disabled=true; b.textContent='…';
+  try{ const r=await api('/api/run-all',{method:'POST'});
+    const n=r.results.filter(x=>x.decision&&x.decision!=='IGNORE').length;
+    toast(`✓ ${r.scanned} · ${n} ${t('alertTitle')}`);
     load();
-  }catch(e){ toast('Lỗi: ' + e.message); }
-  finally{ b.disabled = false; b.textContent = '⟳ Quét tất cả'; }
+  }catch(e){ toast('Lỗi: '+e.message); }
+  finally{ b.disabled=false; b.textContent=t('scanAll'); }
 };
 $('#refresh').onclick = load;
 $('#logout').onclick = () => { localStorage.removeItem(TOK_KEY); $('#login').style.display='flex'; };
 
-// thêm sản phẩm động
 $('#np_add').onclick = async () => {
-  const pid = $('#np_id').value.trim();
-  const name = $('#np_name').value.trim();
-  if(!pid || !name){ $('#np_hint').textContent='Cần nhập Mã SP và Tên'; return; }
-  try{
-    await api('/api/products', {method:'POST', body: JSON.stringify({
-      product_id: pid, name, brand: $('#np_brand').value.trim(),
-      source: $('#np_source').value.trim() || 'manual'
-    })});
-    $('#np_hint').textContent = `Đã thêm ${pid} — quét để lấy giá mốc`;
+  const pid=$('#np_id').value.trim(), name=$('#np_name').value.trim();
+  if(!pid||!name){ $('#np_hint').textContent='*'; return; }
+  try{ await api('/api/products',{method:'POST',body:JSON.stringify({product_id:pid,name,brand:$('#np_brand').value.trim(),source:$('#np_source').value.trim()||'manual'})});
     $('#np_id').value=''; $('#np_name').value=''; $('#np_brand').value='';
-    toast(`Đã thêm ${pid}. Bấm "Quét tất cả" để lấy giá mốc tự động.`);
-    load();
-  }catch(e){ $('#np_hint').textContent='Lỗi: '+e.message; }
+    toast('✓ '+pid); load();
+  }catch(e){ $('#np_hint').textContent='! '+e.message; }
 };
-
-// range filter
-$('#rangeBtns').addEventListener('click', e=>{
-  const btn = e.target.closest('button[data-range]'); if(!btn) return;
-  CUR_RANGE = btn.dataset.range;
+$('#rangeBtns').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-range]'); if(!btn) return;
+  CUR_RANGE=btn.dataset.range;
   document.querySelectorAll('#rangeBtns button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   api('/api/chart?range='+CUR_RANGE).then(renderChart).catch(()=>{});
 });
-
-// chart checkbox quick actions
-$('#grpQuick').addEventListener('click', e=>{
-  const act = e.target.dataset.act; if(!act) return;
-  if(act==='all') LATEST.forEach(p=>SHOWN.add(p.id));
+$('#grpQuick').addEventListener('click',e=>{
+  const act=e.target.dataset.act; if(!act) return;
+  const vis=filteredLatest();
+  if(act==='all') vis.forEach(p=>SHOWN.add(p.id));
   else if(act==='none') SHOWN.clear();
-  else if(act==='invert') LATEST.forEach(p=> SHOWN.has(p.id)?SHOWN.delete(p.id):SHOWN.add(p.id));
+  else if(act==='invert') vis.forEach(p=> SHOWN.has(p.id)?SHOWN.delete(p.id):SHOWN.add(p.id));
   syncChecks(); renderChart(CHART);
 });
+['#f_brand','#f_dec','#f_search'].forEach(s=>$(s).addEventListener('input',()=>renderAll()));
+['#f_brand_a','#f_dec_a','#f_search_a'].forEach(s=>$(s).addEventListener('input',()=>renderAll()));
+$('#f_reset').onclick = () => { $('#f_brand').value=''; $('#f_dec').value=''; $('#f_search').value=''; renderAll(); };
+$('#f_reset_a').onclick = () => { $('#f_brand_a').value=''; $('#f_dec_a').value=''; $('#f_search_a').value=''; renderAll(); };
 
-// table filters
-['#f_brand','#f_dec','#f_search'].forEach(s=>$(s).addEventListener('input',()=>renderLatest()));
-['#f_brand_a','#f_dec_a','#f_search_a'].forEach(s=>$(s).addEventListener?$(s).addEventListener('input',()=>renderAlerts()):0);
-$('#f_brand_a').addEventListener('input',()=>renderAlerts());
-$('#f_dec_a').addEventListener('input',()=>renderAlerts());
-$('#f_search_a').addEventListener('input',()=>renderAlerts());
-$('#f_reset').onclick = () => { $('#f_brand').value=''; $('#f_dec').value=''; $('#f_search').value=''; renderLatest(); };
-$('#f_reset_a').onclick = () => { $('#f_brand_a').value=''; $('#f_dec_a').value=''; $('#f_search_a').value=''; renderAlerts(); };
+/* ---------- theme & lang ---------- */
+$('#theme').onclick = () => { THEME = THEME==='dark'?'light':'dark'; localStorage.setItem('hmip_theme',THEME); applyTheme(); };
+$('#langSeg').addEventListener('click',e=>{ const b=e.target.closest('button[data-lang]'); if(!b) return;
+  LANG=b.dataset.lang; localStorage.setItem('hmip_lang',LANG); applyLang(); });
+applyTheme();
+
+/* ---------- AI Analyst (rule-based) ---------- */
+function aiAnalyze(q){
+  q=q.trim().toLowerCase();
+  const brands=[...new Set(LATEST.map(p=>p.brand).filter(Boolean))];
+  const matchBrand = brands.find(b=> q.includes(b.toLowerCase()));
+  const matchProd = LATEST.find(p=> q.includes((p.name||'').toLowerCase()) || q.includes(p.id.toLowerCase()));
+  const target = matchProd || (matchBrand? LATEST.filter(p=>p.brand===matchBrand):null);
+  let out = `🤖 <span class="lab">${t('observed')}</span>\n`;
+  if(!target){
+    out = `<span class="lab">${t('aiNoMatch')}</span> ${brands.slice(0,12).join(', ')}.`;
+    return out;
+  }
+  if(Array.isArray(target)){
+    out += `${t('brandTitle')}: ${matchBrand} — ${target.length} SKU\n`;
+    const a=target.reduce((x,y)=>x+(y.price||0),0)/target.length;
+    const marketAvg=LATEST.reduce((x,y)=>x+(y.price||0),0)/LATEST.length;
+    out += `• ${t('avgCol')}: ${fmt(a)}  (${t('idxCol')}: ${(a/marketAvg*100).toFixed(1)})\n`;
+    const es=target.filter(p=>p.decision==='ESCALATE').length, al=target.filter(p=>p.decision==='ALERT').length;
+    out += `• ${t('escCol')}: ${es} · ${t('alertCol')}: ${al}\n`;
+  } else {
+    out += `${target.name??target.id} (${target.brand??''})\n`;
+    out += `• ${t('colPrice')}: ${fmt(target.price)} ${target.currency||''} (${pct(target.delta_percent)})\n`;
+    out += `• ${t('colDec')}: ${decLabel(target.decision)}\n`;
+    const m=LATEST.find(p=>p.id===target.id);
+    out += `• ${t('kpiLast')}: ${when(target.captured_at)}\n`;
+  }
+  out += `\n<span class="lab">${t('drivers')}</span>\n`;
+  const dec = Array.isArray(target)? (target.find(p=>p.decision==='ESCALATE')||target.find(p=>p.decision==='ALERT')||target[0]).decision : target.decision;
+  if(dec==='ESCALATE') out += `• ${t('observed')}: ${t('colDelta')} > 10% → ${t('drivers')}: promotion ended / competitor movement (hypothesis).\n`;
+  else if(dec==='ALERT') out += `• ${t('observed')}: ${t('colDelta')} 5–10% → ${t('drivers')}: channel repricing (hypothesis).\n`;
+  else if(dec==='HUMAN_REVIEW') out += `• ${t('observed')}: ${t('colDelta')} 3–5% → monitor.\n`;
+  else out += `• ${t('observed')}: within ±3% band → stable.\n`;
+  // competitor compare
+  const comp = LATEST.filter(p=>p.brand!==(Array.isArray(target)?matchBrand:target.brand)).slice(0,3)
+    .map(p=>`${p.brand} ${fmt(p.price)}`).join(' · ');
+  out += `• ${t('brandTitle')}: ${comp}\n`;
+  out += `\n<span class="lab">${t('conf')}</span>: ${dec==='IGNORE'?'92':'78'}%`
+  out += `\n<span class="lab">${t('evid')}</span>: ${t('latestTitle')} + ${t('alertTitle')} (rule-based, no LLM).`;
+  return out;
+}
+$('#aiAsk').onclick = () => {
+  const q=$('#aiQ').value.trim(); if(!q) return;
+  const chat=$('#aiChat');
+  chat.insertAdjacentHTML('beforeend', `<div class="ai-msg ai-q">${q.replace(/</g,'&lt;')}</div>`);
+  const ans=aiAnalyze(q);
+  chat.insertAdjacentHTML('beforeend', `<div class="ai-msg ai-a">${ans}</div>`);
+  $('#aiQ').value=''; chat.scrollTop=chat.scrollHeight;
+};
+$('#aiQ').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#aiAsk').click(); });
+
+/* ---------- login ---------- */
+function doLogin(){
+  const tok=$('#tok').value.trim();
+  if(!tok){ $('#loginErr').textContent='*'; return; }
+  localStorage.setItem(TOK_KEY,tok);
+  api('/api/health').then(()=>{ $('#login').style.display='none'; load(); syncAuto(); })
+    .catch(e=>{ localStorage.removeItem(TOK_KEY); $('#loginErr').textContent=e.message; });
+}
+$('#loginBtn').onclick=doLogin;
+$('#tok').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 
 async function syncAuto(){
-  try{
-    const s = await api('/api/autoscan/status');
-    const btn = $('#auto');
-    btn.textContent = s.running ? '⏱ Tự động: BẬT' : '⏱ Tự động: TẮT';
+  try{ const s=await api('/api/autoscan/status'); const btn=$('#auto');
+    btn.textContent = s.running? t('autoOn') : t('auto');
     btn.classList.toggle('alt', !s.running);
   }catch(e){}
 }
 $('#auto').onclick = async () => {
-  const turningOn = $('#auto').textContent.includes('TẮT');
-  try{
-    turningOn ? await api('/api/autoscan/start',{method:'POST'}) : await api('/api/autoscan/stop',{method:'POST'});
-    toast(turningOn ? 'Đã bật quét tự động' : 'Đã tắt quét tự động');
-    syncAuto();
-  }catch(e){ toast('Lỗi: ' + e.message); }
+  const isOn = $('#auto').textContent.includes('BẬT') || $('#auto').textContent.includes('ON') || $('#auto').textContent.includes('开');
+  try{ isOn? await api('/api/autoscan/stop',{method:'POST'}) : await api('/api/autoscan/start',{method:'POST'});
+    toast(isOn? '⏱ OFF':'⏱ ON'); syncAuto();
+  }catch(e){ toast('Lỗi: '+e.message); }
 };
 
-function doLogin(){
-  const tok = $('#tok').value.trim();
-  if(!tok){ $('#loginErr').textContent='Vui lòng nhập token'; return; }
-  localStorage.setItem(TOK_KEY, tok);
-  api('/api/health').then(()=>{ $('#login').style.display='none'; load(); syncAuto(); })
-    .catch(e=>{ localStorage.removeItem(TOK_KEY); $('#loginErr').textContent=e.message; });
-}
-$('#loginBtn').onclick = doLogin;
-$('#tok').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
-
-if(localStorage.getItem(TOK_KEY)){ $('#login').style.display='none'; load(); syncAuto(); }
+if(localStorage.getItem(TOK_KEY)){ $('#login').style.display='none'; applyLang(); load(); syncAuto(); }
+else { applyLang(); }
+$('#aiChat').innerHTML = `<div class="ai-msg ai-a">${t('aiGreeting')}</div>`;
 setInterval(()=>{ if(localStorage.getItem(TOK_KEY)) load(); }, 30000);
 </script>
 </body>
