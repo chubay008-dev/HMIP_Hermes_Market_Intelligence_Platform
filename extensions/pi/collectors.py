@@ -26,6 +26,7 @@ from .normalization import normalize_price
 log = logging.getLogger("hmip.collectors")
 
 TIKI_SEARCH = "https://tiki.vn/api/v2/products"
+TIKI_HOME = "https://tiki.vn/"
 _HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -37,6 +38,21 @@ _HEADERS = {
 _REQUEST_TIMEOUT = 20
 # Tiki chặn nếu gọi quá nhanh; nghỉ giữa các sản phẩm.
 _REQ_GAP_S = 0.6
+
+
+def _get_guest_token() -> str | None:
+    """Tiki API cần x-guest-token (lấy từ cookie trang chủ)."""
+    try:
+        r = requests.get(TIKI_HOME, headers=_HEADERS, timeout=_REQUEST_TIMEOUT)
+        # token nằm trong cookie 'tiki_token' hoặc JS window.__TOKEN
+        tok = r.cookies.get("tiki_token")
+        if not tok:
+            import re
+            m = re.search(r"window\.__TOKEN\s*=\s*[\"']([^\"']+)[\"']", r.text)
+            tok = m.group(1) if m else None
+        return tok
+    except Exception:
+        return None
 
 
 @dataclass
@@ -97,12 +113,16 @@ class TikiCollector:
 
     def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         last_err = None
+        token = _get_guest_token()
+        headers = dict(_HEADERS)
+        if token:
+            headers["x-guest-token"] = token
         for attempt in range(3):
             try:
                 r = requests.get(
                     TIKI_SEARCH,
                     params={"q": query, "limit": limit},
-                    headers=_HEADERS,
+                    headers=headers,
                     timeout=_REQUEST_TIMEOUT,
                 )
                 if r.status_code != 200:
