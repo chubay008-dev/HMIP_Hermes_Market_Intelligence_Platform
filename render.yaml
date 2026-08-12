@@ -30,7 +30,7 @@ services:
       - key: HMIP_PI_DB_PATH
         value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → auto-seed lại)
       - key: HMIP_PI_COLLECT_MIN
-        value: "30"                     # quét Tiki định kỳ mỗi 30 phút (B)
+        value: "360"                    # quét Firecrawl mỗi 6h (tiết kiệm credit; 402 nếu quét quá nhiều)
       - key: TELEGRAM_HMIP_MARKET_BOT
         sync: false                     # bạn điền token bot HMIP (Discord/Telegram alert)
       - key: FIRECRAWL_API_KEY

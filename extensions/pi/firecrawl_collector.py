@@ -67,7 +67,10 @@ class FirecrawlCollector:
                 timeout=60,
             )
             if r.status_code != 200:
-                log.warning("Firecrawl HTTP %s: %s", r.status_code, r.text[:200])
+                if r.status_code == 402:
+                    log.error("Firecrawl HẾT CREDIT (402). Cần nạp tại firecrawl.dev/pricing. Dừng quét để tránh đốt credit.")
+                else:
+                    log.warning("Firecrawl HTTP %s: %s", r.status_code, r.text[:200])
                 return []
             data = r.json().get("data", {})
             extract = data.get("extract") or data.get("json") or {}
