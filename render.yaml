@@ -33,6 +33,8 @@ services:
         value: "360"                    # quét Firecrawl mỗi 6h (tiết kiệm credit; 402 nếu quét quá nhiều)
       - key: TELEGRAM_HMIP_MARKET_BOT
         sync: false                     # bạn điền token bot HMIP (Discord/Telegram alert)
+      - key: CRAWL4AI_ENABLED
+        value: "false"                    # tier 4 (cần chromium, nặng) - bật true nếu muốn self-host crawl
       - key: FIRECRAWL_API_KEY
         value: "fc-906d2952a729471c99a642d5955d76a8"   # nguồn giá thật chính (Tiki qua Firecrawl)
       - key: DISCORD_BOT_TOKEN

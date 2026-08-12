@@ -13,6 +13,7 @@ Chỉ mở rộng extensions/pi, không sửa core/domains.
 from __future__ import annotations
 
 import logging
+import os
 import re
 import time
 from dataclasses import dataclass, field
@@ -354,6 +355,23 @@ def collect_realtime_smart(limit: int | None = None, path: str | None = None) ->
     # Tier 3: Jina Reader (free)
     from . import jina_collector as jc
     jr = jc.collect_realtime_jina(channel="TIKI", limit=limit, path=path)
+    if jr.get("collected", 0) > 0:
+        jr["source_used"] = "jina-reader"
+        return jr
+
+    # Tier 4: Crawl4AI (self-host, free, cần chromium) — chỉ nếu bật env
+    if os.getenv("CRAWL4AI_ENABLED", "false").lower() in ("1", "on", "true", "yes"):
+        try:
+            from . import crawl4ai_collector as ca
+            ca_res = ca.collect_realtime_crawl4ai(channel="TIKI", limit=limit, path=path)
+            if ca_res.get("collected", 0) > 0:
+                ca_res["source_used"] = "crawl4ai"
+                return ca_res
+        except Exception as exc:
+            log.warning("Crawl4AI tier fail: %s", exc)
+
+    # Tất cả fail: trả tier3 (dù có thể 0) để caller biết
     jr["source_used"] = "jina-reader"
     return jr
+
 
