@@ -329,27 +329,31 @@ def collect_realtime(channel: str = "TIKI", limit: int | None = None, path: str 
 
 
 def collect_realtime_smart(limit: int | None = None, path: str | None = None) -> dict[str, Any]:
-    """Quét giá thật với fallback thông minh (không tốn tiền khi có thể).
+    """Quét giá thật với fallback 3 tầng (tối ưu chi phí).
 
-    Ưu tiên Firecrawl (trả giá thật ổn định) → nếu hết credit (402) hoặc thiếu
-    key → fallback Tiki API công khai (100% free, đã verify lấy được giá).
-    Trả summary có trường 'source_used' để biết dùng nguồn nào.
+    Tier 1: Tiki API công khai (100% FREE, JSON chuẩn, ưu tiên).
+    Tier 2: Firecrawl (nếu Tiki API fail + có credit, không hết 402).
+    Tier 3: Jina Reader (free, nếu cả 2 trên fail).
+    Trả summary + 'source_used'.
     """
-    from . import firecrawl_collector as fc
-
-    fc_key = (fc.FirecrawlCollector().api_key or "").strip()
-    if fc_key:
-        res = fc.collect_realtime_firecrawl(channel="TIKI", limit=limit, path=path)
-        # Nếu Firecrawl fail hoàn toàn (thường do 402 hết credit) -> fallback Tiki
-        if res.get("collected", 0) == 0 and res.get("total", 0) > 0:
-            log.warning("Firecrawl fail (có thể hết credit) -> fallback Tiki API (free)")
-            tk = collect_realtime(channel="TIKI", limit=limit, path=path)
-            tk["source_used"] = "tiki-api-fallback"
-            tk["firecrawl_result"] = res
-            return tk
-        res["source_used"] = "firecrawl"
-        return res
-    # Không có Firecrawl key -> Tiki API trực tiếp
+    # Tier 1: Tiki API (free, không tốn tiền)
     tk = collect_realtime(channel="TIKI", limit=limit, path=path)
-    tk["source_used"] = "tiki-api"
-    return tk
+    if tk.get("collected", 0) > 0:
+        tk["source_used"] = "tiki-api"
+        return tk
+
+    # Tier 2: Firecrawl (nếu có key + chưa hết credit)
+    from . import firecrawl_collector as fc
+    if (fc.FirecrawlCollector().api_key or "").strip():
+        fc_res = fc.collect_realtime_firecrawl(channel="TIKI", limit=limit, path=path)
+        if fc_res.get("collected", 0) > 0:
+            fc_res["source_used"] = "firecrawl"
+            return fc_res
+        log.warning("Firecrawl fail (có thể hết credit) -> tier 3 Jina")
+
+    # Tier 3: Jina Reader (free)
+    from . import jina_collector as jc
+    jr = jc.collect_realtime_jina(channel="TIKI", limit=limit, path=path)
+    jr["source_used"] = "jina-reader"
+    return jr
+
