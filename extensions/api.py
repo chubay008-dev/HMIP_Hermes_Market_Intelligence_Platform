@@ -56,12 +56,14 @@ def _pi_collect_job() -> None:
         from extensions.pi import firecrawl_collector as _fc
         from extensions.pi import collectors as _col
         from extensions.pi import events as _ev
+        import os as _os
+        _path = _os.getenv("HMIP_PI_DB_PATH") or None
         if _fc.FirecrawlCollector().api_key:
-            r = _fc.collect_realtime_firecrawl(channel="TIKI", limit=None)
+            r = _fc.collect_realtime_firecrawl(channel="TIKI", limit=None, path=_path)
         else:
-            r = _col.collect_realtime(channel="TIKI", limit=None)
+            r = _col.collect_realtime(channel="TIKI", limit=None, path=_path)
         log.info("PI collect: %s", r)
-        _ev.detect_events(path=None)
+        _ev.detect_events(path=_path)
     except Exception as exc:  # noqa: BLE001
         log.exception("PI collect job lỗi: %s", exc)
 
@@ -491,7 +493,8 @@ def pi_reset() -> dict[str, Any]:
     """
     from extensions.pi import pi_store as _ps
     try:
-        _ps.clear_observations(path=None)
+        path = os.getenv("HMIP_PI_DB_PATH") or None
+        _ps.clear_observations(path=path)
         return {"status": "reset_done", "msg": "Đã xóa observation/event/alert demo"}
     except Exception as exc:
         raise HTTPException(500, str(exc))
@@ -506,12 +509,14 @@ def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any
    """
     from extensions.pi import collectors as _col
     from extensions.pi import firecrawl_collector as _fc
+    import os as _os
+    _path = _os.getenv("HMIP_PI_DB_PATH") or None
     # Firecrawl là nguồn chính (giá thật ổn định)
     if _fc.FirecrawlCollector().api_key:
-        return _fc.collect_realtime_firecrawl(channel=channel.upper(), limit=limit)
+        return _fc.collect_realtime_firecrawl(channel=channel.upper(), limit=limit, path=_path)
     # Fallback: TikiCollector tự viết (có thể bị block)
     try:
-        return _col.collect_realtime(channel=channel.upper(), limit=limit)
+        return _col.collect_realtime(channel=channel.upper(), limit=limit, path=_path)
     except NotImplementedError as exc:
         raise HTTPException(501, str(exc))
 
