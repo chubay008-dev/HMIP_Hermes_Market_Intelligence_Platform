@@ -27,3 +27,5 @@ services:
         value: "demo"          # đổi thành "http" nếu có nguồn giá thật
       - key: HMIP_API_TOKEN
         generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên (dùng login web)
+      - key: HMIP_PI_DB_PATH
+        value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → auto-seed lại)
