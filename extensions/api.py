@@ -482,6 +482,21 @@ def pi_ai_analysis(
     raise HTTPException(422, "cần event_id hoặc question")
 
 
+@app.post("/api/prices/reset")
+def pi_reset() -> dict[str, Any]:
+    """Xóa toàn bộ observation/event/alert (demo) — giữ nguyên catalog schema.
+
+    Dùng khi muốn chuyển 100% sang giá thật (không demo). Sau reset, gọi
+    /api/prices/collect để nạp data thật từ Firecrawl.
+    """
+    from extensions.pi import pi_store as _ps
+    try:
+        _ps.clear_observations(path=None)
+        return {"status": "reset_done", "msg": "Đã xóa observation/event/alert demo"}
+    except Exception as exc:
+        raise HTTPException(500, str(exc))
+
+
 @app.post("/api/prices/collect")
 def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any]:
     """Quét giá THẬT (Firecrawl/Tiki) thay thế demo.

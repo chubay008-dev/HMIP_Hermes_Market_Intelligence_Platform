@@ -80,14 +80,24 @@ class FirecrawlCollector:
         items = self.search(product_name)
         if not items:
             return None
-        # Chọn item khớp nhất: chứa volume + tên sản phẩm
+        # Matching chặt: ưu tiên item chứa brand + volume đúng.
         vol = ref_vol
+        brand = product_name.split()[0].lower()  # từ đầu tiên thường là brand (Heineken, Tiger,...)
         best = None
+        # Pass 1: có brand + volume
         for it in items:
             n = (it.get("name") or "").lower()
-            if f"{vol}ml" in n and product_name.split()[0].lower() in n:
+            if brand in n and f"{vol}ml" in n:
                 best = it
                 break
+        # Pass 2: chỉ cần brand
+        if not best:
+            for it in items:
+                n = (it.get("name") or "").lower()
+                if brand in n:
+                    best = it
+                    break
+        # Pass 3: fallback item đầu
         if not best:
             best = items[0]
         price = best.get("price")

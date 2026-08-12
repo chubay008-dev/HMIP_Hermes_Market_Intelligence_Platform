@@ -494,3 +494,18 @@ def count_rows(table: str, path: str | None = None) -> int:
 
 def db_path_resolved(path: str | None = None) -> str:
     return path or DEFAULT_PI_DB_PATH
+
+
+def clear_observations(path: str | None = None) -> int:
+    """Xóa sạch observation + event + alert (demo/thật) — giữ catalog/schema.
+
+    Trả số dòng đã xóa. Dùng trước khi nạp data thật 100%.
+    """
+    if path is None:
+        path = DEFAULT_PI_DB_PATH
+    total = 0
+    with _session(path) as c:
+        for tbl in ("pi_alerts", "pi_events", "pi_observations"):
+            cur = c.execute(f"DELETE FROM {tbl}").rowcount
+            total += cur or 0
+    return total
