@@ -33,8 +33,8 @@ services:
         value: "30"                     # quét Tiki định kỳ mỗi 30 phút (B)
       - key: TELEGRAM_HMIP_MARKET_BOT
         sync: false                     # bạn điền token bot HMIP (Discord/Telegram alert)
-      - key: TELEGRAM_CHAT_ID
-        value: "8891619372"              # chat ID nhận alert Telegram
+      - key: FIRECRAWL_API_KEY
+        value: "fc-906d2952a729471c99a642d5955d76a8"   # nguồn giá thật chính (Tiki qua Firecrawl)
       - key: DISCORD_BOT_TOKEN
         sync: false                     # Discord bot token đẩy alert
       - key: DISCORD_HOME_CHANNEL

@@ -51,13 +51,16 @@ def _auto_scan_job() -> None:
 
 
 def _pi_collect_job() -> None:
-    """Job nền (B): quét giá thật từ Tiki định kỳ, detect event + notify."""
+    """Job nền (B): quét giá thật từ Firecrawl/Tiki định kỳ, detect + notify."""
     try:
+        from extensions.pi import firecrawl_collector as _fc
         from extensions.pi import collectors as _col
         from extensions.pi import events as _ev
-        r = _col.collect_realtime(channel="TIKI", limit=None)
-        log.info("PI Tiki collect: %s", r)
-        # Re-detect events/alerts trên data mới (best-effort)
+        if _fc.FirecrawlCollector().api_key:
+            r = _fc.collect_realtime_firecrawl(channel="TIKI", limit=None)
+        else:
+            r = _col.collect_realtime(channel="TIKI", limit=None)
+        log.info("PI collect: %s", r)
         _ev.detect_events(path=None)
     except Exception as exc:  # noqa: BLE001
         log.exception("PI collect job lỗi: %s", exc)
@@ -481,11 +484,17 @@ def pi_ai_analysis(
 
 @app.post("/api/prices/collect")
 def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any]:
-    """Quét giá THẬT từ sàn (hiện Tiki hoạt động; Shopee/Lazada cần key).
+    """Quét giá THẬT (Firecrawl/Tiki) thay thế demo.
 
-    Thay thế seed demo bằng data thực. Trả summary {collected, failed, total}.
-    """
+   Ưu tiên Firecrawl (vượt block Tiki, trả giá thật). Nếu thiếu key thì
+    fallback TikiCollector tự viết. Trả summary {collected, failed, total}.
+   """
     from extensions.pi import collectors as _col
+    from extensions.pi import firecrawl_collector as _fc
+    # Firecrawl là nguồn chính (giá thật ổn định)
+    if _fc.FirecrawlCollector().api_key:
+        return _fc.collect_realtime_firecrawl(channel=channel.upper(), limit=limit)
+    # Fallback: TikiCollector tự viết (có thể bị block)
     try:
         return _col.collect_realtime(channel=channel.upper(), limit=limit)
     except NotImplementedError as exc:
