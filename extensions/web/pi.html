@@ -107,6 +107,8 @@
   <h1>📊 HMIP Price Intelligence</h1>
   <span class="sub">Workspace v2.0 · Spec-driven</span>
   <div class="spacer"></div>
+  <span id="tokBadge" class="chip" style="display:none"></span>
+  <button class="btn" id="tokBtn" title="Nhập mã truy cập (dùng chung với Monitor cũ)">🔐 Token</button>
   <button class="btn" id="seedBtn" title="Tạo dữ liệu thị trường mẫu">⟳ Seed dữ liệu</button>
   <button class="btn" id="themeBtn">🌓 Theme</button>
   <a class="btn" href="/" style="text-decoration:none">← Monitor cũ</a>
@@ -225,11 +227,34 @@ const fmt = n => n==null ? "—" : new Intl.NumberFormat('vi-VN').format(Math.ro
 const pct = n => n==null ? "—" : (n>=0?"+":"") + n.toFixed(1) + "%";
 const esc = s => (s??"").toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
-async function api(path, opts){
+async function api(path, opts={}){
+  const tok = localStorage.getItem('hmip_token') || '';
+  opts.headers = Object.assign({}, opts.headers, {'Content-Type':'application/json', 'Authorization':'Bearer '+tok});
   const r = await fetch(API+path, opts);
-  if(!r.ok){ throw new Error(await r.text()); }
+  if(r.status === 401){ showLogin(); throw new Error('Thiếu hoặc sai token'); }
+  if(!r.ok){ let d; try{d=await r.json();}catch(_){d={detail:r.statusText};} throw new Error(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail)); }
   return r.json();
 }
+
+// ---- Auth / token (shared with index.html via localStorage 'hmip_token') ----
+function showLogin(){
+  const cur = localStorage.getItem('hmip_token') || '';
+  const t = prompt('Nhập HMIP_API_TOKEN (mã truy cập do quản trị viên cung cấp):', cur);
+  if(t===null) return;
+  const v = t.trim();
+  if(!v){ localStorage.removeItem('hmip_token'); updateTokBadge(); return; }
+  localStorage.setItem('hmip_token', v);
+  updateTokBadge();
+  loadAll();
+}
+function updateTokBadge(){
+  const badge = document.getElementById('tokBadge');
+  const tok = localStorage.getItem('hmip_token');
+  if(tok){ badge.style.display=''; badge.textContent='🔑 ' + tok.slice(0,12) + (tok.length>12?'…':''); }
+  else { badge.style.display='none'; }
+}
+document.getElementById('tokBtn').onclick = showLogin;
+updateTokBadge();
 
 // ---- Theme ----
 const theme = localStorage.getItem('hmip-pi-theme') || 'dark';
