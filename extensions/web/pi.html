@@ -293,12 +293,38 @@ function readFilters(){
   };
 }
 
-// ---- Seed ----
+// ---- Seed (async + poll status) ----
+let _seedTimer = null;
 $('#seedBtn').onclick = async () => {
-  $('#seedBtn').textContent='Đang seed…';
-  try { const r = await api('/api/price-intelligence/seed', {method:'POST'});
-    alert('Seed xong: '+JSON.stringify(r)); await loadAll();
-  } catch(e){ alert('Lỗi seed: '+e.message); } finally { $('#seedBtn').textContent='⟳ Seed dữ liệu'; }
+  $('#seedBtn').disabled = true;
+  $('#seedBtn').textContent = 'Đang seed…';
+  try {
+    await api('/api/price-intelligence/seed', {method:'POST'});
+    // poll status cho đến khi done/error
+    if (_seedTimer) clearInterval(_seedTimer);
+    _seedTimer = setInterval(async () => {
+      try {
+        const st = await api('/api/price-intelligence/status');
+        if (st.status === 'running') {
+          $('#seedBtn').textContent = 'Đang seed… ' + (st.message || '');
+        } else if (st.status === 'done') {
+          clearInterval(_seedTimer); _seedTimer = null;
+          $('#seedBtn').disabled = false;
+          $('#seedBtn').textContent = '⟳ Seed dữ liệu';
+          await loadAll();
+        } else if (st.status === 'error') {
+          clearInterval(_seedTimer); _seedTimer = null;
+          $('#seedBtn').disabled = false;
+          $('#seedBtn').textContent = '⟳ Seed dữ liệu';
+          alert('Lỗi seed: ' + (st.message || 'không rõ'));
+        }
+      } catch(e) { /* ignore poll error, tiếp tục */ }
+    }, 2000);
+  } catch(e) {
+    $('#seedBtn').disabled = false;
+    $('#seedBtn').textContent = '⟳ Seed dữ liệu';
+    alert('Lỗi seed: ' + e.message);
+  }
 };
 
 // ---- Refresh all ----

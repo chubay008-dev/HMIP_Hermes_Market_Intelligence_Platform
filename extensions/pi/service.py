@@ -11,9 +11,44 @@ Không sửa code core/domains. Chỉ gọi extensions.pi.* (tầng bọc ngoài
 
 from __future__ import annotations
 
+import threading
 from typing import Any
 
 from extensions.pi import pi_store, seed, analytics, events, ai_analyst
+
+
+# ---- Seed background state (tránh Render request timeout do seed chạy đồng bộ) ----
+_seed_lock = threading.Lock()
+_seed_state: dict[str, Any] = {"status": "idle", "message": "", "detail": None}
+
+
+def seed_status() -> dict[str, Any]:
+    """Trả trạng thái seed hiện tại (cho frontend poll)."""
+    with _seed_lock:
+        return dict(_seed_state)
+
+
+def _run_seed():
+    global _seed_state
+    try:
+        with _seed_lock:
+            _seed_state = {"status": "running", "message": "Đang tạo dữ liệu thị trường...", "detail": None}
+        res = rebuild()
+        with _seed_lock:
+            _seed_state = {"status": "done", "message": "Seed xong", "detail": res}
+    except Exception as e:  # noqa: BLE001
+        with _seed_lock:
+            _seed_state = {"status": "error", "message": f"Lỗi seed: {e}", "detail": repr(e)}
+
+
+def seed_async() -> dict[str, Any]:
+    """Bắt đầu seed bất đồng bộ (thread). Trả ngay, không chờ."""
+    with _seed_lock:
+        if _seed_state["status"] == "running":
+            return {"status": "running", "message": "Seed đang chạy"}
+    t = threading.Thread(target=_run_seed, daemon=True)
+    t.start()
+    return {"status": "started", "message": "Đã bắt đầu seed (chạy nền)"}
 
 
 def ensure_ready(path: str | None = None) -> dict[str, Any]:

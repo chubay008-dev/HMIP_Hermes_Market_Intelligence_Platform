@@ -477,10 +477,17 @@ def pi_alerts(severity: str | None = None, limit: int = 100) -> list[dict[str, A
 
 @app.post("/api/price-intelligence/seed")
 def pi_seed(rebuild: bool = True) -> dict[str, Any]:
-    """Seed (hoặc rebuild) dữ liệu thị trường PI."""
+    """Seed dữ liệu PI bất đồng bộ (chạy nền, tránh Render request timeout).
+    Trả ngay 202-style; frontend poll /api/price-intelligence/status để theo dõi."""
     if rebuild:
-        return pi_service.rebuild()
+        return pi_service.seed_async()
     return pi_service.ensure_ready()
+
+
+@app.get("/api/price-intelligence/status")
+def pi_seed_status() -> dict[str, Any]:
+    """Trạng thái seed hiện tại (idle/running/done/error)."""
+    return pi_service.seed_status()
 
 
 @app.post("/api/ai/price-analysis")
