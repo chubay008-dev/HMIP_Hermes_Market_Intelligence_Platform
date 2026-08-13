@@ -26,11 +26,27 @@ from extensions.pi.models import DEFAULT_THRESHOLDS, Severity, now_iso
 # Static dimensions
 # ---------------------------------------------------------------------------
 CHANNELS: dict[str, tuple[str, str]] = {
+    # E-commerce
     "SHOPEE": ("Shopee", "ecommerce"),
     "LAZADA": ("Lazada", "ecommerce"),
     "TIKI": ("Tiki", "ecommerce"),
+    "TIKTOK": ("TikTok Shop", "ecommerce"),
+    "SHOPEEFOOD": ("ShopeeFood", "ecommerce"),
+    "GRABMART": ("GrabMart", "ecommerce"),
+    # Modern trade / siêu thị
     "WINMART": ("WinMart", "modern_trade"),
     "AEON": ("AEON", "modern_trade"),
+    "COOPMART": ("Co.op Mart", "modern_trade"),
+    "BIGC": ("BigC / GO!", "modern_trade"),
+    "LOTTE": ("Lotte Mart", "modern_trade"),
+    "MEGAMARKET": ("MM Mega Market", "modern_trade"),
+    # Điện máy / tiện lợi
+    "DIENMAYXANH": ("Điện Máy Xanh", "modern_trade"),
+    "TGDD": ("Thế Giới Di Động", "modern_trade"),
+    "GS25": ("GS25", "convenience"),
+    "CIRCLEK": ("Circle K", "convenience"),
+    "FAMIMA": ("Famima", "convenience"),
+    "CONCUNG": ("ConCung", "convenience"),
 }
 REGIONS: dict[str, tuple[str, str, str]] = {
     "HCMC": ("VN", "South", "TP.HCM"),

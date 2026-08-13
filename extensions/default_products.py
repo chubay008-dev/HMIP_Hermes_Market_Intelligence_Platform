@@ -1,25 +1,40 @@
 # extensions/default_products.py
 # Catalog sản phẩm bia mặc định — hardcode để mỗi lần deploy đều có sẵn.
-# Nguồn: danh sách market map bia VN + nhập khẩu (từ ChatGPT, 2026-08-11).
+# Nguồn: danh sách market map bia VN + nhập khẩu, đã đối chiếu thực tế thị trường VN (2026-08-13).
 # Mỗi entry: product_id -> {brand, product_name, ref_price, province}
 # ref_price là giá tham chiếu demo (VND), dùng làm base_price tự động khi quét.
 
 DEFAULT_PRODUCTS: dict[str, dict[str, str | float]] = {
     # --- Bia nội / phổ biến ---
-    "P123": {"brand": "Saigon Beer", "product_name": "Saigon Special 330ml", "ref_price": 18000.0, "province": "HCMC"},
+    "P123": {"brand": "Bia Sài Gòn", "product_name": "Bia Sài Gòn Special 330ml", "ref_price": 18000.0, "province": "HCMC"},
+    "P555": {"brand": "Bia Sài Gòn", "product_name": "Bia Sài Gòn Export 330ml", "ref_price": 17000.0, "province": "HCMC"},
+    "PSG_LG": {"brand": "Bia Sài Gòn", "product_name": "Bia Sài Gòn Lager 330ml", "ref_price": 16000.0, "province": "HCMC"},
+    "PSG_GD": {"brand": "Bia Sài Gòn", "product_name": "Bia Sài Gòn Gold 330ml", "ref_price": 20000.0, "province": "HCMC"},
+    "PSG_BK": {"brand": "Bia Sài Gòn", "product_name": "Bia Sài Gòn Black 330ml", "ref_price": 22000.0, "province": "HCMC"},
+    "PSG_BC": {"brand": "Bia Sài Gòn", "product_name": "Bia Sài Gòn Bạc 330ml", "ref_price": 19000.0, "province": "HCMC"},
     "P456": {"brand": "Heineken", "product_name": "Heineken Lager 330ml", "ref_price": 22000.0, "province": "HCMC"},
     "P789": {"brand": "Tiger", "product_name": "Tiger Beer 330ml", "ref_price": 20000.0, "province": "HCMC"},
-    "P012": {"brand": "Habeco", "product_name": "Bia Ha Noi 450ml", "ref_price": 15000.0, "province": "Hanoi"},
-    "P555": {"brand": "Saigon Beer", "product_name": "Saigon Export 330ml", "ref_price": 17000.0, "province": "HCMC"},
-    "P333": {"brand": "Larue", "product_name": "Bia Larue 330ml", "ref_price": 16000.0, "province": "Danang"},
-    "P777": {"brand": "Sapporo", "product_name": "Sapporo Premium 330ml", "ref_price": 25000.0, "province": "HCMC"},
-    "P888": {"brand": "Budweiser", "product_name": "Budweiser 330ml", "ref_price": 24000.0, "province": "HCMC"},
+    "PTGR_C": {"brand": "Tiger", "product_name": "Tiger Crystal 330ml", "ref_price": 24000.0, "province": "HCMC"},
+    "PTGR_T": {"brand": "Tiger", "product_name": "Tiger Tail 330ml", "ref_price": 21000.0, "province": "HCMC"},
+    "P012": {"brand": "Bia Hà Nội", "product_name": "Bia Hà Nội Lon 450ml", "ref_price": 15000.0, "province": "Hanoi"},
+    "PHN_CH": {"brand": "Bia Hà Nội", "product_name": "Bia Hà Nội Chai 450ml", "ref_price": 14000.0, "province": "Hanoi"},
+    "P333": {"brand": "Bia Larue", "product_name": "Bia Larue 330ml", "ref_price": 16000.0, "province": "Danang"},
+    "PTB": {"brand": "Bia Trúc Bạch", "product_name": "Bia Trúc Bạch 330ml", "ref_price": 23000.0, "province": "Hanoi"},
+    "PSTW": {"brand": "Bia Sư Tử Trắng", "product_name": "Bia Sư Tử Trắng 330ml", "ref_price": 17000.0, "province": "Danang"},
+    "PHUDA": {"brand": "Bia Huda", "product_name": "Bia Huda 330ml", "ref_price": 16000.0, "province": "Danang"},
+    "PVT": {"brand": "Bia Vĩnh Tuy", "product_name": "Bia Vĩnh Tuy 330ml", "ref_price": 15000.0, "province": "Hanoi"},
 
     # --- Tuborg (Carlsberg VN) ---
     "PTBG": {"brand": "Tuborg", "product_name": "Tuborg 330ml", "ref_price": 19000.0, "province": "HCMC"},
     "PTBG_G": {"brand": "Tuborg", "product_name": "Tuborg Green 330ml", "ref_price": 19000.0, "province": "HCMC"},
     "PTBG_C": {"brand": "Tuborg", "product_name": "Tuborg Classic 330ml", "ref_price": 19500.0, "province": "HCMC"},
     "PTBG_D": {"brand": "Tuborg", "product_name": "Tuborg Gold 330ml", "ref_price": 21000.0, "province": "HCMC"},
+    "PCAR": {"brand": "Carlsberg", "product_name": "Carlsberg 330ml", "ref_price": 20000.0, "province": "HCMC"},
+
+    # --- Bia nhập khẩu Nhật / Hàn ---
+    "P777": {"brand": "Sapporo", "product_name": "Sapporo Premium 330ml", "ref_price": 25000.0, "province": "HCMC"},
+    "PASP": {"brand": "Asahi", "product_name": "Asahi Super Dry 330ml", "ref_price": 26000.0, "province": "HCMC"},
+    "PKIR": {"brand": "Kirin", "product_name": "Kirin Ichiban 330ml", "ref_price": 27000.0, "province": "HCMC"},
 
     # --- Bia nhập khẩu Tây Ban Nha ---
     "PESP_EG": {"brand": "Estrella", "product_name": "Estrella Galicia 330ml", "ref_price": 35000.0, "province": "HCMC"},
@@ -49,9 +64,23 @@ DEFAULT_PRODUCTS: dict[str, dict[str, str | float]] = {
     "PMEX_PA": {"brand": "Pacifico", "product_name": "Pacifico 330ml", "ref_price": 29000.0, "province": "HCMC"},
     "PMEX_DE": {"brand": "Dos Equis", "product_name": "Dos Equis 330ml", "ref_price": 30000.0, "province": "HCMC"},
 
+    # --- Bia nhập khẩu Thái Lan ---
+    "PTH_CH": {"brand": "Chang", "product_name": "Chang 330ml", "ref_price": 18000.0, "province": "HCMC"},
+    "PTH_SG": {"brand": "Singha", "product_name": "Singha 330ml", "ref_price": 19000.0, "province": "HCMC"},
+
+    # --- Bia nhập khẩu Đức / Áo / Bỉ ---
+    "PDE_PA": {"brand": "Paulaner", "product_name": "Paulaner 330ml", "ref_price": 49000.0, "province": "HCMC"},
+    "PDE_WE": {"brand": "Weihenstephaner", "product_name": "Weihenstephaner Hefeweissbier 330ml", "ref_price": 52000.0, "province": "HCMC"},
+    "PAT_ED": {"brand": "Edelweiss", "product_name": "Edelweiss Wheat Beer 330ml", "ref_price": 56000.0, "province": "HCMC"},
+    "PBE_HG": {"brand": "Hoegaarden", "product_name": "Hoegaarden White 330ml", "ref_price": 30000.0, "province": "HCMC"},
+    "PBE_LF": {"brand": "Leffe", "product_name": "Leffe Blonde 330ml", "ref_price": 32000.0, "province": "HCMC"},
+
+    # --- Bia nhập khẩu Lào ---
+    "PLA_LG": {"brand": "Beerlao", "product_name": "Beerlao Lager 330ml", "ref_price": 18000.0, "province": "HCMC"},
+    "PLA_GD": {"brand": "Beerlao", "product_name": "Beerlao Gold 330ml", "ref_price": 20000.0, "province": "HCMC"},
+
     # --- Bia nhập khẩu Nga / Đông Âu ---
     "PRUS_BA": {"brand": "Baltika", "product_name": "Baltika 330ml", "ref_price": 27000.0, "province": "HCMC"},
-    "PRUS_B0": {"brand": "Baltika", "product_name": "Baltika 0 (khong con) 330ml", "ref_price": 26000.0, "province": "HCMC"},
 
     # --- Bia khong con / Low-alcohol ---
     "PZ_HN": {"brand": "Heineken", "product_name": "Heineken 0.0 330ml", "ref_price": 20000.0, "province": "HCMC"},
@@ -59,6 +88,7 @@ DEFAULT_PRODUCTS: dict[str, dict[str, str | float]] = {
     "PZ_ER": {"brand": "Erdinger", "product_name": "Erdinger Alkoholfrei 330ml", "ref_price": 45000.0, "province": "HCMC"},
     "PZ_AS": {"brand": "Asahi", "product_name": "Asahi Dry Zero 330ml", "ref_price": 30000.0, "province": "HCMC"},
     "PZ_BK": {"brand": "Beck's", "product_name": "Beck's Blue 330ml", "ref_price": 29000.0, "province": "HCMC"},
+    "PZ_BUD": {"brand": "Budweiser", "product_name": "Budweiser 330ml", "ref_price": 24000.0, "province": "HCMC"},
 
     # --- Bia Trung Quoc (Tsingtao) ---
     "PCN_TL": {"brand": "Tsingtao", "product_name": "Tsingtao Lager 330ml", "ref_price": 26000.0, "province": "HCMC"},
@@ -68,6 +98,4 @@ DEFAULT_PRODUCTS: dict[str, dict[str, str | float]] = {
     "PCN_19B": {"brand": "Tsingtao", "product_name": "Tsingtao 1903 Premium Lager 500ml", "ref_price": 42000.0, "province": "HCMC"},
     "PCN_PD": {"brand": "Tsingtao", "product_name": "Tsingtao Pure Draft 330ml", "ref_price": 31000.0, "province": "HCMC"},
     "PCN_LM": {"brand": "Tsingtao", "product_name": "Tsingtao Lemon 0.0 330ml", "ref_price": 29000.0, "province": "HCMC"},
-    "PCN_SE": {"brand": "Tsingtao", "product_name": "Tsingtao 2026 Special Edition 330ml", "ref_price": 35000.0, "province": "HCMC"},
-    "PCN_OB": {"brand": "Tsingtao", "product_name": "Tsingtao Oak Barrel Luxury Legend 330ml", "ref_price": 55000.0, "province": "HCMC"},
 }

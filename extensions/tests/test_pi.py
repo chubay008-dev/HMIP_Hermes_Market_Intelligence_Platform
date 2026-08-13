@@ -21,7 +21,7 @@ def db():
     if Path(PI_DB).exists():
         Path(PI_DB).unlink()
     res = seed.seed_full(history_days=20, path=PI_DB, seed=42)
-    assert res["products"] == 48
+    assert res["products"] == 68
     assert res["observations"] > 0
     return PI_DB
 
@@ -56,7 +56,7 @@ def test_seed_counts(db):
 
 def test_channel_comparison(db):
     ch = analytics.channel_comparison(path=db)
-    assert len(ch["channels"]) == 5
+    assert len(ch["channels"]) == 18
     assert ch["lowest_channel"]["channel_id"] == "SHOPEE"
     assert ch["highest_channel"]["channel_id"] == "WINMART"
 
