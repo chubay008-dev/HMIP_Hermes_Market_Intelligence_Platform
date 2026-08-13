@@ -67,11 +67,13 @@ def detect_events(product_id: str | None = None, rerun: bool = False,
     """
     if rerun:
         conn = pi_store._connect(path or pi_store.DEFAULT_PI_DB_PATH)  # type: ignore[attr-defined]
+        conn.execute("PRAGMA foreign_keys=OFF")
         try:
             conn.execute("DELETE FROM pi_price_events")
             conn.execute("DELETE FROM pi_alerts")
             conn.commit()
         finally:
+            conn.execute("PRAGMA foreign_keys=ON")
             conn.close()
 
     where = "WHERE o.product_id = ?" if product_id else ""
