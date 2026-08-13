@@ -14,6 +14,7 @@ Tất cả ghi vào DB PI riêng (không đụng DB cũ). Idempotent.
 
 from __future__ import annotations
 
+import os
 import random
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -90,9 +91,20 @@ def _brand_id(product_id: str, brand: str) -> str:
     return f"BR-{safe}"
 
 
-def seed_full(history_days: int = 90, path: str | None = None,
+def seed_full(history_days: int | None = None, path: str | None = None,
               seed: int = 20260812) -> dict[str, Any]:
-    """Xoá và seed lại toàn bộ dữ liệu PI. Trả summary."""
+    """Xoá và seed lại toàn bộ dữ liệu PI. Trả summary.
+
+    history_days mặc định 30 (qua env HMIP_SEED_DAYS). Giảm từ 90 xuống 30
+    để seed nhanh hơn (~3 phút thay vì ~10 phút) trên Render free, tránh
+    timeout/OOM. Đổi trên Render env HMIP_SEED_DAYS nếu muốn nhiều ngày hơn.
+    """
+    if history_days is None:
+        try:
+            history_days = int(os.getenv("HMIP_SEED_DAYS", "30"))
+        except (TypeError, ValueError):
+            history_days = 30
+    history_days = max(7, min(history_days, 365))
     rng = random.Random(seed)
     init = pi_store
     init.init_pi_db(path)
