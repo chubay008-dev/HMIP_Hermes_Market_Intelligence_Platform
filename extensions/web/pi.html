@@ -104,67 +104,69 @@
 </head>
 <body>
 <header>
-  <h1>📊 HMIP Price Intelligence</h1>
-  <span class="sub">Workspace v2.0 · Spec-driven</span>
+  <h1>📊 <span data-i18n="app">HMIP Price Intelligence</span></h1>
+  <span class="sub" data-i18n="workspace">Workspace v2.0 · Spec-driven</span>
   <div class="spacer"></div>
+  <span id="langBadge" class="chip">VI</span>
+  <button class="btn" id="langBtn" data-i18n-title="language" title="Đổi ngôn ngữ / Change language / 切换语言"><span data-i18n="language">🌐 Ngôn ngữ</span></button>
   <span id="tokBadge" class="chip" style="display:none"></span>
-  <button class="btn" id="tokBtn" title="Nhập mã truy cập (dùng chung với Monitor cũ)">🔐 Token</button>
-  <button class="btn" id="seedBtn" title="Tạo dữ liệu thị trường mẫu">⟳ Seed dữ liệu</button>
-  <button class="btn" id="themeBtn">🌓 Theme</button>
-  <a class="btn" href="/" style="text-decoration:none">← Monitor cũ</a>
+  <button class="btn" id="tokBtn" data-i18n-title="tokTitle" title="Nhập mã truy cập (dùng chung với Monitor cũ)"><span data-i18n="tokBtn">🔐 Token</span></button>
+  <button class="btn" id="seedBtn" data-i18n-title="seedTitle" title="Tạo dữ liệu thị trường mẫu"><span data-i18n="seedBtn">⟳ Seed dữ liệu</span></button>
+  <button class="btn" id="themeBtn"><span data-i18n="themeBtn">🌓 Theme</span></button>
+  <a class="btn" href="/" style="text-decoration:none"><span data-i18n="oldMonitor">← Monitor cũ</span></a>
 </header>
 
 <div class="filterbar">
-  <div class="fgroup"><label>Brand</label><select id="f_brand"></select></div>
-  <div class="fgroup"><label>Sản phẩm</label><select id="f_product"></select></div>
-  <div class="fgroup"><label>Kênh</label><select id="f_channel"></select></div>
-  <div class="fgroup"><label>Vùng</label><select id="f_region"></select></div>
-  <div class="fgroup"><label>Kỳ</label>
+  <div class="fgroup"><label data-i18n="brand">Brand</label><select id="f_brand"></select></div>
+  <div class="fgroup"><label data-i18n="product">Sản phẩm</label><select id="f_product"></select></div>
+  <div class="fgroup"><label data-i18n="channel">Kênh</label><select id="f_channel"></select></div>
+  <div class="fgroup"><label data-i18n="region">Vùng</label><select id="f_region"></select></div>
+  <div class="fgroup"><label data-i18n="period">Kỳ</label>
     <select id="f_period">
-      <option value="7D">7 ngày</option>
-      <option value="30D">30 ngày</option>
-      <option value="90D" selected>90 ngày</option>
-      <option value="6M">6 tháng</option>
-      <option value="12M">12 tháng</option>
+      <option value="7D" data-i18n="p7d">7 ngày</option>
+      <option value="30D" data-i18n="p30d">30 ngày</option>
+      <option value="90D" selected data-i18n="p90d">90 ngày</option>
+      <option value="6M" data-i18n="p6m">6 tháng</option>
+      <option value="12M" data-i18n="p12m">12 tháng</option>
     </select>
   </div>
-  <div class="fgroup"><label>&nbsp;</label><button class="btn primary" id="applyBtn">Áp dụng</button></div>
+  <div class="fgroup"><label>&nbsp;</label><button class="btn primary" id="applyBtn" data-i18n="apply">Áp dụng</button></div>
 </div>
 
 <div class="wrap">
   <!-- KPI -->
-  <div class="grid kpis" id="kpis"><div class="loading">Đang tải KPI…</div></div>
+  <div class="grid kpis" id="kpis"><div class="loading" data-i18n="loadingKpi">Đang tải KPI…</div></div>
 
   <!-- Trend + Index -->
   <div class="grid two-col" style="margin-top:14px">
     <div class="card">
-      <h3>📈 Price Trend</h3>
+      <h3 data-i18n="priceTrend">📈 Price Trend</h3>
       <div class="toggle-row" id="trendToggles">
         <span class="toggle on" data-s="sku_price">SKU</span>
-        <span class="toggle on" data-s="market_avg">Thị trường</span>
-        <span class="toggle" data-s="brand_avg">Brand</span>
-        <span class="toggle" data-s="regular_price">Regular</span>
-        <span class="toggle" data-s="promotion_price">Promotion</span>
+        <span class="toggle on" data-s="market_avg" data-i18n="market">Thị trường</span>
+        <span class="toggle" data-s="brand_avg" data-i18n="brandAvg">Brand</span>
+        <span class="toggle" data-s="regular_price" data-i18n="regular">Regular</span>
+        <span class="toggle" data-s="promotion_price" data-i18n="promotion">Promotion</span>
       </div>
       <div id="trendChart"></div>
       <div class="legend" id="trendLegend"></div>
     </div>
     <div class="card">
-      <h3>🧭 Price Index (theo Brand)</h3>
+      <h3 data-i18n="priceIndex">🧭 Price Index (theo Brand)</h3>
       <div id="indexChart"></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px">100 = tham chiếu thị trường (median). &gt;100 cao hơn, &lt;100 thấp hơn.</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px" data-i18n="indexNote">100 = tham chiếu thị trường (median). &gt;100 cao hơn, &lt;100 thấp hơn.</div>
     </div>
   </div>
 
   <!-- Competitor + Channel -->
   <div class="grid two-col" style="margin-top:14px">
     <div class="card">
-      <h3>⚔️ Competitor Comparison <span class="chip" id="compUniv"></span></h3>
-      <table id="compTable"><thead><tr><th>Sản phẩm</th><th>Brand</th><th>Giá TB</th><th>Index</th></tr></thead><tbody></tbody></table>
+      <h3>⚔️ <span data-i18n="competitor">Competitor Comparison</span> <span class="chip" id="compUniv"></span></h3>
+      <table id="compTable"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colBrand">Brand</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th></tr></thead><tbody></tbody></table>
     </div>
     <div class="card">
-      <h3>🛒 Channel Comparison</h3>
-      <table id="chTable"><thead><tr><th>Kênh</th><th>Giá TB</th><th>Index</th><th>n</th></tr></thead><tbody></tbody></table>
+      <h3 data-i18n="channelCmp">🛒 Channel Comparison</h3>
+      <table id="chTable"><thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th><th data-i18n="colN">n</th></tr></thead><tbody></tbody></table>
       <div id="chLowHigh" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
     </div>
   </div>
@@ -172,47 +174,47 @@
   <!-- Region + Positioning -->
   <div class="grid two-col" style="margin-top:14px">
     <div class="card">
-      <h3>🌏 Regional Pricing</h3>
-      <table id="regTable"><thead><tr><th>Vùng</th><th>Tỉnh</th><th>Giá TB</th><th>Index</th></tr></thead><tbody></tbody></table>
+      <h3 data-i18n="regional">🌏 Regional Pricing</h3>
+      <table id="regTable"><thead><tr><th data-i18n="colRegion">Vùng</th><th data-i18n="colProvince">Tỉnh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th></tr></thead><tbody></tbody></table>
     </div>
     <div class="card">
-      <h3>🎯 Price Positioning Matrix</h3>
+      <h3 data-i18n="positioning">🎯 Price Positioning Matrix</h3>
       <div id="posChart" style="height:260px"></div>
-      <div class="legend">X = Price Index · Y = Market Presence (số kênh)</div>
+      <div class="legend" data-i18n="posLegend">X = Price Index · Y = Market Presence (số kênh)</div>
     </div>
   </div>
 
   <!-- Promotions + Events -->
   <div class="grid two-col" style="margin-top:14px">
     <div class="card">
-      <h3>🏷️ Promotion Intelligence</h3>
+      <h3 data-i18n="promo">🏷️ Promotion Intelligence</h3>
       <div id="promoSummary" class="row-actions" style="flex-wrap:wrap;gap:8px"></div>
-      <table id="promoTable" style="margin-top:8px"><thead><tr><th>Sản phẩm</th><th>Loại</th><th>Giảm</th><th>Giá KM</th></tr></thead><tbody></tbody></table>
+      <table id="promoTable" style="margin-top:8px"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colType">Loại</th><th data-i18n="colDisc">Giảm</th><th data-i18n="colPromoPrice">Giá KM</th></tr></thead><tbody></tbody></table>
     </div>
     <div class="card">
-      <h3>⚡ Price Events</h3>
+      <h3 data-i18n="events">⚡ Price Events</h3>
       <div id="eventsList" style="max-height:300px;overflow:auto"></div>
     </div>
   </div>
 
   <!-- Alerts -->
   <div class="card" style="margin-top:14px">
-    <h3>🔔 Price Alert Center</h3>
+    <h3 data-i18n="alerts">🔔 Price Alert Center</h3>
     <div id="alertsList" class="grid" style="gap:8px"></div>
   </div>
 
   <!-- SKU Explorer + AI -->
   <div class="card" style="margin-top:14px">
-    <h3>🔬 SKU Explorer + AI Analyst</h3>
+    <h3 data-i18n="skuAi">🔬 SKU Explorer + AI Analyst</h3>
     <div class="row-actions" style="margin-bottom:10px">
       <select id="skuPick" class="sku-pick"></select>
-      <button class="btn" id="skuLoad">Xem SKU</button>
+      <button class="btn" id="skuLoad" data-i18n="viewSku">Xem SKU</button>
     </div>
     <div id="skuResult"></div>
     <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
       <div class="row-actions">
-        <input id="aiQ" class="sku-pick" placeholder="Hỏi AI Analyst, ví dụ: Tại sao giá Tiger tăng?" style="flex:1" />
-        <button class="btn primary" id="aiAskBtn">Hỏi AI</button>
+        <input id="aiQ" class="sku-pick" data-i18n-ph="aiPlaceholder" placeholder="Hỏi AI Analyst, ví dụ: Tại sao giá Tiger tăng?" style="flex:1" />
+        <button class="btn primary" id="aiAskBtn" data-i18n="askAi">Hỏi AI</button>
       </div>
       <div id="aiResult"></div>
     </div>
@@ -226,6 +228,118 @@ const $ = s => document.querySelector(s);
 const fmt = n => n==null ? "—" : new Intl.NumberFormat('vi-VN').format(Math.round(n)) + " ₫";
 const pct = n => n==null ? "—" : (n>=0?"+":"") + n.toFixed(1) + "%";
 const esc = s => (s??"").toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+// ---- i18n (VI / EN / ZH) ----
+const I18N = {
+  vi: {
+    app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven",
+    tokBtn:"🔐 Token", tokTitle:"Nhập mã truy cập (dùng chung với Monitor cũ)",
+    seedBtn:"⟳ Seed dữ liệu", seedTitle:"Tạo dữ liệu thị trường mẫu",
+    themeBtn:"🌓 Theme", oldMonitor:"← Monitor cũ", language:"🌐 Ngôn ngữ",
+    brand:"Brand", product:"Sản phẩm", channel:"Kênh", region:"Vùng", period:"Kỳ",
+    p7d:"7 ngày", p30d:"30 ngày", p90d:"90 ngày", p6m:"6 tháng", p12m:"12 tháng",
+    apply:"Áp dụng", loadingKpi:"Đang tải KPI…",
+    priceTrend:"📈 Price Trend", market:"Thị trường", brandAvg:"Brand",
+    regular:"Regular", promotion:"Promotion",
+    priceIndex:"🧭 Price Index (theo Brand)",
+    indexNote:"100 = tham chiếu thị trường (median). >100 cao hơn, <100 thấp hơn.",
+    competitor:"⚔️ Competitor Comparison", channelCmp:"🛒 Channel Comparison",
+    regional:"🌏 Regional Pricing", positioning:"🎯 Price Positioning Matrix",
+    posLegend:"X = Price Index · Y = Market Presence (số kênh)",
+    promo:"🏷️ Promotion Intelligence", events:"⚡ Price Events",
+    alerts:"🔔 Price Alert Center", skuAi:"🔬 SKU Explorer + AI Analyst",
+    viewSku:"Xem SKU", askAi:"Hỏi AI", aiPlaceholder:"Hỏi AI Analyst, ví dụ: Tại sao giá Tiger tăng?",
+    colProduct:"Sản phẩm", colBrand:"Brand", colAvg:"Giá TB", colIndex:"Index",
+    colChannel:"Kênh", colN:"n", colRegion:"Vùng", colProvince:"Tỉnh",
+    colType:"Loại", colDisc:"Giảm", colPromoPrice:"Giá KM",
+    chooseSeries:"Chọn ít nhất 1 series",
+    errLoad:"Lỗi tải dữ liệu: ", seedFirst:"Thử bấm \"Seed dữ liệu\" trước.",
+    cheapest:"Kênh rẻ nhất: ", priciest:" · Cao nhất: ",
+    noData:"Chưa có dữ liệu. Bấm 'Seed dữ liệu' để tạo market data.",
+  },
+  en: {
+    app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven",
+    tokBtn:"🔐 Token", tokTitle:"Enter access token (shared with Old Monitor)",
+    seedBtn:"⟳ Seed data", seedTitle:"Generate sample market data",
+    themeBtn:"🌓 Theme", oldMonitor:"← Old Monitor", language:"🌐 Language",
+    brand:"Brand", product:"Product", channel:"Channel", region:"Region", period:"Period",
+    p7d:"7 days", p30d:"30 days", p90d:"90 days", p6m:"6 months", p12m:"12 months",
+    apply:"Apply", loadingKpi:"Loading KPIs…",
+    priceTrend:"📈 Price Trend", market:"Market", brandAvg:"Brand",
+    regular:"Regular", promotion:"Promotion",
+    priceIndex:"🧭 Price Index (by Brand)",
+    indexNote:"100 = market median reference. >100 higher, <100 lower.",
+    competitor:"⚔️ Competitor Comparison", channelCmp:"🛒 Channel Comparison",
+    regional:"🌏 Regional Pricing", positioning:"🎯 Price Positioning Matrix",
+    posLegend:"X = Price Index · Y = Market Presence (channel count)",
+    promo:"🏷️ Promotion Intelligence", events:"⚡ Price Events",
+    alerts:"🔔 Price Alert Center", skuAi:"🔬 SKU Explorer + AI Analyst",
+    viewSku:"View SKU", askAi:"Ask AI", aiPlaceholder:"Ask AI Analyst, e.g.: Why did Tiger price rise?",
+    colProduct:"Product", colBrand:"Brand", colAvg:"Avg Price", colIndex:"Index",
+    colChannel:"Channel", colN:"n", colRegion:"Region", colProvince:"Province",
+    colType:"Type", colDisc:"Discount", colPromoPrice:"Promo Price",
+    chooseSeries:"Select at least 1 series",
+    errLoad:"Data load error: ", seedFirst:"Try clicking \"Seed data\" first.",
+    cheapest:"Cheapest channel: ", priciest:" · Priciest: ",
+    noData:"No data yet. Click 'Seed data' to generate market data.",
+  },
+  zh: {
+    app:"HMIP 价格情报", workspace:"Workspace v2.0 · Spec-driven",
+    tokBtn:"🔐 令牌", tokTitle:"输入访问令牌（与旧监视器共用）",
+    seedBtn:"⟳ 种子数据", seedTitle:"生成示例市场数据",
+    themeBtn:"🌓 主题", oldMonitor:"← 旧监视器", language:"🌐 语言",
+    brand:"品牌", product:"产品", channel:"渠道", region:"地区", period:"周期",
+    p7d:"7天", p30d:"30天", p90d:"90天", p6m:"6个月", p12m:"12个月",
+    apply:"应用", loadingKpi:"加载 KPI…",
+    priceTrend:"📈 价格趋势", market:"市场", brandAvg:"品牌",
+    regular:"常规", promotion:"促销",
+    priceIndex:"🧭 价格指数（按品牌）",
+    indexNote:"100 = 市场中位数参考。>100 更高，<100 更低。",
+    competitor:"⚔️ 竞品对比", channelCmp:"🛒 渠道对比",
+    regional:"🌏 地区定价", positioning:"🎯 价格定位矩阵",
+    posLegend:"X = 价格指数 · Y = 市场存在度（渠道数）",
+    promo:"🏷️ 促销情报", events:"⚡ 价格事件",
+    alerts:"🔔 价格警报中心", skuAi:"🔬 SKU 浏览器 + AI 分析师",
+    viewSku:"查看 SKU", askAi:"问 AI", aiPlaceholder:"问 AI 分析师，例如：为什么 Tiger 涨价了？",
+    colProduct:"产品", colBrand:"品牌", colAvg:"平均价", colIndex:"指数",
+    colChannel:"渠道", colN:"n", colRegion:"地区", colProvince:"省份",
+    colType:"类型", colDisc:"折扣", colPromoPrice:"促销价",
+    chooseSeries:"请至少选择 1 个序列",
+    errLoad:"数据加载错误：", seedFirst:"请先点击“种子数据”。",
+    cheapest:"最便宜渠道：", priciest:" · 最贵渠道：",
+    noData:"暂无数据。点击“种子数据”生成市场数据。",
+  },
+};
+let LANG = localStorage.getItem('hmip_pi_lang') || 'vi';
+const LANGS = ['vi','en','zh'];
+const LANG_NAME = {vi:'VI', en:'EN', zh:'ZH'};
+function t(k){ return (I18N[LANG] && I18N[LANG][k] !== undefined) ? I18N[LANG][k] : (I18N.vi[k] ?? k); }
+function applyLang(){
+  document.documentElement.lang = LANG;
+  const b = document.getElementById('langBadge'); if(b) b.textContent = LANG_NAME[LANG];
+  // static text via [data-i18n]
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(I18N[LANG][key] !== undefined) el.textContent = I18N[LANG][key];
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-title');
+    if(I18N[LANG][key] !== undefined) el.title = I18N[LANG][key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph');
+    if(I18N[LANG][key] !== undefined) el.placeholder = I18N[LANG][key];
+  });
+}
+document.getElementById('langBtn').onclick = () => {
+  const i = LANGS.indexOf(LANG);
+  LANG = LANGS[(i+1) % LANGS.length];
+  localStorage.setItem('hmip_pi_lang', LANG);
+  applyLang();
+  loadAll();
+};
+applyLang();
+
 
 async function api(path, opts={}){
   const tok = localStorage.getItem('hmip_token') || '';
@@ -333,7 +447,7 @@ async function loadAll(){
   // 1) workspace
   let ws;
   try { ws = await api('/api/price-intelligence/workspace?'+qs(f)); }
-  catch(e){ $('#kpis').innerHTML='<div class="err">Lỗi tải dữ liệu: '+esc(e.message)+'<br>Thử bấm "Seed dữ liệu" trước.</div>'; return; }
+  catch(e){ $('#kpis').innerHTML='<div class="err">'+t('errLoad')+esc(e.message)+'<br>'+t('seedFirst')+'</div>'; return; }
   renderKPIs(ws.kpi);
   renderTrend(ws.trend);
   renderIndex(ws.index);
@@ -396,12 +510,12 @@ function renderTrend(t){
   const colors={'sku_price':'#4f9cff','market_avg':'#7c5cff','brand_avg':'#2ea043','regular_price':'#db8b1a','promotion_price':'#f85149'};
   const onSeries = state.trendSeries;
   Object.keys(t.series||{}).forEach(k=>{ if(onSeries.includes(k)) series[k]=t.series[k]; });
-  if(Object.keys(series).length===0){ $('#trendChart').innerHTML='<div class="loading">Chọn ít nhất 1 series</div>'; $('#trendLegend').innerHTML=''; return; }
+  if(Object.keys(series).length===0){ $('#trendChart').innerHTML='<div class="loading">'+t('chooseSeries')+'</div>'; $('#trendLegend').innerHTML=''; return; }
   // flatten brand_avg (has brand key) into single? keep as market_avg if present
   lineChart('#trendChart', series, {colors:Object.values(colors).filter((c,i)=>onSeries.includes(Object.keys(colors)[i]))});
   $('#trendLegend').innerHTML = onSeries.map(k=>`<span><i class="dot" style="background:${colors[k]}"></i>${labelOf(k)}</span>`).join('');
 }
-function labelOf(k){ return {sku_price:'SKU',market_avg:'Thị trường',brand_avg:'Brand',regular_price:'Regular',promotion_price:'Promotion'}[k]||k; }
+function labelOf(k){ return {sku_price:'SKU',market_avg:t('market'),brand_avg:t('brandAvg'),regular_price:t('regular'),promotion_price:t('promotion')}[k]||k; }
 
 $('#trendToggles').addEventListener('click', e=>{
   const t=e.target.closest('.toggle'); if(!t) return;
@@ -448,7 +562,7 @@ function renderChannel(ch){
     tb.innerHTML+=`<tr><td>${esc(r.channel)}</td><td class="mono">${fmt(r.avg_price)}</td><td class="mono" style="color:${col}">${r.price_index}</td><td class="mono">${r.n}</td></tr>`;
   });
   if(ch.lowest_channel&&ch.highest_channel){
-    $('#chLowHigh').innerHTML=`Kênh rẻ nhất: <b>${esc(ch.lowest_channel.channel)}</b> (${fmt(ch.lowest_channel.avg_price)}) · Cao nhất: <b>${esc(ch.highest_channel.channel)}</b> (${fmt(ch.highest_channel.avg_price)})`;
+    $('#chLowHigh').innerHTML=`${t('cheapest')}<b>${esc(ch.lowest_channel.channel)}</b> (${fmt(ch.lowest_channel.avg_price)}) ${t('priciest')}<b>${esc(ch.highest_channel.channel)}</b> (${fmt(ch.highest_channel.avg_price)})`;
   }
 }
 function renderRegion(rg){
@@ -594,7 +708,7 @@ $('#applyBtn').onclick = loadAll;
 
 // ---- init ----
 loadCatalog().then(()=>loadAll()).catch(e=>{
-  $('#kpis').innerHTML='<div class="err">Chưa có dữ liệu. Bấm "Seed dữ liệu" để tạo market data.</div>';
+  $('#kpis').innerHTML='<div class="err">'+t('noData')+'</div>';
   console.error(e);
 });
 </script>
