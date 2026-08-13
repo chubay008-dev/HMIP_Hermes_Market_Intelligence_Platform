@@ -32,7 +32,7 @@ def temp_db(monkeypatch):
 def test_simulated_adapter_returns_known_product():
     out = SimulatedPriceAdapter().fetch({"product_id": "P123", "source": "demo"})
     assert out["product_id"] == "P123"
-    assert out["brand"] == "Saigon Beer"
+    assert out["brand"] == "Bia Sài Gòn"
     assert "price_text" in out
     assert out["currency"] == "VND"
 
@@ -62,7 +62,11 @@ def test_adapter_health():
 
 # ------------------------------------------------------------ base price
 
-def test_base_price_from_catalog():
+def test_base_price_from_catalog(temp_db):
+    # load catalog vào temp_db để resolve_base_price đọc được base_price
+    from extensions.default_products import DEFAULT_PRODUCTS
+    for pid, info in DEFAULT_PRODUCTS.items():
+        db.upsert_product(pid, info["product_name"], info["brand"], "catalog", base_price=info["ref_price"], path=temp_db)
     assert resolve_base_price("P123") == 18000.0
     assert resolve_base_price("P456") == 22000.0
 
@@ -80,12 +84,12 @@ def test_base_price_fallback_for_unknown_is_none(temp_db):
 # -------------------------------------------------------------------- db
 
 def test_db_roundtrip(temp_db):
-    db.upsert_product("P123", "Saigon Special 330ml", "Saigon Beer", "demo", temp_db)
+    db.upsert_product("P123", "Bia Sài Gòn Special 330ml", "Bia Sài Gòn", "demo", temp_db)
     db.record_price_point("P123", 18500.0, "VND", "ALERT", 2.78, "demo://x", temp_db)
 
     products = db.get_products(temp_db)
     assert len(products) >= 1
-    assert products[0]["name"] == "Saigon Special 330ml"
+    assert products[0]["name"] == "Bia Sài Gòn Special 330ml"
 
     history = db.get_history("P123", path=temp_db)
     assert len(history) == 1
@@ -95,7 +99,7 @@ def test_db_roundtrip(temp_db):
 
 def test_db_upsert_is_idempotent(temp_db):
     for _ in range(3):
-        db.upsert_product("P123", "Tên mới", "Saigon Beer", "demo", temp_db)
+        db.upsert_product("P123", "Tên mới", "Bia Sài Gòn", "demo", temp_db)
     assert len(db.get_products(temp_db)) == 1
     assert db.get_products(temp_db)[0]["name"] == "Tên mới"
 

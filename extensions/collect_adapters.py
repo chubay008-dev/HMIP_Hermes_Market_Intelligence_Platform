@@ -50,8 +50,8 @@ from extensions.default_products import DEFAULT_PRODUCTS
 
 _DEMO_CATALOG: dict[str, dict[str, Any]] = {
     "P123": {
-        "brand": "Saigon Beer",
-        "product_name": "Saigon Special 330ml",
+        "brand": "Bia Sài Gòn",
+        "product_name": "Bia Sài Gòn Special 330ml",
         "ref_price": 18000.0,
         "province": "HCMC",
     },

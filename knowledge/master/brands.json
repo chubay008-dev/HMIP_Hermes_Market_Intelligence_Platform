@@ -1,7 +1,7 @@
 [
   {
     "id": "BRAND-SAIGON",
-    "name": "Saigon Beer",
+    "name": "Bia Sài Gòn",
     "country": "VN"
   },
   {
@@ -23,11 +23,11 @@
   },
   {
     "id": "BRAND-P555",
-    "name": "Saigon Beer"
+    "name": "Bia Sài Gòn"
   },
   {
     "id": "BRAND-P123",
-    "name": "Saigon Beer"
+    "name": "Bia Sài Gòn"
   },
   {
     "id": "BRAND-P456",
@@ -39,7 +39,7 @@
   },
   {
     "id": "BRAND-P012",
-    "name": "Habeco"
+    "name": "Bia Hà Nội"
   },
   {
     "id": "BRAND-P333",

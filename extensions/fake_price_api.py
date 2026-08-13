@@ -13,7 +13,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # Giá tham chiếu thực tế (VND) để app so sánh quyết định
 _PRICES = {
-    "P123": {"title": "Saigon Special 330ml", "brand": "Saigon Beer", "price": 18500, "province": "HCMC"},
+    "P123": {"title": "Bia Sài Gòn Special 330ml", "brand": "Bia Sài Gòn", "price": 18500, "province": "HCMC"},
     "P456": {"title": "Heineken Lager 330ml", "brand": "Heineken", "price": 23500, "province": "HCMC"},
 }
 
