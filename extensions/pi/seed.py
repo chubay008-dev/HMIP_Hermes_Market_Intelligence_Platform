@@ -82,7 +82,9 @@ def seed_full(history_days: int = 90, path: str | None = None,
     init.init_pi_db(path)
 
     # Reset tables (idempotent seed)
+    # Tắt FK check khi xóa để tránh IntegrityError do thứ tự bảng
     conn = init._connect(path or init.DEFAULT_PI_DB_PATH)  # type: ignore[attr-defined]
+    conn.execute("PRAGMA foreign_keys=OFF")
     try:
         for t in ("pi_observations", "pi_promotions", "pi_price_events",
                   "pi_alerts", "pi_ai_analyses", "pi_skus", "pi_products",
@@ -91,6 +93,7 @@ def seed_full(history_days: int = 90, path: str | None = None,
             conn.execute(f"DELETE FROM {t}")
         conn.commit()
     finally:
+        conn.execute("PRAGMA foreign_keys=ON")
         conn.close()
 
     # Static dimensions
