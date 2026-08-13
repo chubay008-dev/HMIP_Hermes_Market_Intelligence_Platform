@@ -94,7 +94,7 @@ async def require_token(request: Request) -> None:
 
 # Các path không cần token. Dashboard '/' chỉ exempt chính xác nó
 # (không dùng startswith('/') vì sẽ miễn trừ mọi route).
-_EXEMPT_EXACT = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static", "/")
+_EXEMPT_EXACT = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static", "/", "/pi", "/workspace")
 _EXEMPT_PREFIX = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static")
 
 

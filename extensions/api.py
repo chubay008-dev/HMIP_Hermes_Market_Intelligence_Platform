@@ -540,3 +540,7 @@ if _STATIC_DIR.exists():
     @app.get("/pi")
     def pi_dashboard() -> FileResponse:
         return FileResponse(_PI_DIR / "pi.html")
+
+    @app.get("/workspace")
+    def workspace_dashboard() -> FileResponse:
+        return FileResponse(_PI_DIR / "pi.html")
