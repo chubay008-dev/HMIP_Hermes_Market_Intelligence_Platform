@@ -24,7 +24,7 @@ services:
       - key: HMIP_SCAN_INTERVAL_MIN
         value: "30"            # quét mỗi 30 phút (free tier tránh quá tải)
       - key: HMIP_COLLECT_MODE
-        value: "demo"          # đổi thành "http" nếu có nguồn giá thật
+        value: "http"          # dùng nguồn giá thật (Tiki API công khai, free) cho tab Giám sát
       - key: HMIP_API_TOKEN
         generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên (dùng login web)
       - key: HMIP_PI_DB_PATH
