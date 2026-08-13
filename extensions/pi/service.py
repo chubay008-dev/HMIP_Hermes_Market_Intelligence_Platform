@@ -51,6 +51,25 @@ def seed_async() -> dict[str, Any]:
     return {"status": "started", "message": "Đã bắt đầu seed (chạy nền)"}
 
 
+def ensure_ready_count(path: str | None = None) -> int:
+    """Đếm số observation hiện có (không seed). Dùng để quyết định có auto-seed không."""
+    try:
+        pi_store.init_pi_db(path)
+        return pi_store.count_rows("pi_observations", path=path)
+    except Exception:
+        return 0
+
+
+def mark_ready(path: str | None = None) -> dict[str, Any]:
+    """DB đã có data sẵn -> đánh dấu trạng thái seed là done (không chạy lại)."""
+    with _seed_lock:
+        if _seed_state["status"] == "running":
+            return dict(_seed_state)
+        obs = pi_store.count_rows("pi_observations", path=path)
+        _seed_state = {"status": "done", "message": "Seed sẵn có", "detail": {"observations": obs}}
+    return dict(_seed_state)
+
+
 def ensure_ready(path: str | None = None) -> dict[str, Any]:
     """Đảm bảo DB PI đã init + có dữ liệu. Nếu rỗng -> seed."""
     pi_store.init_pi_db(path)

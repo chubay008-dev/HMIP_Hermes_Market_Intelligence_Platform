@@ -237,6 +237,9 @@ def seed_full(history_days: int = 90, path: str | None = None,
                         "metadata": None,
                     })
                     n_obs += 1
+                    if len(obs_rows) >= 5000:  # flush chunk để tránh OOM (520k rows)
+                        init.bulk_insert_observations(obs_rows, path=path)
+                        obs_rows.clear()
                     if promo_price:
                         n_promo += 1
                         ptype = "Flash Sale" if is_weekend else "Campaign"
@@ -252,6 +255,9 @@ def seed_full(history_days: int = 90, path: str | None = None,
                             "campaign": f"{ptype} {cur_date.strftime('%Y-%m')}",
                             "source_url": f"https://{cid.lower()}.vn/p/{pid}",
                         })
+                        if len(promo_rows) >= 5000:
+                            init.bulk_insert_promotions(promo_rows, path=path)
+                            promo_rows.clear()
                     prev_price = price
                     day += 1
 
