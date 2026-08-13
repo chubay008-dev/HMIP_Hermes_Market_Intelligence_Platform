@@ -80,17 +80,18 @@ def _start_pi_collect(interval_min: int = 30) -> None:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init_db()
-    # Tự seed Price Intelligence DB nếu rỗng (Render ephemeral FS: data reset
-    # khi restart → cần tái lập từ catalog mỗi lần cold start).
-    # QUAN TRỌNG: chạy BẤT ĐỒNG BỘ (background thread) để không block startup
-    # và tránh OOM (seed 520k rows tốn RAM) làm Render kill instance.
+    # Tự seed Price Intelligence DB nếu rỗng + env HMIP_PI_AUTOSEED=on.
+    # MẶC ĐỊNH TẮT: seed 520k rows (68x17x5x90) ăn RAM + thời gian, dễ gây
+    # OOM/timeout trên Render free (512Mi). Để user bấm nút Seed thủ công khi cần.
+    # Khi bật, seed chạy BẤT ĐỒNG BỘ (background thread) không block startup.
     try:
-        if pi_service.seed_status()["status"] == "idle":
-            obs = pi_service.ensure_ready_count()
-            if obs == 0:
-                pi_service.seed_async()
-            else:
-                pi_service.mark_ready()
+        if os.getenv("HMIP_PI_AUTOSEED", "off").lower() in ("1", "on", "true", "yes"):
+            if pi_service.seed_status()["status"] == "idle":
+                obs = pi_service.ensure_ready_count()
+                if obs == 0:
+                    pi_service.seed_async()
+                else:
+                    pi_service.mark_ready()
     except Exception as exc:  # không block startup nếu seed lỗi
         print(f"[PI] seed skip/error: {exc}")
     # Tự động bật auto-scan nếu env yêu cầu (mặc định TẮT để user chủ động).

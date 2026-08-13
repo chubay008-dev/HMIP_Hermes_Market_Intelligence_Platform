@@ -76,83 +76,90 @@ def detect_events(product_id: str | None = None, rerun: bool = False,
             conn.execute("PRAGMA foreign_keys=ON")
             conn.close()
 
-    where = "WHERE o.product_id = ?" if product_id else ""
-    params = [product_id] if product_id else []
-    rows = pi_store.fetch_all(
-        f"""SELECT o.observation_id, o.sku_id, o.product_id, o.channel_id,
-                   o.region_id, o.observed_at, o.effective_price, o.regular_price,
-                   o.promotion_price
-            FROM pi_observations o
-            {where}
-            ORDER BY o.sku_id, o.channel_id, o.region_id, o.observed_at""",
-        params, path=path,
-    )
-
-    # group theo (sku, channel, region)
-    groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
-    for r in rows:
-        key = (r["sku_id"], r["channel_id"], r["region_id"])
-        groups.setdefault(key, []).append(r)
+    # Lấy danh sách product_id (nhẹ) rồi xử lý theo batch để tránh OOM
+    # khi fetch_all toàn bộ 520k observations vào memory.
+    if product_id:
+        product_ids = [product_id]
+    else:
+        product_ids = [r["product_id"] for r in pi_store.fetch_all(
+            "SELECT DISTINCT product_id FROM pi_observations ORDER BY product_id", [], path=path)]
 
     new_events = 0
     new_alerts = 0
-    _pending_alerts: list[dict] = []
     thresholds = DEFAULT_THRESHOLDS
-    WINDOW = 7  # dedup window: mỗi (sku,channel,region,type) chỉ 1 event/7 ngày
+    WINDOW = 7
 
-    for key, series in groups.items():
-        series.sort(key=lambda x: x["observed_at"])
-        for i in range(1, len(series)):
-            cur = series[i]
-            prev = series[i - 1]
-            newp = float(cur["effective_price"])
-            oldp = float(prev["effective_price"])
-            if oldp <= 0:
-                continue
-            change = (newp - oldp) / oldp * 100.0
-            change_abs = abs(change)
-            # Price event khi bước nhảy ngày-liền-kề vượt HIGH (10%) — tương
-            # ứng "significant price event" (Spec §22, §25). Với giá bia ổn
-            #  định (flat + tiny noise) chỉ jump_event mới vượt ngưỡng.
-            if change_abs < thresholds["high"]:
-                continue
-            etype = "PRICE_INCREASE" if change > 0 else "PRICE_DECREASE"
-            sev, _ = _severity_for(change_abs, thresholds)
-            day = cur["observed_at"][:10]
-            # Dedup: chỉ 1 event cùng (sku,channel,region,type) trong 7 ngày
-            dk = _dedup_key(cur["sku_id"], cur["channel_id"], cur["region_id"], etype, day)
-            if _recent_dedup(cur["sku_id"], cur["channel_id"], cur["region_id"], etype,
-                             cur["observed_at"], path=path):
-                continue
-            correlated = _count_recent_events(cur["sku_id"], cur["observed_at"], path=path)
-            sig = _significance(change_abs, correlated)
-            ev_id = f"PE-{cur['observed_at'][:10].replace('-', '')}-{key[0]}-{key[1]}-{key[2]}-{i}"
-            inserted = pi_store.insert_event(
-                event_id=ev_id, sku_id=cur["sku_id"], channel_id=cur["channel_id"],
-                region_id=cur["region_id"], timestamp=cur["observed_at"],
-                old_price=round(oldp, 2), new_price=newp, change_percent=round(change, 2),
-                event_type=etype, significance=sig, confidence=0.9, dedup_key=dk, path=path)
-            if inserted:
-                new_events += 1
-                if sev == Severity.CRITICAL:
-                    alert_msg = (
-                        f"{'Tăng' if change > 0 else 'Giảm'} giá {cur['sku_id']} "
-                        f"{abs(change):.1f}% trên {cur['channel_id']} ({cur['region_id']}). Mức {sev}.")
-                    a_id = f"AL-{ev_id}"
-                    if pi_store.insert_alert(
-                        alert_id=a_id, event_id=ev_id, sku_id=cur["sku_id"],
-                        severity=sev, created_at=now_iso(), message=alert_msg,
-                        dedup_key=dk, path=path):
-                        new_alerts += 1
-                        # Thu thập để push ra ngoài (Discord/Telegram)
-                        _pending_alerts.append({
-                            "event_type": etype, "sku_id": cur["sku_id"],
-                            "product_name": cur.get("product_name"),
-                            "channel_id": cur["channel_id"], "region_id": cur["region_id"],
-                            "old_price": round(oldp, 2), "new_price": round(newp, 2),
-                            "change_pct": round(change, 2), "severity": sev,
-                            "timestamp": cur["observed_at"],
-                        })
+    for pid in product_ids:
+        rows = pi_store.fetch_all(
+            """SELECT o.observation_id, o.sku_id, o.product_id, o.channel_id,
+                      o.region_id, o.observed_at, o.effective_price, o.regular_price,
+                      o.promotion_price
+               FROM pi_observations o
+               WHERE o.product_id = ?
+               ORDER BY o.sku_id, o.channel_id, o.region_id, o.observed_at""",
+            [pid], path=path,
+        )
+
+        # group theo (sku, channel, region)
+        groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+        for r in rows:
+            key = (r["sku_id"], r["channel_id"], r["region_id"])
+            groups.setdefault(key, []).append(r)
+
+        _pending_alerts: list[dict] = []
+        for key, series in groups.items():
+            series.sort(key=lambda x: x["observed_at"])
+            for i in range(1, len(series)):
+                cur = series[i]
+                prev = series[i - 1]
+                newp = float(cur["effective_price"])
+                oldp = float(prev["effective_price"])
+                if oldp <= 0:
+                    continue
+                change = (newp - oldp) / oldp * 100.0
+                change_abs = abs(change)
+                # Price event khi bước nhảy ngày-liền-kề vượt HIGH (10%) — tương
+                # ứng "significant price event" (Spec §22, §25). Với giá bia ổn
+                #  định (flat + tiny noise) chỉ jump_event mới vượt ngưỡng.
+                if change_abs < thresholds["high"]:
+                    continue
+                etype = "PRICE_INCREASE" if change > 0 else "PRICE_DECREASE"
+                sev, _ = _severity_for(change_abs, thresholds)
+                day = cur["observed_at"][:10]
+                # Dedup: chỉ 1 event cùng (sku,channel,region,type) trong 7 ngày
+                dk = _dedup_key(cur["sku_id"], cur["channel_id"], cur["region_id"], etype, day)
+                if _recent_dedup(cur["sku_id"], cur["channel_id"], cur["region_id"], etype,
+                                 cur["observed_at"], path=path):
+                    continue
+                correlated = _count_recent_events(cur["sku_id"], cur["observed_at"], path=path)
+                sig = _significance(change_abs, correlated)
+                ev_id = f"PE-{cur['observed_at'][:10].replace('-', '')}-{key[0]}-{key[1]}-{key[2]}-{i}"
+                inserted = pi_store.insert_event(
+                    event_id=ev_id, sku_id=cur["sku_id"], channel_id=cur["channel_id"],
+                    region_id=cur["region_id"], timestamp=cur["observed_at"],
+                    old_price=round(oldp, 2), new_price=newp, change_percent=round(change, 2),
+                    event_type=etype, significance=sig, confidence=0.9, dedup_key=dk, path=path)
+                if inserted:
+                    new_events += 1
+                    if sev == Severity.CRITICAL:
+                        alert_msg = (
+                            f"{'Tăng' if change > 0 else 'Giảm'} giá {cur['sku_id']} "
+                            f"{abs(change):.1f}% trên {cur['channel_id']} ({cur['region_id']}). Mức {sev}.")
+                        a_id = f"AL-{ev_id}"
+                        if pi_store.insert_alert(
+                            alert_id=a_id, event_id=ev_id, sku_id=cur["sku_id"],
+                            severity=sev, created_at=now_iso(), message=alert_msg,
+                            dedup_key=dk, path=path):
+                            new_alerts += 1
+                            # Thu thập để push ra ngoài (Discord/Telegram)
+                            _pending_alerts.append({
+                                "event_type": etype, "sku_id": cur["sku_id"],
+                                "product_name": cur.get("product_name"),
+                                "channel_id": cur["channel_id"], "region_id": cur["region_id"],
+                                "old_price": round(oldp, 2), "new_price": round(newp, 2),
+                                "change_pct": round(change, 2), "severity": sev,
+                                "timestamp": cur["observed_at"],
+                            })
 
     # Push CRITICAL alerts ra kênh ngoài (best-effort, không block).
     if _pending_alerts:
