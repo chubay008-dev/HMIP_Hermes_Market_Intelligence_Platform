@@ -153,6 +153,7 @@
       <button data-lang="zh">中文</button>
     </div>
     <button class="btn alt" id="theme" title="Theme">🌙</button>
+    <a class="btn alt" href="/workspace" style="text-decoration:none" data-i18n="workspaceLink">📊 Workspace</a>
     <button class="btn" id="scan" data-i18n="scanAll">⟳ Quét tất cả</button>
     <button class="btn alt" id="auto" data-i18n="auto">⏱ Tự động: TẮT</button>
     <button class="btn alt" id="refresh" data-i18n="refresh">Làm mới</button>
@@ -277,7 +278,7 @@ const $$ = s => Array.from(document.querySelectorAll(s));
 const T = {
   vi:{
     title:"HMIP — Giám sát giá thị trường", subtitle:"Chạy trên HMIP workflow kernel · WF-PRC-001 · nguồn: thật (Firecrawl)",
-    scanAll:"⟳ Quét tất cả", auto:"⏱ Tự động: TẮT", autoOn:"⏱ Tự động: BẬT", refresh:"Làm mới", logout:"Đăng xuất",
+    scanAll:"⟳ Quét tất cả", auto:"⏱ Tự động: TẮT", autoOn:"⏱ Tự động: BẬT", refresh:"Làm mới", logout:"Đăng xuất", workspaceLink:"📊 Workspace",
     addTitle:"Thêm sản phẩm theo dõi", code:"Mã SP (vd P789)", pname:"Tên sản phẩm", brand:"Thương hiệu", source:"Nguồn",
     add:"Thêm", hint:"base_price tự động = giá quét đầu",
     kpiProducts:"Sản phẩm theo dõi", kpiAvg:"Giá trung bình", kpiMedian:"Giá trung vị", kpiMin:"Giá thấp nhất", kpiMax:"Giá cao nhất",
@@ -309,7 +310,7 @@ const T = {
   },
   en:{
     title:"HMIP — Market Price Intelligence", subtitle:"Runs on HMIP workflow kernel · WF-PRC-001 · source: real (Firecrawl)",
-    scanAll:"⟳ Scan all", auto:"⏱ Auto: OFF", autoOn:"⏱ Auto: ON", refresh:"Refresh", logout:"Logout",
+    scanAll:"⟳ Scan all", auto:"⏱ Auto: OFF", autoOn:"⏱ Auto: ON", refresh:"Refresh", logout:"Logout", workspaceLink:"📊 Workspace",
     addTitle:"Add product to track", code:"Product ID (e.g. P789)", pname:"Product name", brand:"Brand", source:"Source",
     add:"Add", hint:"base_price auto = first scan price",
     kpiProducts:"Products tracked", kpiAvg:"Average price", kpiMedian:"Median price", kpiMin:"Min price", kpiMax:"Max price",
@@ -341,7 +342,7 @@ const T = {
   },
   zh:{
     title:"HMIP — 市场价格情报", subtitle:"运行于 HMIP 工作流内核 · WF-PRC-001 · 来源: 真实 (Firecrawl)",
-    scanAll:"⟳ 全部扫描", auto:"⏱ 自动: 关", autoOn:"⏱ 自动: 开", refresh:"刷新", logout:"登出",
+    scanAll:"⟳ 全部扫描", auto:"⏱ 自动: 关", autoOn:"⏱ 自动: 开", refresh:"刷新", logout:"登出", workspaceLink:"📊 工作台",
     addTitle:"添加监控产品", code:"产品编号 (如 P789)", pname:"产品名称", brand:"品牌", source:"来源",
     add:"添加", hint:"基准价自动 = 首次扫描价",
     kpiProducts:"监控产品", kpiAvg:"平均价格", kpiMedian:"中位价格", kpiMin:"最低价格", kpiMax:"最高价格",
