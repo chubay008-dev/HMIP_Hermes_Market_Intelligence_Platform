@@ -205,10 +205,29 @@ def build_collect_adapter() -> Any:
             def fetch(self, request: dict[str, Any]) -> dict[str, Any]:
                 pid = str(request.get("product_id", ""))
                 name = str(request.get("product_name") or request.get("brand") or pid)
-                pp = _col.collect_product("TIKI", pid, name)
+                pp = None
+                # Tier 1: Tiki API công khai (nhanh, free) — hay bị block từ cloud IP
+                try:
+                    pp = _col.collect_product("TIKI", pid, name)
+                except Exception as _e:
+                    print(f"[collect] Tiki err: {_e}")
+                # Tier 2: Firecrawl (có key trên Render) — scrape Tiki chuẩn, tin cậy
+                if not pp:
+                    try:
+                        from . import firecrawl_collector as _fc
+                        pp = _fc.FirecrawlCollector().collect(pid, name)
+                    except Exception as _e:
+                        print(f"[collect] Firecrawl err: {_e}")
+                # Tier 3: Jina scrape Tiki search (free, fallback cuối)
+                if not pp:
+                    try:
+                        from . import jina_collector as _jc
+                        pp = _jc.JinaCollector().collect(pid, name)
+                    except Exception as _e:
+                        print(f"[collect] Jina err: {_e}")
                 if not pp:
                     raise WorkflowExecutionException(
-                        f"collect: Tiki không trả giá cho {pid} ({name})",
+                        f"collect: không lấy được giá Tiki cho {pid} ({name})",
                         code="COLLECT_PRICE_SOURCE_UNAVAILABLE",
                     )
                 eff = pp.promotion_price or pp.regular_price

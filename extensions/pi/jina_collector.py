@@ -64,19 +64,21 @@ class JinaCollector:
             return None
 
     def collect(self, product_id: str, product_name: str, ref_vol: int = 330) -> PricePoint | None:
-        url, real_name = self.search_product_url(product_name)
-        if not url:
-            return None
-        price = self.scrape_price(url)
+        # Jina scrape Tiki SEARCH trực tiếp (không qua Tiki API công khai) ->
+        # tránh bị block IP từ server cloud (Render) như Tiki API hay gặp.
+        import requests as _req
+        q = _req.utils.quote(product_name)
+        search_url = f"https://tiki.vn/search?q={q}"
+        price = self.scrape_price(search_url)
         if not price:
             return None
-        pack, v = _parse_pack_volume(real_name or product_name)
+        pack, v = _parse_pack_volume(product_name)
         promo = None
         return PricePoint(
             product_id=product_id, sku_id=f"SKU-{product_id}",
             channel_id=self.channel_id, region_id="ONLINE",
             regular_price=float(price), promotion_price=promo,
-            pack_quantity=pack, unit_volume_ml=v, source=self.source, raw={"url": url},
+            pack_quantity=pack, unit_volume_ml=v, source=self.source, raw={"url": search_url},
         )
 
 
