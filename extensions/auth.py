@@ -1,37 +1,71 @@
 """auth.py — bảo vệ API khi mở ra internet.
 
-Đơn giản nhưng hiệu quả: Bearer token đọc từ env HMIP_API_TOKEN.
-Nếu chưa đặt → app CHẠY KHÔNG CÓ AUTH (cảnh báo log) để dev local
-không bị chặn. Khi deploy lên cloud, BẮT BUỘC đặt HMIP_API_TOKEN.
+Thiết kế multi-token (Phương án A):
+- Đọc danh sách token được phép từ env HMIP_API_TOKENS (JSON array).
+  Ví dụ: HMIP_API_TOKENS='["hmip-chubay-9k2x","hmip-user2-3f8a"]'
+- Backward-compat: nếu chỉ có HMIP_API_TOKEN (chuỗi đơn, cũ) → coi là 1 token.
+- Token nào nằm trong danh sách đều hợp lệ → mỗi người dùng 1 token riêng,
+  thu hồi (revoke) bằng cách bỏ token đó khỏi list rồi redeploy.
+- KHÔNG dùng SQLite (Render free ephemeral FS mất data) — token định nghĩa
+  qua env, deploy nào cũng tái tạo giống hệt.
 
-Thiết kế:
-- Dùng Starlette HTTPBearer dependency → áp dụng cho các route cần bảo vệ.
-- Route /api/health và /docs được miễn trừ (health để monitor, docs
-  để debug — đóng docs khi production nếu muốn).
-- KHÔNG sửa kernel; chỉ là lớp ngoài cùng.
+Không đổi kernel; chỉ là lớp ngoài cùng. Route /api/health, /docs, /openapi.json,
+/redoc, /static được miễn trừ.
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.openapi.utils import get_openapi
+from fastapi import FastAPI, HTTPException, Request
+from starlette.responses import JSONResponse
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 log = logging.getLogger("hmip.auth")
 
-API_TOKEN = os.getenv("HMIP_API_TOKEN", "")
+# Danh sách token hợp lệ (set để lookup O(1))
+ALLOWED_TOKENS: set[str] = set()
 
-# Các path không cần token. Dashboard '/' chỉ exempt chính xác nó
-# (không dùng startswith('/') vì sẽ miễn trừ mọi route).
-_EXEMPT_EXACT = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static", "/")
-_EXEMPT_PREFIX = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static")
+
+def _load_tokens() -> set[str]:
+    """Đọc token từ env.
+
+    Ưu tiên HMIP_API_TOKENS (JSON array). Nếu không có, fallback HMIP_API_TOKEN
+    (chuỗi đơn, tương thích ngược). Trả về set rỗng nếu không có gì.
+    """
+    raw = os.getenv("HMIP_API_TOKENS", "").strip()
+    if raw:
+        try:
+            data = json.loads(raw)
+            if isinstance(data, list):
+                return {str(t).strip() for t in data if str(t).strip()}
+            # Nếu là chuỗi đơn trong JSON (hiếm) → coi như 1 token
+            return {str(data).strip()} if str(data).strip() else set()
+        except (json.JSONDecodeError, TypeError):
+            log.warning(
+                "HMIP_API_TOKENS không phải JSON hợp lệ, bỏ qua. Giá trị: %.50s",
+                raw,
+            )
+    single = os.getenv("HMIP_API_TOKEN", "").strip()
+    if single:
+        return {single}
+    return set()
+
+
+# Load lúc import; reload() sẽ gọi lại khi test thay đổi env.
+ALLOWED_TOKENS = _load_tokens()
+
+
+def reload_tokens() -> None:
+    """Đọc lại token từ env (dùng khi test monkeypatch env)."""
+    global ALLOWED_TOKENS
+    ALLOWED_TOKENS = _load_tokens()
 
 
 def is_enabled() -> bool:
-    return bool(API_TOKEN)
+    return bool(ALLOWED_TOKENS)
 
 
 def _extract_token(request: Request) -> str | None:
@@ -41,17 +75,27 @@ def _extract_token(request: Request) -> str | None:
     return None
 
 
+def _check(token: str | None) -> bool:
+    return bool(token) and token in ALLOWED_TOKENS
+
+
 async def require_token(request: Request) -> None:
     """Dependency: từ chối nếu thiếu/sai token."""
     if not is_enabled():
         return  # dev mode: không bật auth
     token = _extract_token(request)
-    if not token or token != API_TOKEN:
+    if not _check(token):
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED,
-            detail="Thiếu hoặc sai HMIP_API_TOKEN",
+            detail="Thiếu hoặc sai token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+# Các path không cần token. Dashboard '/' chỉ exempt chính xác nó
+# (không dùng startswith('/') vì sẽ miễn trừ mọi route).
+_EXEMPT_EXACT = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static", "/")
+_EXEMPT_PREFIX = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static")
 
 
 def protect_app(app: FastAPI) -> None:
@@ -67,19 +111,13 @@ def protect_app(app: FastAPI) -> None:
         if not is_enabled():
             return await call_next(request)
         path = request.url.path
-        if path in _EXEMPT_EXACT or any(
-            path.startswith(p) for p in _EXEMPT_PREFIX
-        ):
+        if path in _EXEMPT_EXACT or any(path.startswith(p) for p in _EXEMPT_PREFIX):
             return await call_next(request)
         token = _extract_token(request)
-        if not token or token != API_TOKEN:
+        if not _check(token):
             return JSONResponse(
                 status_code=HTTP_401_UNAUTHORIZED,
-                content={"detail": "Thiếu hoặc sai HMIP_API_TOKEN"},
+                content={"detail": "Thiếu hoặc sai token"},
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return await call_next(request)
-
-
-# import ở cuối tránh circular import với fastapi response
-from starlette.responses import JSONResponse  # noqa: E402
