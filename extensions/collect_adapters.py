@@ -188,9 +188,47 @@ class HttpCollectAdapter:
 
 
 def build_collect_adapter() -> Any:
-    """Chọn adapter theo HMIP_COLLECT_MODE."""
+    """Chọn adapter theo HMIP_COLLECT_MODE.
+
+    - "http" + có HMIP_PRICE_API_BASE -> HttpCollectAdapter (API giá riêng).
+    - "http" NHƯNG chưa đặt PRICE_API_BASE -> dùng Tiki thật (TikiCollector,
+      API công khai FREE, không cần key) làm nguồn giá thật luôn.
+    - mọi trường hợp khác -> SimulatedPriceAdapter (demo).
+    """
     if COLLECT_MODE == "http":
-        return HttpCollectAdapter()
+        if PRICE_API_BASE:
+            return HttpCollectAdapter()
+        # Fallback: Tiki API công khai (free) làm nguồn giá thật.
+        from extensions.pi import collectors as _col
+
+        class _TikiRealAdapter:
+            def fetch(self, request: dict[str, Any]) -> dict[str, Any]:
+                pid = str(request.get("product_id", ""))
+                name = str(request.get("product_name") or request.get("brand") or pid)
+                pp = _col.collect_product("TIKI", pid, name)
+                if not pp:
+                    raise WorkflowExecutionException(
+                        f"collect: Tiki không trả giá cho {pid} ({name})",
+                        code="COLLECT_PRICE_SOURCE_UNAVAILABLE",
+                    )
+                eff = pp.promotion_price or pp.regular_price
+                return {
+                    "brand": pp.source,
+                    "product_name": name,
+                    "price_text": f"{eff:,.0f}",
+                    "currency": "VND",
+                    "store": "tiki",
+                    "province": pp.region_id,
+                    "source_url": f"https://tiki.vn/search?q={name}",
+                    "product_id": pid,
+                    "source": "tiki",
+                    "fetched_at": time.time(),
+                }
+
+            def health(self) -> bool:
+                return True
+
+        return _TikiRealAdapter()
     return SimulatedPriceAdapter()
 
 
