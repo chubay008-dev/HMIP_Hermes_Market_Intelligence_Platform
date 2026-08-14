@@ -127,9 +127,16 @@
     .filters{flex-wrap:wrap}
     .filters input,.filters select{width:100%!important}
   }
+  /* ---- accessibility ---- */
+  .skip-link{position:absolute;left:-9999px;top:0;z-index:9999;padding:8px 14px;background:var(--cyan);color:#000;border-radius:0 0 6px 0;font-weight:600}
+  .skip-link:focus{left:0}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:3px}
+  button[aria-label]::after{content:attr(aria-label);position:absolute;left:-9999px}
 </style>
 </head>
 <body>
+
+<a href="#main" class="skip-link" data-i18n="skipLink">Bỏ qua tới nội dung</a>
 
 <div id="login">
   <div class="box">
@@ -144,15 +151,15 @@
 <header>
   <div>
     <h1 data-i18n="title">HMIP — Giám sát giá thị trường</h1>
-    <div class="sub"><span data-i18n="subtitle">Chạy trên HMIP workflow kernel · WF-PRC-001 · nguồn: thật (Firecrawl)</span><span id="mode" class="mono"></span></div>
+    <div class="sub"><span data-i18n="subtitle">Chạy trên HMIP workflow kernel · WF-PRC-001 · nguồn:</span> <span id="mode" class="mono">…</span></div>
   </div>
   <div class="topbar">
-    <div class="seg" id="langSeg" title="Language / 语言">
+    <div class="seg" id="langSeg" title="Language / 语言" role="group" aria-label="Chọn ngôn ngữ">
       <button data-lang="vi">VI</button>
       <button data-lang="en">EN</button>
       <button data-lang="zh">中文</button>
     </div>
-    <button class="btn alt" id="theme" title="Theme">🌙</button>
+    <button class="btn alt" id="theme" title="Theme" aria-label="Chuyển giao diện tối/sáng">🌙</button>
     <a class="btn alt" href="/workspace" style="text-decoration:none" data-i18n="workspaceLink">📊 Workspace</a>
     <button class="btn" id="scan" data-i18n="scanAll">⟳ Quét tất cả</button>
     <button class="btn alt" id="auto" data-i18n="auto">⏱ Tự động: TẮT</button>
@@ -163,6 +170,7 @@
 
 <div class="grid" id="stats"></div>
 
+<main id="main">
 <section>
   <h2>➕ <span data-i18n="addTitle">Thêm sản phẩm theo dõi</span></h2>
   <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
@@ -277,9 +285,10 @@ const $$ = s => Array.from(document.querySelectorAll(s));
 /* ---------- i18n ---------- */
 const T = {
   vi:{
-    title:"HMIP — Giám sát giá thị trường", subtitle:"Chạy trên HMIP workflow kernel · WF-PRC-001 · nguồn: thật (Firecrawl)",
+    title:"HMIP — Giám sát giá thị trường", subtitle:"Chạy trên HMIP workflow kernel · WF-PRC-001 · nguồn:",
     scanAll:"⟳ Quét tất cả", auto:"⏱ Tự động: TẮT", autoOn:"⏱ Tự động: BẬT", refresh:"Làm mới", logout:"Đăng xuất", workspaceLink:"📊 Workspace",
     addTitle:"Thêm sản phẩm theo dõi", code:"Mã SP (vd P789)", pname:"Tên sản phẩm", brand:"Thương hiệu", source:"Nguồn",
+    skipLink:"Bỏ qua tới nội dung",
     add:"Thêm", hint:"base_price tự động = giá quét đầu",
     kpiProducts:"Sản phẩm theo dõi", kpiAvg:"Giá trung bình", kpiMedian:"Giá trung vị", kpiMin:"Giá thấp nhất", kpiMax:"Giá cao nhất",
     kpiEsc:"Khẩn cấp (ESCALATE)", kpiLast:"Lần quét gần nhất",
@@ -309,9 +318,10 @@ const T = {
     observed:"QUAN SÁT", drivers:"NGUYÊN NHÂN GẢI (suy luận)", conf:"ĐỘ TIN CẬY", evid:"BẰNG CHỨNG",
   },
   en:{
-    title:"HMIP — Market Price Intelligence", subtitle:"Runs on HMIP workflow kernel · WF-PRC-001 · source: real (Firecrawl)",
+    title:"HMIP — Market Price Intelligence", subtitle:"Runs on HMIP workflow kernel · WF-PRC-001 · source:",
     scanAll:"⟳ Scan all", auto:"⏱ Auto: OFF", autoOn:"⏱ Auto: ON", refresh:"Refresh", logout:"Logout", workspaceLink:"📊 Workspace",
     addTitle:"Add product to track", code:"Product ID (e.g. P789)", pname:"Product name", brand:"Brand", source:"Source",
+    skipLink:"Skip to content",
     add:"Add", hint:"base_price auto = first scan price",
     kpiProducts:"Products tracked", kpiAvg:"Average price", kpiMedian:"Median price", kpiMin:"Min price", kpiMax:"Max price",
     kpiEsc:"Critical (ESCALATE)", kpiLast:"Last scan",
@@ -341,9 +351,10 @@ const T = {
     observed:"OBSERVED", drivers:"LIKELY DRIVERS (inference)", conf:"CONFIDENCE", evid:"EVIDENCE",
   },
   zh:{
-    title:"HMIP — 市场价格情报", subtitle:"运行于 HMIP 工作流内核 · WF-PRC-001 · 来源: 真实 (Firecrawl)",
+    title:"HMIP — 市场价格情报", subtitle:"运行于 HMIP 工作流内核 · WF-PRC-001 · 来源:",
     scanAll:"⟳ 全部扫描", auto:"⏱ 自动: 关", autoOn:"⏱ 自动: 开", refresh:"刷新", logout:"登出", workspaceLink:"📊 工作台",
     addTitle:"添加监控产品", code:"产品编号 (如 P789)", pname:"产品名称", brand:"品牌", source:"来源",
+    skipLink:"跳到主要内容",
     add:"添加", hint:"基准价自动 = 首次扫描价",
     kpiProducts:"监控产品", kpiAvg:"平均价格", kpiMedian:"中位价格", kpiMin:"最低价格", kpiMax:"最高价格",
     kpiEsc:"紧急 (ESCALATE)", kpiLast:"最近扫描",
@@ -384,6 +395,7 @@ function decLabel(d){ return (T[LANG].dec[d]) || d || "—"; }
 const fmt = n => n==null ? '—' : Number(n).toLocaleString(LOCALE[LANG],{maximumFractionDigits:0});
 const pct = n => n==null ? '—' : (n>0?'▲ +':(n<0?'▼ ':'')) + Number(n).toFixed(2) + '%';
 const when = s => s ? new Date(s).toLocaleString(LOCALE[LANG],{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+const esc = s => (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
 const TOK_KEY = 'hmip_token';
 let CUR_RANGE = 'all';
@@ -432,9 +444,9 @@ function buildProdChecks(){
   // also clear SHOWN entries no longer visible
   SHOWN.forEach(id=>{ if(!vis.find(p=>p.id===id)) SHOWN.delete(id); });
   box.innerHTML = vis.map(p=>`
-    <label class="chk"><input type="checkbox" data-pid="${p.id}" ${SHOWN.has(p.id)?'checked':''}>
+    <label class="chk"><input type="checkbox" data-pid="${esc(p.id)}" ${SHOWN.has(p.id)?'checked':''}>
       <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colorOf(p.id)}"></span>
-      ${p.name??p.id} <span class="sub">(${p.brand??''})</span></label>`).join('');
+      ${esc(p.name??p.id)} <span class="sub">(${esc(p.brand??'')})</span></label>`).join('');
   box.querySelectorAll('input[type=checkbox]').forEach(c=>{
     c.onchange = () => { c.checked ? SHOWN.add(c.dataset.pid) : SHOWN.delete(c.dataset.pid); renderChart(CHART); };
   });
@@ -478,7 +490,7 @@ function renderChart(data){
   svg.innerHTML=s;
   $('#chartLegend').innerHTML = all.map(([pid,v])=>{
     const col=colorOf(pid);
-    return `<div class="lg" data-pid="${pid}"><span class="sw" style="background:${col}"></span>${v.name||pid}</div>`;
+    return `<div class="lg" data-pid="${esc(pid)}"><span class="sw" style="background:${col}"></span>${esc(v.name||pid)}</div>`;
   }).join('');
   $('#chartLegend').querySelectorAll('.lg').forEach(l=>{ l.onclick=()=>{ SHOWN.delete(l.dataset.pid); syncChecks(); renderChart(CHART); }; });
 }
@@ -541,7 +553,7 @@ function renderIndex(){
   $('#priceIndex').innerHTML = rows.map(r=>{
     const w = Math.min(100, r.idx/maxIdx*100);
     const col = r.idx>105?'var(--red)':(r.idx<95?'var(--green)':'var(--cyan)');
-    return `<div class="ibar"><div class="nm">${r.br}</div>
+    return `<div class="ibar"><div class="nm">${esc(r.br)}</div>
       <div class="track"><div class="fill" style="width:${w}%;background:${col}"></div></div>
       <div class="val" style="color:${col}">${r.idx.toFixed(1)}</div></div>`;
   }).join('') + `<div class="sub" style="margin-top:8px">${t('indexSub')} · ${t('kpiAvg')}: ${fmt(marketAvg)}</div>`;
@@ -564,7 +576,7 @@ function renderBrandCmp(){
   $('#brandCmp').innerHTML = `<table><thead><tr>
     <th>${t('brandCol')}</th><th>${t('skuCol')}</th><th>${t('avgCol')}</th><th>${t('idxCol')}</th><th>${t('alertCol')}</th><th>${t('escCol')}</th>
     </tr></thead><tbody>${rows.map(r=>`<tr>
-      <td><strong>${r.br}</strong></td><td>${r.sku}</td>
+      <td><strong>${esc(r.br)}</strong></td><td>${r.sku}</td>
       <td class="mono">${fmt(r.a)}</td>
       <td class="mono" style="color:${r.idx>105?'var(--red)':(r.idx<95?'var(--green)':'var(--cyan)')}">${r.idx.toFixed(1)}</td>
       <td style="color:var(--orange)">${r.al}</td><td style="color:var(--red)">${r.es}</td></tr>`).join('')}</tbody></table>`;
@@ -606,7 +618,7 @@ function renderPos(){
     const r = 8 + (aMax===aMin?0:(p.alerts-aMin)/(aMax-aMin))*22;
     const col = p.idx>105?'var(--red)':(p.idx<95?'var(--green)':'var(--cyan)');
     s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" fill-opacity="0.32" stroke="${col}" stroke-width="1.5"/>`;
-    s+=`<text x="${cx}" y="${cy+3}" text-anchor="middle" font-size="9" fill="var(--tx)">${p.br}</text>`;
+    s+=`<text x="${cx}" y="${cy+3}" text-anchor="middle" font-size="9" fill="var(--tx)">${esc(p.br)}</text>`;
   });
   svg.innerHTML=s;
 }
@@ -618,12 +630,12 @@ function renderLatest(){
   $('#latest').innerHTML = `<table><thead><tr>
     <th>${t('colProduct')}</th><th>${t('colBrand')}</th><th>${t('colPrice')}</th>
     <th>${t('colDelta')}</th><th>${t('colDec')}</th><th>${t('colUpdate')}</th><th></th></tr></thead><tbody>${data.map(r=>`
-    <tr><td><strong>${r.name??r.id}</strong><div class="sub mono">${r.id}</div></td>
-    <td>${r.brand??'—'}</td><td class="mono">${fmt(r.price)} ${r.currency??''}</td>
+    <tr><td><strong>${esc(r.name??r.id)}</strong><div class="sub mono">${esc(r.id)}</div></td>
+    <td>${esc(r.brand??'—')}</td><td class="mono">${fmt(r.price)} ${esc(r.currency??'')}</td>
     <td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
     <td><span class="tag ${r.decision??'IGNORE'}">${decLabel(r.decision)}</span></td>
     <td class="sub">${when(r.captured_at)}</td>
-    <td><button class="btn sm" onclick="runOne('${r.id}')">${t('colScan')}</button></td></tr>`).join('')}</tbody></table>`;
+    <td><button class="btn sm" onclick="runOne('${esc(r.id)}')">${t('colScan')}</button></td></tr>`).join('')}</tbody></table>`;
 }
 function renderAlerts(){
   const data = filteredAlerts();
@@ -631,7 +643,7 @@ function renderAlerts(){
   $('#alerts').innerHTML = `<table><thead><tr>
     <th>${t('colTime')}</th><th>${t('colProduct')}</th><th>${t('colPrice')}</th><th>${t('colDiff')}</th><th>${t('colDec')}</th>
     </tr></thead><tbody>${data.slice(0,40).map(r=>`
-    <tr><td class="sub">${when(r.captured_at)}</td><td>${r.product_name??r.product_id}</td>
+    <tr><td class="sub">${when(r.captured_at)}</td><td>${esc(r.product_name??r.product_id)}</td>
     <td class="mono">${fmt(r.price)}</td><td class="mono ${r.delta_percent>0?'up':'down'}">${pct(r.delta_percent)}</td>
     <td><span class="tag ${r.decision}">${decLabel(r.decision)}</span></td></tr>`).join('')}</tbody></table>`;
 }
@@ -639,13 +651,13 @@ function fillBrandFilters(){
   const sel=$('#f_brand');
   if(sel.options.length>1) return; // chỉ fill 1 lần; giữ lựa chọn người dùng
   const brands=[...new Set(LATEST.map(p=>p.brand).filter(Boolean))].sort();
-  const opts='<option value=""></option>'+brands.map(b=>`<option value="${b}">${b}</option>`).join('');
+  const opts='<option value=""></option>'+brands.map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');
   $('#f_brand').innerHTML=opts; $('#f_brand_a').innerHTML=opts;
 }
 
 /* ---------- Regional Pricing (heatmap từ province) ---------- */
 function renderRegion(){
-  const rows = LATEST.filter(p=>p.price!=null && p.province);
+  const rows = LATEST.filter(p=>p.price!=null && p.province && p.province!=='N/A');
   if(!rows.length){ $('#regHeat').innerHTML = `<div class="sub">—</div>`; return; }
   const byProv = {};
   rows.forEach(p=>{ (byProv[p.province] ??= []).push(p.price); });
@@ -662,7 +674,7 @@ function renderRegion(){
   </tr></thead><tbody>${data.map(d=>{
     const w=Math.max(6, d.idx/maxIdx*100);
     const col=d.idx>105?'var(--red)':(d.idx<95?'var(--green)':'var(--cyan)');
-    return `<tr><td>${d.prov}</td><td class="mono">${fmt(d.avg)}</td>
+    return `<tr><td>${esc(d.prov)}</td><td class="mono">${fmt(d.avg)}</td>
       <td class="mono" style="color:${col}">${d.idx.toFixed(1)}</td><td class="sub">${d.n}</td>
       <td><div class="track"><div class="fill" style="width:${w}%;background:${col}"></div></div>
       <span class="sub mono">${fmt(d.hi)}</span></td></tr>`;
@@ -688,7 +700,7 @@ function renderPromo(){
   </tr></thead><tbody>${events.slice(0,30).map(e=>{
     const up=e.change>0, type=up?(e.change>=10?'ESCALATE':(e.change>=5?'ALERT':'HUMAN_REVIEW')):'PROMOTION';
     const col=up?'var(--red)':'var(--green)';
-    return `<tr><td class="sub">${when(e.t)}</td><td>${e.name} <span class="sub">(${e.brand})</span></td>
+    return `<tr><td class="sub">${when(e.t)}</td><td>${esc(e.name)} <span class="sub">(${esc(e.brand)})</span></td>
       <td class="mono ${up?'up':'down'}">${pct(e.change)}</td>
       <td><span class="tag ${type}">${type==='PROMOTION'?'🏷 '+type:decLabel(type)}</span></td></tr>`;
   }).join('')}</tbody></table>`;
@@ -709,8 +721,12 @@ async function load(){
       api('/api/latest'), api('/api/alerts'), api('/api/health'), api('/api/chart?range='+CUR_RANGE)
     ]);
     LATEST=latest; ALERTS=alerts;
-    $('#mode').textContent = health.collect_mode && health.collect_mode !== 'demo'
-      ? ' · ' + health.collect_mode : '';
+    const cm = health.collect_mode || 'demo';
+    const srcLabel = {
+      demo: LANG==='en' ? 'demo (simulated)' : (LANG==='zh' ? '演示 (模拟)' : 'demo (mô phỏng)'),
+      http: LANG==='en' ? 'real (HTTP/Firecrawl)' : (LANG==='zh' ? '真实 (HTTP/Firecrawl)' : 'thật (HTTP/Firecrawl)'),
+    }[cm] || cm;
+    $('#mode').textContent = srcLabel;
     CHART = chart || CHART;
     renderAll(); renderChart(chart); renderPromo();
   }catch(e){ if(e.message!=='no-token') toast('Lỗi tải dữ liệu: '+e.message); }
@@ -853,10 +869,43 @@ $('#auto').onclick = async () => {
   }catch(e){ toast('Lỗi: '+e.message); }
 };
 
-if(localStorage.getItem(TOK_KEY)){ $('#login').style.display='none'; applyLang(); load(); syncAuto(); }
-else { applyLang(); }
-$('#aiChat').innerHTML = `<div class="ai-msg ai-a">${t('aiGreeting')}</div>`;
-setInterval(()=>{ if(localStorage.getItem(TOK_KEY)) load(); }, 30000);
+/* ---------- init: tự ẩn login overlay khi auth đang tắt ---------- */
+async function init(){
+  applyLang();
+  $('#aiChat').innerHTML = `<div class="ai-msg ai-a">${t('aiGreeting')}</div>`;
+  const tok = localStorage.getItem(TOK_KEY);
+  if(tok){
+    // Đã có token → verify rồi vào dashboard
+    try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); return; }
+    catch(e){ /* token sai → xoá + hiện overlay */ localStorage.removeItem(TOK_KEY); }
+  }
+  // Chưa có token: kiểm tra xem auth có bật không (gọi health KHÔNG kèm token)
+  try{
+    const r = await fetch('/api/health');
+    if(r.ok){
+      // Auth TẮT → vào dashboard luôn, không cần token
+      $('#login').style.display='none'; load(); syncAuto(); return;
+    }
+  }catch(_){}
+  // Auth BẬT (401) → giữ overlay, focus ô token
+  $('#tok').focus();
+}
+init();
+// Auto-refresh 30s, nhưng tạm dừng khi tab ẩn để tiết kiệm băng thông/CPU.
+let _refreshTimer = null;
+function _startRefresh(){
+  if(_refreshTimer) return;
+  _refreshTimer = setInterval(()=>{ if(localStorage.getItem(TOK_KEY)) load(); }, 30000);
+}
+function _stopRefresh(){
+  if(_refreshTimer){ clearInterval(_refreshTimer); _refreshTimer=null; }
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) _stopRefresh();
+  else if(localStorage.getItem(TOK_KEY)) { load(); _startRefresh(); }
+});
+_startRefresh();
 </script>
+</main>
 </body>
 </html>

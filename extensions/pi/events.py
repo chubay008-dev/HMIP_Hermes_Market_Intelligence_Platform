@@ -258,17 +258,21 @@ def list_alerts(severity: str | None = None, limit: int = 100,
     clauses: list[str] = []
     params: list[Any] = []
     if severity:
-        clauses.append("severity = ?")
+        clauses.append("a.severity = ?")
         params.append(severity.upper())
     where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+    # ORDER BY e.timestamp (thời điểm thật của event) thay vì a.created_at
+    # (đồng loạt = now() khi detect, khiến LIMIT chỉ trả 1 SKU).
     rows = pi_store.fetch_all(
         f"""SELECT a.alert_id, a.event_id, a.sku_id, a.severity, a.created_at,
-                   a.message, a.acknowledged, p.product_name, b.name AS brand
+                   a.message, a.acknowledged, p.product_name, b.name AS brand,
+                   e.timestamp AS event_time, e.change_percent, e.event_type
             FROM pi_alerts a
+            LEFT JOIN pi_price_events e ON e.event_id = a.event_id
             LEFT JOIN pi_skus s ON s.sku_id = a.sku_id
             LEFT JOIN pi_products p ON p.product_id = s.product_id
             LEFT JOIN pi_brands b ON b.brand_id = p.brand_id
             {where}
-            ORDER BY a.created_at DESC LIMIT ?""",
+            ORDER BY e.timestamp DESC, a.alert_id DESC LIMIT ?""",
         params + [limit], path=path)
     return [dict(r) for r in rows]

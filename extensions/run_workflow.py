@@ -276,6 +276,7 @@ def run_prc_001(
                 decision=decided.get("decision") or alerted.get("decision"),
                 delta_percent=compared.get("delta_percent"),
                 source_url=enriched.get("source_url"),
+                province=enriched.get("province"),
             )
             result["saved"] = True
 

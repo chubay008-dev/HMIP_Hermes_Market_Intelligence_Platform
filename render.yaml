@@ -36,7 +36,7 @@ services:
       - key: CRAWL4AI_ENABLED
         value: "false"                    # tier 4 (cần chromium, nặng) - bật true nếu muốn self-host crawl
       - key: FIRECRAWL_API_KEY
-        value: "fc-906d2952a729471c99a642d5955d76a8"   # nguồn giá thật chính (Tiki qua Firecrawl)
+        sync: false                    # 🔒 SECRET — điền giá trị thật trong Render Dashboard, KHÔNG commit vào repo (giống TELEGRAM/DISCORD). Nguồn giá thật chính (Tiki qua Firecrawl).
       - key: DISCORD_BOT_TOKEN
         sync: false                     # Discord bot token đẩy alert
       - key: DISCORD_HOME_CHANNEL

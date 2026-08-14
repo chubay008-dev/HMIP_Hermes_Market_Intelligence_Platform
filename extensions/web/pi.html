@@ -94,15 +94,37 @@
   .evidence { font-size:12px; color:var(--muted); background:var(--bg); border:1px solid var(--border);
     border-radius:7px; padding:8px; margin-top:6px; white-space:pre-wrap; max-height:160px; overflow:auto; }
   a { color:var(--accent); }
+  /* ---------- responsive (mobile) ---------- */
+  /* Table cuộn ngang trên mobile tránh tràn */
+  .tbl-wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .tbl-wrap table { min-width:360px; }
+  /* Card chứa table cũng overflow an toàn */
+  .card { overflow-x:auto; }
+  /* Header sticky: bù theo chiều cao header thực (mobile header có thể wrap cao hơn) */
+  header { flex-wrap:wrap; gap:8px; }
+  @media(max-width:640px){
+    header { padding:10px 14px; }
+    .filterbar { top:auto; position:static; padding:8px 14px; }
+    .wrap { padding:12px 14px 60px; }
+    .kpi .val { font-size:20px; }
+    table { font-size:12px; }
+    th, td { padding:6px 5px; }
+    .tbl-wrap table { min-width:340px; }
+    /* positioning/line chart: giữ tỉ lệ, không méo */
+    .chart-svg, #posChart { width:100%; height:240px; }
+  }
+  /* Tap target tối thiểu 40px */
+  @media(max-width:640px){ .btn, .toggle { min-height:40px; } }
+  /* ---- accessibility ---- */
+  .skip-link{position:absolute;left:-9999px;top:0;z-index:9999;padding:8px 14px;background:var(--cyan);color:#000;border-radius:0 0 6px 0;font-weight:600}
+  .skip-link:focus{left:0}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:3px}
 </style>
-<!-- Modern UI: Tailwind (no preflight to preserve existing CSS) + ApexCharts -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = { corePlugins: { preflight: false } };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.1/dist/apexcharts.min.js"></script>
+<!-- ApexCharts (local bundle — không phụ thuộc CDN ngoài, an toàn khi Render/network chặn) -->
+<script src="/static/vendor/apexcharts.min.js"></script>
 </head>
 <body>
+<a href="#main" class="skip-link" data-i18n="skipLink">Bỏ qua tới nội dung</a>
 <header>
   <h1>📊 <span data-i18n="app">HMIP Price Intelligence</span></h1>
   <span class="sub" data-i18n="workspace">Workspace v2.0 · Spec-driven</span>
@@ -116,6 +138,7 @@
   <a class="btn" href="/" style="text-decoration:none"><span data-i18n="home">🏠 Trang Chủ</span></a>
 </header>
 
+<main id="main">
 <div class="filterbar">
   <div class="fgroup"><label data-i18n="brand">Brand</label><select id="f_brand"></select></div>
   <div class="fgroup"><label data-i18n="product">Sản phẩm</label><select id="f_product"></select></div>
@@ -162,11 +185,11 @@
   <div class="grid two-col" style="margin-top:14px">
     <div class="card">
       <h3>⚔️ <span data-i18n="competitor">Competitor Comparison</span> <span class="chip" id="compUniv"></span></h3>
-      <table id="compTable"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colBrand">Brand</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th></tr></thead><tbody></tbody></table>
+      <div class="tbl-wrap"><table id="compTable"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colBrand">Brand</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card">
       <h3 data-i18n="channelCmp">🛒 Channel Comparison</h3>
-      <table id="chTable"><thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th><th data-i18n="colN">n</th></tr></thead><tbody></tbody></table>
+      <div class="tbl-wrap"><table id="chTable"><thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th><th data-i18n="colN">n</th></tr></thead><tbody></tbody></table></div>
       <div id="chLowHigh" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
     </div>
   </div>
@@ -175,7 +198,7 @@
   <div class="grid two-col" style="margin-top:14px">
     <div class="card">
       <h3 data-i18n="regional">🌏 Regional Pricing</h3>
-      <table id="regTable"><thead><tr><th data-i18n="colRegion">Vùng</th><th data-i18n="colProvince">Tỉnh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th></tr></thead><tbody></tbody></table>
+      <div class="tbl-wrap"><table id="regTable"><thead><tr><th data-i18n="colRegion">Vùng</th><th data-i18n="colProvince">Tỉnh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card">
       <h3 data-i18n="positioning">🎯 Price Positioning Matrix</h3>
@@ -189,7 +212,7 @@
     <div class="card">
       <h3 data-i18n="promo">🏷️ Promotion Intelligence</h3>
       <div id="promoSummary" class="row-actions" style="flex-wrap:wrap;gap:8px"></div>
-      <table id="promoTable" style="margin-top:8px"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colType">Loại</th><th data-i18n="colDisc">Giảm</th><th data-i18n="colPromoPrice">Giá KM</th></tr></thead><tbody></tbody></table>
+      <div class="tbl-wrap"><table id="promoTable" style="margin-top:8px"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colType">Loại</th><th data-i18n="colDisc">Giảm</th><th data-i18n="colPromoPrice">Giá KM</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card">
       <h3 data-i18n="events">⚡ Price Events</h3>
@@ -236,6 +259,7 @@ const I18N = {
     tokBtn:"🔐 Token", tokTitle:"Nhập mã truy cập (dùng chung với Monitor cũ)",
     seedBtn:"⟳ Seed dữ liệu", seedTitle:"Tạo dữ liệu thị trường mẫu",
     themeBtn:"🌓 Theme", oldMonitor:"← Monitor cũ", language:"🌐 Ngôn ngữ", home:"🏠 Trang Chủ",
+    skipLink:"Bỏ qua tới nội dung",
     brand:"Brand", product:"Sản phẩm", channel:"Kênh", region:"Vùng", period:"Kỳ",
     p7d:"7 ngày", p30d:"30 ngày", p90d:"90 ngày", p6m:"6 tháng", p12m:"12 tháng",
     apply:"Áp dụng", loadingKpi:"Đang tải KPI…",
@@ -262,6 +286,7 @@ const I18N = {
     tokBtn:"🔐 Token", tokTitle:"Enter access token (shared with Old Monitor)",
     seedBtn:"⟳ Seed data", seedTitle:"Generate sample market data",
     themeBtn:"🌓 Theme", oldMonitor:"← Old Monitor", language:"🌐 Language", home:"🏠 Home",
+    skipLink:"Skip to content",
     brand:"Brand", product:"Product", channel:"Channel", region:"Region", period:"Period",
     p7d:"7 days", p30d:"30 days", p90d:"90 days", p6m:"6 months", p12m:"12 months",
     apply:"Apply", loadingKpi:"Loading KPIs…",
@@ -288,6 +313,7 @@ const I18N = {
     tokBtn:"🔐 令牌", tokTitle:"输入访问令牌（与旧监视器共用）",
     seedBtn:"⟳ 种子数据", seedTitle:"生成示例市场数据",
     themeBtn:"🌓 主题", oldMonitor:"← 旧监视器", language:"🌐 语言", home:"🏠 主页",
+    skipLink:"跳到主要内容",
     brand:"品牌", product:"产品", channel:"渠道", region:"地区", period:"周期",
     p7d:"7天", p30d:"30天", p90d:"90天", p6m:"6个月", p12m:"12个月",
     apply:"应用", loadingKpi:"加载 KPI…",
@@ -310,7 +336,7 @@ const I18N = {
     noData:"暂无数据。点击“种子数据”生成市场数据。",
   },
 };
-let LANG = localStorage.getItem('hmip_pi_lang') || 'vi';
+let LANG = localStorage.getItem('hmip_lang') || 'vi';
 const LANGS = ['vi','en','zh'];
 const LANG_NAME = {vi:'VI', en:'EN', zh:'ZH'};
 function t(k){ return (I18N[LANG] && I18N[LANG][k] !== undefined) ? I18N[LANG][k] : (I18N.vi[k] ?? k); }
@@ -334,7 +360,7 @@ function applyLang(){
 document.getElementById('langBtn').onclick = () => {
   const i = LANGS.indexOf(LANG);
   LANG = LANGS[(i+1) % LANGS.length];
-  localStorage.setItem('hmip_pi_lang', LANG);
+  localStorage.setItem('hmip_lang', LANG);
   applyLang();
   loadAll();
 };
@@ -371,12 +397,12 @@ document.getElementById('tokBtn').onclick = showLogin;
 updateTokBadge();
 
 // ---- Theme ----
-const theme = localStorage.getItem('hmip-pi-theme') || 'dark';
+const theme = localStorage.getItem('hmip_theme') || 'dark';
 document.documentElement.setAttribute('data-theme', theme);
 $('#themeBtn').onclick = () => {
   const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('hmip-pi-theme', t);
+  localStorage.setItem('hmip_theme', t);
 };
 
 // ---- Catalog / filters ----
@@ -624,7 +650,7 @@ function renderPositioning(p){
   const pres=pts.map(p=>p.presence); const maxP=Math.max(...pres,1);
   const x=v=>pad+(W-2*pad)*(v-minI)/(maxI-minI||1);
   const y=v=>H-pad-(H-2*pad)*v/maxP;
-  let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart-svg" preserveAspectRatio="none">`;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart-svg" preserveAspectRatio="xMidYMid meet">`;
   svg+=`<line x1="${x(100)}" y1="${pad}" x2="${x(100)}" y2="${H-pad}" stroke="var(--accent)" stroke-dasharray="4 4"/>`;
   svg+=`<text x="${x(100)+4}" y="${pad+10}" fill="var(--accent)" font-size="10">Index 100</text>`;
   pts.forEach(p=>{
@@ -712,5 +738,6 @@ loadCatalog().then(()=>loadAll()).catch(e=>{
   console.error(e);
 });
 </script>
+</main>
 </body>
 </html>

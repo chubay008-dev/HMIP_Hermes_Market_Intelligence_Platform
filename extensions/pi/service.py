@@ -12,6 +12,7 @@ Không sửa code core/domains. Chỉ gọi extensions.pi.* (tầng bọc ngoài
 from __future__ import annotations
 
 import threading
+import time
 from typing import Any
 
 from extensions.pi import pi_store, seed, analytics, events, ai_analyst
@@ -20,6 +21,33 @@ from extensions.pi import pi_store, seed, analytics, events, ai_analyst
 # ---- Seed background state (tránh Render request timeout do seed chạy đồng bộ) ----
 _seed_lock = threading.Lock()
 _seed_state: dict[str, Any] = {"status": "idle", "message": "", "detail": None}
+
+# ---- In-memory TTL cache cho analytics (giảm ~9s → ms khi filter không đổi) ----
+_cache_lock = threading.Lock()
+_cache: dict[tuple, tuple[float, Any]] = {}
+_CACHE_TTL = 60.0  # giây
+
+
+def _cache_get(key: tuple) -> Any | None:
+    with _cache_lock:
+        ent = _cache.get(key)
+        if ent and (time.monotonic() - ent[0]) < _CACHE_TTL:
+            return ent[1]
+        if ent:
+            _cache.pop(key, None)
+        return None
+
+
+def _cache_set(key: tuple, val: Any) -> Any:
+    with _cache_lock:
+        _cache[key] = (time.monotonic(), val)
+    return val
+
+
+def invalidate_cache() -> None:
+    """Xoá cache khi dữ liệu thay đổi (seed/rebuild/scan)."""
+    with _cache_lock:
+        _cache.clear()
 
 
 def seed_status() -> dict[str, Any]:
@@ -83,6 +111,7 @@ def rebuild(path: str | None = None) -> dict[str, Any]:
     """Xoá + seed lại + detect events. Dùng khi muốn dữ liệu mới."""
     res = seed.seed_full(path=path)
     det = events.detect_events(rerun=True, path=path)
+    invalidate_cache()
     return {**res, **det}
 
 
@@ -176,8 +205,15 @@ def get_catalog(path: str | None = None) -> dict[str, Any]:
 
 
 def full_workspace(filters: dict[str, Any] | None = None, path: str | None = None) -> dict[str, Any]:
-    """Gom tất cả cho dashboard một lần gọi (giảm số round-trip)."""
-    return {
+    """Gom tất cả cho dashboard một lần gọi (giảm số round-trip).
+
+    Cache in-memory TTL 60s theo filter set: request đầu ~9s, các request lặp
+    trong 60s tiếp theo trả ngay (ms). Cache tự xoá khi rebuild/seed."""
+    key = ("full_workspace", _norm_filters(filters), path)
+    hit = _cache_get(key)
+    if hit is not None:
+        return hit
+    payload = {
         "kpi": overview(filters, path=path),
         "trend": trend(filters, path=path),
         "index": index(filters, path=path),
@@ -189,3 +225,11 @@ def full_workspace(filters: dict[str, Any] | None = None, path: str | None = Non
         "events": price_events(filters, limit=30, path=path),
         "alerts": alerts(limit=30, path=path),
     }
+    return _cache_set(key, payload)
+
+
+def _norm_filters(f: dict[str, Any] | None) -> tuple:
+    """Bộ lọc None hoặc {} đều ra cùng key tránh cache miss."""
+    if not f:
+        return ()
+    return tuple(sorted((k, str(v)) for k, v in f.items() if v is not None))
