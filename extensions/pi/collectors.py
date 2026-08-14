@@ -340,13 +340,26 @@ def collect_realtime(channel: str = "TIKI", limit: int | None = None, path: str 
 
 
 def collect_realtime_smart(limit: int | None = None, path: str | None = None) -> dict[str, Any]:
-    """Quét giá thật với fallback 3 tầng (tối ưu chi phí).
+    """Quét giá thật thông minh: seed lần đầu + cập nhật gia tăng.
 
-    Tier 1: Tiki API công khai (100% FREE, JSON chuẩn, ưu tiên).
-    Tier 2: Firecrawl (nếu Tiki API fail + có credit, không hết 402).
-    Tier 3: Jina Reader (free, nếu cả 2 trên fail).
-    Trả summary + 'source_used'.
+    Delegate sang persistent_collector.collect_smart để duy trì hành vi:
+    - Lần đầu (chưa có giá thật): cào 1 lần qua chain Firecrawl→ScraperAPI→
+      ZenRows→Jina, ghi toàn bộ observation, đánh dấu marker.
+    - Các lần sau: chỉ ghi observation khi giá thay đổi + notify Telegram/Discord.
+
+    Thứ tự tier (theo yêu cầu): 1-Firecrawl, 2-ScraperAPI, 3-ZenRows, 4-Jina.
+    Dừng tại tier đầu tiên thành công (collected > 0) để tiết kiệm credit.
+
+    Vẫn giữ fallback 4-tier cũ (Tiki API→Firecrawl→Jina→Crawl4AI) nếu
+    persistent_collector không khả dụng (import lỗi).
     """
+    try:
+        from . import persistent_collector as pc
+        return pc.collect_smart(limit=limit, path=path)
+    except Exception as exc:
+        log.warning("persistent_collector fail, fallback legacy chain: %s", exc)
+
+    # Legacy fallback (để đảm bảo không break nếu marker logic lỗi)
     # Tier 1: Tiki API (free, không tốn tiền)
     tk = collect_realtime(channel="TIKI", limit=limit, path=path)
     if tk.get("collected", 0) > 0:

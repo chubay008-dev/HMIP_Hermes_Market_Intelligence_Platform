@@ -83,7 +83,8 @@ def init_pi_db(path: str | None = None) -> None:
                 barcode         TEXT,
                 pack_quantity   REAL,
                 unit_volume_ml  REAL,
-                normalized_unit TEXT
+                normalized_unit TEXT,
+                metadata        TEXT
             );
 
             -- v3.1 P0: Source Listing (1 SKU có nhiều listing trên các sàn)
@@ -215,6 +216,11 @@ def init_pi_db(path: str | None = None) -> None:
             CREATE INDEX IF NOT EXISTS idx_pi_listing_chan  ON pi_source_listings(channel_id);
             """
         )
+        # Migration: thêm cột metadata cho pi_skus (DB cũ chưa có) để lưu
+        # marker "real_price_seeded" (one-time seed giá thật).
+        cols = {r["name"] for r in conn.execute("PRAGMA table_info(pi_skus)").fetchall()}
+        if "metadata" not in cols:
+            conn.execute("ALTER TABLE pi_skus ADD COLUMN metadata TEXT")
         conn.commit()
     finally:
         conn.close()

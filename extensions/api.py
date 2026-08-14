@@ -51,7 +51,12 @@ def _auto_scan_job() -> None:
 
 
 def _pi_collect_job() -> None:
-    """Job nền (B): quét giá thật (Firecrawl → fallback Tiki API) định kỳ."""
+    """Job nền (B): quét giá thật (chain 4-tier) định kỳ + detect/notify.
+
+    Lần đầu: cào 1 lần ghi toàn bộ observation, đánh dấu marker (giá thật gốc).
+    Các lần sau: chỉ ghi observation khi giá thay đổi + notify Telegram/Discord.
+    Dừng tại tier đầu tiên thành công: Firecrawl → ScraperAPI → ZenRows → Jina.
+    """
     try:
         from extensions.pi import collectors as _col
         import os as _os
@@ -86,20 +91,34 @@ async def lifespan(_app: FastAPI):
     # Đã fix OOM: seed chunked + 30 ngày (~184k rows, RAM ~100MB) + chạy
     # BẤT ĐỒNG BỘ (background thread) không block startup, an toàn 512Mi.
     # Tắt bằng env HMIP_PI_AUTOSEED=off nếu muốn seed thủ công hoàn toàn.
+    #
+    # GIỮ CỐ ĐỊNH GIÁ THẬT: nếu đã cào giá thật lần đầu (marker đặt) thì
+    # KHÔNG re-seed synthetic — giữ dữ liệu thật cố định qua các lần restart.
     try:
         if os.getenv("HMIP_PI_AUTOSEED", "on").lower() not in ("0", "off", "false", "no"):
-            if pi_service.seed_status()["status"] == "idle":
-                obs = pi_service.ensure_ready_count()
+            _pi_path = os.getenv("HMIP_PI_DB_PATH") or None
+            _has_real = False
+            try:
+                from extensions.pi import persistent_collector as _pc
+                _has_real = _pc.has_real_prices(path=_pi_path)
+            except Exception:
+                pass
+            if _has_real:
+                # Đã có giá thật → giữ cố định, không re-seed synthetic.
+                pi_service.mark_ready(path=_pi_path)
+                print("[PI] Đã có giá thật (marker) → giữ cố định, không re-seed")
+            elif pi_service.seed_status()["status"] == "idle":
+                obs = pi_service.ensure_ready_count(path=_pi_path)
                 if obs == 0:
                     pi_service.seed_async()
                 else:
-                    pi_service.mark_ready()
+                    pi_service.mark_ready(path=_pi_path)
     except Exception as exc:  # không block startup nếu seed lỗi
         print(f"[PI] seed skip/error: {exc}")
     # Tự động bật auto-scan nếu env yêu cầu (mặc định TẮT để user chủ động).
     if os.getenv("HMIP_AUTOSCAN", "off").lower() in ("1", "on", "true", "yes"):
         _start_auto_scan()
-        # Job PI: quét giá thật từ Tiki định kỳ (B) + detect/notify.
+        # Job PI: quét giá thật (chain 4-tier) định kỳ + detect/notify.
         _start_pi_collect(int(os.getenv("HMIP_PI_COLLECT_MIN", "30")))
     yield
     if _auto_scheduler.running:

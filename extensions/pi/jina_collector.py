@@ -1,32 +1,36 @@
 """jina_collector.py — Nguồn giá thật dự phòng qua Jina Reader (free).
 
 Jina Reader (https://r.jina.ai/<url>) trả markdown sạch của bất kỳ URL nào
-mà không cần browser/proxy. Dùng làm tier-3 fallback khi Tiki API bị block
-và Firecrawl hết credit.
+mà không cần browser/proxy. Dùng làm tier-4 fallback khi Firecrawl/ScraperAPI/
+ZenRows đều fail.
+
+GIỚI HẠN: Jina Reader KHÔNG render JavaScript. Tiki là SPA → trang search/
+product KHÔNG chứa giá sản phẩm trong HTML tĩnh, chỉ có text như hotline
+"1000 đ/phút". Module này lọc nhiễu để KHÔNG ghi giá rác: chỉ trả giá khi
+tìm thấy số hợp lệ (5k-2tr) không kèm token "phút/phí/ship...". Trên thực
+tế Jina thường trả None cho Tiki → tier này chỉ dự phòng cuối, không đáng
+tin cậy bằng ScraperAPI/ZenRows (có render JS).
 
 Pipeline:
-  1. Lấy product URL từ Tiki API công khai (free).
-  2. Wrap qua r.jina.ai/<product_url> -> markdown.
-  3. Parse giá từ markdown (regex).
+  1. Wrap URL Tiki search qua r.jina.ai/<url> -> markdown.
+  2. Parse giá từ markdown bằng _extract_product_price (lọc nhiễu hotline).
 """
 
 from __future__ import annotations
 
 import logging
-import re
 import time
 from typing import Any
 
 import requests
 
 from .collectors import PricePoint, _parse_pack_volume, _REQ_GAP_S, store_price_point
-from .normalization import normalize_price
+from .price_extract import extract_product_price
 
 log = logging.getLogger("hmip.jina")
 
 JINA = "https://r.jina.ai/"
 _TIKI_API = "https://tiki.vn/api/v2/products"
-_PRICE_RE = re.compile(r"([\d][\d\.,]{2,})\s*(?:đ|VND|vnđ)", re.I)
 
 
 class JinaCollector:
@@ -49,16 +53,23 @@ class JinaCollector:
             log.warning("Tiki API err: %s", exc)
             return None, None
 
-    def scrape_price(self, product_url: str) -> float | None:
+    def scrape_price(self, product_url: str, brand: str | None = None) -> float | None:
+        """Scrape Tiki qua Jina Reader, trả giá sản phẩm hợp lệ (hoặc None).
+
+        Jina Reader KHÔNG render JS → trang search/product Tiki (SPA) không
+        chứa giá sản phẩm, chỉ có static text như "1000 đ/phút" hotline.
+        Dùng extract_product_price để lọc nhiễu: chỉ trả giá khi tìm thấy
+        số hợp lệ (5k-2tr) KHÔNG kèm token "phút/phí/ship...". Nếu trang
+        chỉ có hotline → trả None (không ghi giá rác).
+
+        brand: tên sản phẩm mục tiêu → ưu tiên giá có brand keyword gần
+        (tránh lấy median của toàn bộ sản phẩm trên trang search).
+        """
         try:
             r = requests.get(JINA + product_url, headers={"Accept": "text/plain"}, timeout=45)
             if r.status_code != 200:
                 return None
-            md = r.text
-            prices = [float(x.replace(".", "").replace(",", "")) for x in _PRICE_RE.findall(md)]
-            # lọc giá hợp lý (50k - 5tr cho 1 thùng bia)
-            valid = [p for p in prices if 50000 <= p <= 5000000]
-            return max(valid) if valid else (prices[0] if prices else None)
+            return extract_product_price(r.text, brand=brand)
         except Exception as exc:
             log.warning("Jina err: %s", exc)
             return None
@@ -69,7 +80,7 @@ class JinaCollector:
         import requests as _req
         q = _req.utils.quote(product_name)
         search_url = f"https://tiki.vn/search?q={q}"
-        price = self.scrape_price(search_url)
+        price = self.scrape_price(search_url, brand=product_name)
         if not price:
             return None
         pack, v = _parse_pack_volume(product_name)

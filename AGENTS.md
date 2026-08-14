@@ -24,7 +24,8 @@ pip install fastapi "uvicorn[standard]" apscheduler httpx requests
 
 # Chạy test (37 file; hiện 257 pass / 11 fail — fail do mismatch data, xem phần Technical Debt)
 python -m pytest                        # toàn bộ + coverage gate 80%
-python -m pytest extensions/tests       # test lớp web
+python -m pytest extensions/tests       # test lớp web (58 pass / 1 skip)
+python -m pytest extensions/tests/test_pi.py --no-cov  # test PI nhanh
 python -m pytest tests/workflow         # test PRC-001 end-to-end
 python -m pytest -p no:cov --no-cov     # chạy nhanh không coverage
 
@@ -48,14 +49,31 @@ python -m extensions.scheduler
 
 - **`core/`** — kernel runtime. KHÔNG sửa trừ khi đổi contract (phải cập nhật `05_Interface_Contract.md`). Không import `domains/`.
 - **`extensions/`** — lớp web + tích hợp. Đây là nơi thêm tính năng ứng dụng mà không phá kernel.
-  - `api.py` — FastAPI (tất cả endpoint `/api/*`)
+  - `api.py` — FastAPI (tất cả endpoint `/api/*`), lifespan seed PI
   - `db.py` — SQLite lịch sử giá (path: `HMIP_DB_PATH`)
   - `pi/` — Price Intelligence (DB riêng `HMIP_PI_DB_PATH`, schema đầy đủ)
+    - `collectors.py` — `collect_realtime_smart` (delegate sang `collect_smart` 4-tier chain)
+    - `persistent_collector.py` — `has_real_prices` (marker), `store_price_point_if_changed` (incremental), `collect_smart` (4-tier chain)
+    - `price_extract.py` — `extract_product_price(brand=)` dùng chung: filter hotline garbage + brand matching
+    - `firecrawl_collector.py` (tier 1), `scraperapi_collector.py` (tier 2), `zenrows_collector.py` (tier 3), `jina_collector.py` (tier 4)
+    - `service.py` — orchestration; `mark_ready` đã sửa `global _seed_state`
+    - `pi_store.py` — đã thêm cột `metadata` cho `pi_skus` (marker)
   - `run_workflow.py` — NỐI kernel vào runtime thật (fix F-01)
-  - `collect_adapters.py` — adapter giá (demo/http/Tiki 3 tầng)
+  - `collect_adapters.py` — adapter giá (demo/http/Tiki 3 tầng — legacy, riêng PI dùng chain smart)
   - `auth.py` — Bearer token middleware
 - **`domains/beer/pricing/`** — vertical slice PRC-001 (7 task: collect→extract→validate→enrich→compare→decide→alert)
-- **`knowledge/master/*.json``** — master data (Brand/Product/SKU). Đã chuyển sang tên tiếng Việt.
+- **`knowledge/master/*.json`** — master data (Brand/Product/SKU). Đã chuyển sang tên tiếng Việt.
+
+## Thu thập giá thật (PI) — chain 4 tầng
+
+Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Crawl4AI tier 5 nếu `CRAWL4AI_ENABLED`).
+
+- `collect_smart(limit, path)` trong `persistent_collector.py` thử từng tier cho toàn bộ sản phẩm.
+- Tier thành công khi: thu được ≥1 observation mới (`collected>0`) HOẶC có giá không đổi (`skipped>0`, tức tier lấy được giá nhưng không cần ghi lại). Chỉ xuống tier sau khi cả hai đều 0.
+- **One-time seed:** `has_real_prices()` kiểm marker `real_price_seeded=true` trong `pi_skus.metadata`. Seed 1 lần → marker đặt → không re-seed synthetic nữa.
+- **Incremental:** `store_price_point_if_changed` chỉ ghi observation khi giá mới (ngoài noise threshold). Giá không đổi → skip (không ghi đè).
+- **Lọc rác:** `extract_product_price(html, brand)` — loại token hotline ("1000 đ/phút"), chỉ nhận 5k-2tr; brand matching ưu tiên giá gần tên thương hiệu (tránh median sản phẩm khác).
+- Env: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render: `sync: false`). Code đọc `SCRAPERAPI_KEY`/`ZENROWS_KEY` (không phải `_API_KEY`).
 
 ## Quy ước mã nguồn
 
@@ -79,6 +97,7 @@ python -m extensions.scheduler
 - DB paths: `HMIP_DB_PATH` (mặc định `hmip.db`), `HMIP_PI_DB_PATH` (mặc định `hmip_pi.db`).
 - Auth: `HMIP_API_TOKEN` (đơn) hoặc `HMIP_API_TOKENS` (JSON array). Không set = auth tắt (dev mode).
 - Thu thập giá: `HMIP_COLLECT_MODE` (demo|http). `http` mà không set `HMIP_PRICE_API_BASE` → fallback Tiki API.
+- Chain smart PI: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render `sync: false`).
 - Scheduler: `HMIP_AUTOSCAN=on`, `HMIP_SCAN_INTERVAL_MIN`, `HMIP_PI_COLLECT_MIN`.
 - Xem `.env.example` cho danh sách đầy đủ (ghi rõ biến nào đã/ chưa nối code).
 

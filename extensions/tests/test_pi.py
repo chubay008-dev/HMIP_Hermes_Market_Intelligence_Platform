@@ -161,3 +161,94 @@ def test_collector_tiki_live():
     from extensions.pi import collectors as col
     pp = col.collect_product("TIKI", "P456", "Heineken Lager 330ml")
     assert pp and pp.regular_price > 0
+
+
+# ---- Tests: price_extract (filter giá rác hotline + brand matching) ----
+
+def test_extract_price_filters_hotline_garbage():
+    """Giá hotline "1000 đ/phút" phải bị loại, không trả về 1000."""
+    from extensions.pi.price_extract import extract_product_price
+    # Chỉ hotline → không có giá sản phẩm → None
+    assert extract_product_price("Hotline: 1000 đ/phút (8-21h)") is None
+    # Hotline lẫn giá thật → trả giá thật, không trả 1000
+    html = "598.800₫ HEINEKEN ### Thùng 24 lon; Hotline 1000 đ/phút"
+    val = extract_product_price(html, brand="Heineken")
+    assert val == 598800.0
+
+
+def test_extract_price_brand_match_avoids_other_products():
+    """Brand match phải ưu tiên giá gần keyword thương hiệu, tránh median
+    của toàn bộ sản phẩm trên trang search (bia ngũ hành, Habeco, Rooster).
+    """
+    from extensions.pi.price_extract import extract_product_price
+    # Trang search có nhiều sản phẩm: 681000 (Rooster), 598800 (Heineken).
+    html = ("681.000₫ ROOSTER BEERS ### Bia; 598.800₫ HEINEKEN ### Thùng; "
+            "635.000₫ HABECO ### Bia")
+    # Không brand → median của 3 = 635000 (trung bình các sản phẩm)
+    assert extract_product_price(html) == 635000.0
+    # Có brand="Heineken" → ưu tiên 598800 (không phải 681000 Rooster)
+    assert extract_product_price(html, brand="Heineken") == 598800.0
+
+
+def test_extract_price_range_and_format():
+    """Chấp nhận nhiều format giá VNĐ, loại giá ngoài khoảng 5k-2tr."""
+    from extensions.pi.price_extract import extract_product_price
+    assert extract_product_price("Giá: 89.000đ") == 89000.0
+    assert extract_product_price("Price 1.408.000₫") == 1408000.0
+    # Giá quá nhỏ (<5k) → loại
+    assert extract_product_price("100đ") is None
+    # Giá quá lớn (>2tr) → loại
+    assert extract_product_price("5.000.000đ") is None
+    # Không có giá → None
+    assert extract_product_price("không có giá ở đây") is None
+
+
+# ---- Tests: persistent_collector (marker + incremental + notify) ----
+
+def test_persistent_marker_and_incremental(db):
+    """collect_smart seed 1 lần (marker), lần 2 cùng giá → skipped (không re-seed)."""
+    import os
+    from extensions.pi import persistent_collector as pc
+    from extensions.pi.collectors import PricePoint
+
+    # DB rỗng → chưa có giá thật
+    assert pc.has_real_prices(path=db) is False
+
+    # Seed 1 PricePoint → marker đặt
+    pp = PricePoint(product_id="P456", sku_id="SKU-P456", channel_id="TIKI",
+                    region_id="ONLINE", regular_price=598800.0, promotion_price=None,
+                    pack_quantity=1, unit_volume_ml=330, source="tiki-jina", raw={})
+    r1 = pc.store_price_point_if_changed(pp, path=db, notify=False)
+    assert r1["inserted"] is True
+    assert pc.has_real_prices(path=db) is True
+
+    # Quét lại cùng giá → KHÔNG ghi lại (incremental)
+    r2 = pc.store_price_point_if_changed(pp, path=db, notify=False)
+    assert r2["inserted"] is False
+    assert r2["changed"] is False
+
+
+def test_persistent_changed_price_notifies(db, monkeypatch):
+    """Giá thay đổi → observation mới + gọi notify_alert (Discord/Telegram)."""
+    from extensions.pi import persistent_collector as pc
+    from extensions.pi.collectors import PricePoint
+
+    pp1 = PricePoint(product_id="P456", sku_id="SKU-P456", channel_id="TIKI",
+                     region_id="ONLINE", regular_price=598800.0, promotion_price=None,
+                     pack_quantity=1, unit_volume_ml=330, source="tiki-jina", raw={})
+    pc.store_price_point_if_changed(pp1, path=db, notify=False)
+
+    called = {}
+    def fake_notify(alert, **kw):
+        called["alert"] = alert
+        return {"discord": True, "telegram": True}
+    monkeypatch.setattr("extensions.pi.notifier.notify_alert", fake_notify)
+
+    pp2 = PricePoint(product_id="P456", sku_id="SKU-P456", channel_id="TIKI",
+                     region_id="ONLINE", regular_price=550000.0, promotion_price=None,
+                     pack_quantity=1, unit_volume_ml=330, source="tiki-jina", raw={})
+    r = pc.store_price_point_if_changed(pp2, path=db, notify=True)
+    assert r["inserted"] is True and r["changed"] is True
+    assert r["old_price"] == 598800.0 and r["new_price"] == 550000.0
+    assert "alert" in called
+    assert called["alert"]["event_type"] == "PRICE_DECREASE"
