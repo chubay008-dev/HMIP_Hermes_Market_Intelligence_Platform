@@ -88,11 +88,15 @@ HMIP/
 │   ├── notifiers/telegram.py   # Cảnh báo Telegram (cho PRC-001)
 │   └── pi/                     # Price Intelligence module (Spec v2.0/v3.1)
 │       ├── service.py          # Orchestration + payload builder cho API
-│       ├── pi_store.py         # SQLite PI (schema đầy đủ: Product/Variant/SKU/Observation/...)
-│       ├── collectors.py       # Thu thập giá thật (Tiki API)
-│       ├── firecrawl_collector.py  # Firecrawl Extract API (tier 2)
-│       ├── jina_collector.py    # Jina Reader fallback (tier 3)
-│       ├── crawl4ai_collector.py # Crawl4AI headless (tier 4)
+│       ├── pi_store.py         # SQLite PI (schema đầy đủ: Product/Variant/SKU/Observation/...; cột metadata cho marker)
+│       ├── collectors.py       # Thu thập giá thật (Tiki API) + collect_realtime_smart (4-tier chain)
+│       ├── firecrawl_collector.py  # Firecrawl Extract API (tier 1)
+│       ├── scraperapi_collector.py # ScraperAPI (render JS, tier 2) — MỚI
+│       ├── zenrows_collector.py    # ZenRows (js_render, tier 3) — MỚI
+│       ├── jina_collector.py    # Jina Reader fallback (tier 4, filter hotline garbage)
+│       ├── crawl4ai_collector.py # Crawl4AI headless (tier 5, mặc định tắt)
+│       ├── price_extract.py    # extract_product_price dùng chung: filter hotline + brand matching — MỚI
+│       ├── persistent_collector.py # has_real_prices marker + store_price_point_if_changed (incremental) + collect_smart — MỚI
 │       ├── normalization.py    # Quy giá về per_100ml để so sánh
 │       ├── analytics.py        # KPI/trend/index/positioning/channel/region/promo
 │       ├── events.py           # Phát hiện price event + alert (dedup)
@@ -244,17 +248,24 @@ HMIP/
 
 | Tích hợp | Cơ chế | Cấu hình env | Trạng thái |
 |---|---|---|---|
-| **Tiki API (công khai)** | HTTP GET `tiki.vn/api/v2/products`, cần guest token từ cookie | — (free, không key) | Hoạt động (tier 1), hay bị block từ cloud IP |
-| **Firecrawl Extract API** | HTTP POST `api.firecrawl.dev/v1/scrape`, Bearer key | `FIRECRAWL_API_KEY` | Nguồn giá thật chính (tier 2); cạn credit → 402 |
-| **Jina Reader** | `r.jina.ai/<url>` → markdown, regex parse giá | — (free) | Fallback cuối (tier 3) |
-| **Crawl4AI** | Headless browser render JS | `CRAWL4AI_ENABLED`, cần chromium | Tier 4 (mặc định tắt) |
+| **Tiki API (công khai)** | HTTP GET `tiki.vn/api/v2/products`, cần guest token từ cookie | — (free, không key) | Hoạt động (adapter riêng, không trong chain smart) |
+| **Firecrawl Extract API** | HTTP POST `api.firecrawl.dev/v1/scrape`, Bearer key | `FIRECRAWL_API_KEY` | Nguồn giá thật (tier 1 trong chain smart); cạn credit → 402 |
+| **ScraperAPI** | HTTP GET `api.scraperapi.com?api_key&url&render=true&country_code=vn` | `SCRAPERAPI_KEY` | Render JS, tier 2 trong chain smart — MỚI |
+| **ZenRows** | HTTP GET `api.zenrows.com/v1/?apikey&url&js_render=true` | `ZENROWS_KEY` | Render JS, tier 3 trong chain smart — MỚI |
+| **Jina Reader** | `r.jina.ai/<url>` → markdown, regex parse giá + filter hotline garbage | — (free) | Fallback cuối (tier 4 trong chain smart) |
+| **Crawl4AI** | Headless browser render JS | `CRAWL4AI_ENABLED`, cần chromium | Tier 5 (mặc định tắt) |
 | **Telegram Bot API** (PRC-001) | POST `api.telegram.org/bot{token}/sendMessage` | `HMIP_TELEGRAM_BOT_TOKEN`, `HMIP_TELEGRAM_CHAT_ID` | Thiếu → console-log fallback |
 | **Telegram** (PI) | Tương tự | `TELEGRAM_HMIP_MARKET_BOT`, `TELEGRAM_CHAT_ID` | Thiếu → skip gracefully |
 | **Discord Bot API** | POST `discord.com/api/v10/channels/{id}/messages` | `DISCORD_BOT_TOKEN`, `DISCORD_HOME_CHANNEL` | Thiếu → skip gracefully |
 | **OpenRouter LLM** (AI Analyst) | POST `openrouter.ai/api/v1/chat/completions` | `OPENROUTER_API_KEY`, `HMIP_PI_AI_MODEL` (mặc định `openai/gpt-4o-mini`) | Thiếu key → rule-based fallback (không bịa số) |
+| **Apify** | `@niceprice/tiki-detail` actor (tuỳ chọn) | `APIFY_API_KEY`, `APIFY_ACTOR_TIKI` | Tuỳ chọn, chưa tích hợp mặc định |
 | **HTTP giá nội bộ** (tuỳ chọn) | `HttpCollectAdapter` GET `{base}/{pid}` | `HMIP_PRICE_API_BASE`, `HMIP_PRICE_API_KEY`, `HMIP_PRICE_FIELD_*` | Tuỳ biến khi nối nguồn riêng |
 
-**Thu thập giá thật 3 tầng (fallback):** Tiki API → Firecrawl → Jina (→ Crawl4AI tier 4). `[VERIFIED]` — `extensions/collect_adapters.py:build_collect_adapter`, commit gần nhất `fix(collect): fallback 3 tầng Tiki->Firecrawl->Jina`.
+**Thu thập giá thật 4 tầng (chain smart — fallback có thứ tự):** Firecrawl → ScraperAPI → ZenRows → Jina (→ Crawl4AI tier 5 nếu bật). Mỗi tier thử cho toàn bộ sản phẩm; nếu thu được ≥1 giá (hoặc giá không đổi = skip) → dừng, không xuống tier sau. `[VERIFIED]` — `extensions/pi/persistent_collector.py:collect_smart`, `extensions/pi/collectors.py:collect_realtime_smart`.
+
+**Lọc giá rác + brand matching:** `extensions/pi/price_extract.py:extract_product_price` — lọc token hotline ("1000 đ/phút"), chỉ nhận giá 5k-2tr; khi truyền `brand` (tên sản phẩm) ưu tiên giá có brand keyword gần (tránh median của sản phẩm khác trên trang search). `[VERIFIED]`.
+
+**One-time seed + incremental:** `extensions/pi/persistent_collector.py` — `has_real_prices()` kiểm tra marker `real_price_seeded=true` trong `pi_skus.metadata`; `store_price_point_if_changed()` chỉ ghi observation khi giá mới (trong noise threshold) → tránh re-scrape ghi đè; `collect_smart()` seed 1 lần rồi incremental. `[VERIFIED]`.
 
 **Tài liệu cũ:** `docs/INTEGRATIONS.md` tuyên bố "Không có external integration" — **lỗi thời**.
 
@@ -297,7 +308,9 @@ HMIP/
 | `HMIP_PRICE_API_BASE`/`_KEY`/`_FIELD_*` | — | Nguồn giá http | Có |
 | `HMIP_BASE_PRICE_<ID>` | — | Ghi đè giá tham chiếu | Có |
 | `HMIP_TELEGRAM_BOT_TOKEN`/`_CHAT_ID` | — | Telegram (PRC-001) | Có |
-| `FIRECRAWL_API_KEY` | — | Firecrawl | Có |
+| `FIRECRAWL_API_KEY` | — | Firecrawl (tier 1) | Có |
+| `SCRAPERAPI_KEY` | — | ScraperAPI render JS (tier 2) | Có — MỚI |
+| `ZENROWS_KEY` | — | ZenRows render JS (tier 3) | Có — MỚI |
 | `OPENROUTER_API_KEY` | — | LLM AI Analyst | Có |
 | `DISCORD_BOT_TOKEN`/`_HOME_CHANNEL` | — | Discord alert PI | Có |
 | `HMIP_IN_DOCKER` | — | Bind 0.0.0.0 | Có (start.sh) |
@@ -324,7 +337,7 @@ HMIP/
 
 **deployment/docker-compose.yml:** service `hmip-bootstrap`, **không expose port** (mô tả mô hình run-to-completion CLI), healthcheck `python -m platform_.health`, volume reports/data/knowledge-dynamic. `[VERIFIED]`.
 
-**render.yaml:** Render Blueprint, web service runtime docker, healthCheckPath `/api/health`, auto-generate `HMIP_API_TOKEN`. `[VERIFIED]`.
+**render.yaml:** Render Blueprint, web service runtime docker, healthCheckPath `/api/health`, auto-generate `HMIP_API_TOKEN`. Env `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` set `sync: false` (điền qua Render Dashboard, không commit). `[VERIFIED]`.
 
 **deployment/kubernetes/:** `[VERIFIED]`
 - `job.yaml` — Kubernetes **Job** (batch, backoffLimit 2, restartPolicy Never) vì "không có HTTP server" — entrypoint `python -m platform_.bootstrap`.
@@ -349,7 +362,7 @@ HMIP/
 
 ## 15. Chiến lược kiểm thử (testing)
 
-**Pytest**, 37 file test, **257 pass / 11 fail** (khi chạy trong môi trường này, Python 3.13). `[VERIFIED]` — chạy trực tiếp.
+**Pytest**, 37 file test, **58 pass / 1 skip** (extensions/tests), **257 pass / 11 fail** (toàn bộ khi chạy `python -m pytest` với coverage gate). `[VERIFIED]` — chạy trực tiếp (Python 3.13). 5 test mới cho `price_extract` (filter hotline + brand matching) và `persistent_collector` (marker + incremental + notify) đã thêm vào `extensions/tests/test_pi.py`.
 
 **Phân loại:** `[VERIFIED]` — `tests/`, `extensions/tests/`, `domains/beer/pricing/tests/`
 - `tests/unit/` — core (bootstrap, config, registry, planner, executor, workflow, event_bus, lineage, models, ontology, health, readiness, platform_bootstrap, context)
@@ -435,6 +448,8 @@ HMIP/
 8. **`shared/types.py` 0% coverage** (file không dùng). `[VERIFIED]` — pytest coverage report.
 9. **Inconsistent env var naming:** Telegram PRC-001 dùng `HMIP_TELEGRAM_*`, PI dùng `TELEGRAM_HMIP_MARKET_BOT`/`TELEGRAM_CHAT_ID` (không prefix `HMIP_`). `[VERIFIED]`.
 10. **`.dockerignore` loại `*.md` và `docs/`** → tài liệu không có trong image (có chủ đích), nhưng cũng loại luôn cả tài liệu vận hành. `[VERIFIED]`.
+11. **`mark_ready` UnboundLocalError (ĐÃ SỬA):** `extensions/pi/service.py:mark_ready` gán `_seed_state` trong hàm mà không khai `global` → khi lifespan gọi `mark_ready` (nhánh marker) lỗi "cannot access local variable". **Đã sửa** bằng `global _seed_state`. `[VERIFIED]`.
+12. **`pi_skus` thiếu cột `metadata` (ĐÃ SỬA):** schema cũ không có cột lưu marker `real_price_seeded`. **Đã thêm** cột `metadata` vào CREATE TABLE + migration `ALTER TABLE ADD COLUMN` (idempotent qua PRAGMA). `[VERIFIED]` — `pi_store.py:init_pi_db`.
 
 ---
 

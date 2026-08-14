@@ -90,6 +90,7 @@ def ensure_ready_count(path: str | None = None) -> int:
 
 def mark_ready(path: str | None = None) -> dict[str, Any]:
     """DB đã có data sẵn -> đánh dấu trạng thái seed là done (không chạy lại)."""
+    global _seed_state
     with _seed_lock:
         if _seed_state["status"] == "running":
             return dict(_seed_state)
