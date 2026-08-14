@@ -26,13 +26,15 @@ services:
       - key: HMIP_COLLECT_MODE
         value: "http"          # dùng nguồn giá thật (chain 4-tier: Firecrawl→ScraperAPI→ZenRows→Jina)
       - key: HMIP_API_TOKEN
-        generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên (dùng login web)
+        sync: false                    # 🔒 SECRET — token đăng nhập API/Dashboard. Nhập thủ công tại Render Dashboard để cố định qua các lần re-apply (không bị Render re-generate).
       - key: HMIP_PI_DB_PATH
         value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → marker giữ giá thật cố định)
       - key: HMIP_PI_COLLECT_MIN
         value: "360"                    # quét gia tăng mỗi 6h (chỉ ghi khi giá đổi + notify; tiết kiệm credit)
       - key: TELEGRAM_HMIP_MARKET_BOT
-        sync: false                     # bạn điền token bot HMIP (Discord/Telegram alert)
+        sync: false                     # 🔒 SECRET — Telegram bot token (tạo qua @BotFather). Điền tại Render Dashboard.
+      - key: TELEGRAM_CHAT_ID
+        sync: false                     # 🔒 SECRET — Chat ID nhận alert Telegram (bot phải là member của chat).
       - key: CRAWL4AI_ENABLED
         value: "false"                    # tier 4 (cần chromium, nặng) - bật true nếu muốn self-host crawl
       - key: FIRECRAWL_API_KEY
