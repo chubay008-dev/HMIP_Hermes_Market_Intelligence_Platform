@@ -205,6 +205,10 @@ def build_collect_adapter() -> Any:
             def fetch(self, request: dict[str, Any]) -> dict[str, Any]:
                 pid = str(request.get("product_id", ""))
                 name = str(request.get("product_name") or request.get("brand") or pid)
+                # Brand thật từ catalog mặc định (khớp ontology) — collector chỉ trả
+                # channel/source, không biết brand nên không dùng làm brand record.
+                from extensions.default_products import DEFAULT_PRODUCTS
+                brand_name = DEFAULT_PRODUCTS.get(pid, {}).get("brand", "")
                 pp = None
                 # Tier 1: Tiki API công khai (nhanh, free) — hay bị block từ cloud IP
                 try:
@@ -253,7 +257,7 @@ def build_collect_adapter() -> Any:
                     )
                 eff = pp.promotion_price or pp.regular_price
                 return {
-                    "brand": "",
+                    "brand": brand_name,
                     "product_name": name,
                     "price_text": f"{eff:,.0f}",
                     "currency": "VND",
