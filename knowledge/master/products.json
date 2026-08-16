@@ -286,5 +286,149 @@
     "brand_id": "BRAND-PCN_OB",
     "name": "Tsingtao Oak Barrel Luxury Legend 330ml",
     "category": "beer"
+  },
+  {
+    "id": "PSG_LG",
+    "brand_id": "BRAND-SAIGON",
+    "name": "Bia Sài Gòn Lager 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PSG_GD",
+    "brand_id": "BRAND-SAIGON",
+    "name": "Bia Sài Gòn Gold 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PSG_BK",
+    "brand_id": "BRAND-SAIGON",
+    "name": "Bia Sài Gòn Black 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PSG_BC",
+    "brand_id": "BRAND-SAIGON",
+    "name": "Bia Sài Gòn Bạc 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTGR_C",
+    "brand_id": "BRAND-P789",
+    "name": "Tiger Crystal 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTGR_T",
+    "brand_id": "BRAND-P789",
+    "name": "Tiger Tail 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PHN_CH",
+    "brand_id": "BRAND-P012",
+    "name": "Bia Hà Nội Chai 450ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTB",
+    "brand_id": "BRAND-BIATRÚCBẠCH",
+    "name": "Bia Trúc Bạch 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PSTW",
+    "brand_id": "BRAND-BIASƯTỬTRẮNG",
+    "name": "Bia Sư Tử Trắng 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PHUDA",
+    "brand_id": "BRAND-BIAHUDA",
+    "name": "Bia Huda 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PVT",
+    "brand_id": "BRAND-BIAVĨNHTUY",
+    "name": "Bia Vĩnh Tuy 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PCAR",
+    "brand_id": "BRAND-CARLSBERG",
+    "name": "Carlsberg 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PASP",
+    "brand_id": "BRAND-PZ_AS",
+    "name": "Asahi Super Dry 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PKIR",
+    "brand_id": "BRAND-KIRIN",
+    "name": "Kirin Ichiban 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTH_CH",
+    "brand_id": "BRAND-CHANG",
+    "name": "Chang 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PTH_SG",
+    "brand_id": "BRAND-SINGHA",
+    "name": "Singha 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PDE_PA",
+    "brand_id": "BRAND-PAULANER",
+    "name": "Paulaner 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PDE_WE",
+    "brand_id": "BRAND-WEIHENSTEPHANER",
+    "name": "Weihenstephaner Hefeweissbier 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PAT_ED",
+    "brand_id": "BRAND-EDELWEISS",
+    "name": "Edelweiss Wheat Beer 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PBE_HG",
+    "brand_id": "BRAND-HOEGAARDEN",
+    "name": "Hoegaarden White 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PBE_LF",
+    "brand_id": "BRAND-LEFFE",
+    "name": "Leffe Blonde 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PLA_LG",
+    "brand_id": "BRAND-BEERLAO",
+    "name": "Beerlao Lager 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PLA_GD",
+    "brand_id": "BRAND-BEERLAO",
+    "name": "Beerlao Gold 330ml",
+    "category": "beer"
+  },
+  {
+    "id": "PZ_BUD",
+    "brand_id": "BRAND-P888",
+    "name": "Budweiser 330ml",
+    "category": "beer"
   }
 ]

@@ -16,5 +16,149 @@
     "product_id": "P555",
     "pack_size": "330ml",
     "barcode": "000P555"
+  },
+  {
+    "id": "SKU-PSG_LG-330",
+    "product_id": "PSG_LG",
+    "pack_size": "330ml",
+    "barcode": "000PSG_LG"
+  },
+  {
+    "id": "SKU-PSG_GD-330",
+    "product_id": "PSG_GD",
+    "pack_size": "330ml",
+    "barcode": "000PSG_GD"
+  },
+  {
+    "id": "SKU-PSG_BK-330",
+    "product_id": "PSG_BK",
+    "pack_size": "330ml",
+    "barcode": "000PSG_BK"
+  },
+  {
+    "id": "SKU-PSG_BC-330",
+    "product_id": "PSG_BC",
+    "pack_size": "330ml",
+    "barcode": "000PSG_BC"
+  },
+  {
+    "id": "SKU-PTGR_C-330",
+    "product_id": "PTGR_C",
+    "pack_size": "330ml",
+    "barcode": "000PTGR_C"
+  },
+  {
+    "id": "SKU-PTGR_T-330",
+    "product_id": "PTGR_T",
+    "pack_size": "330ml",
+    "barcode": "000PTGR_T"
+  },
+  {
+    "id": "SKU-PHN_CH-330",
+    "product_id": "PHN_CH",
+    "pack_size": "330ml",
+    "barcode": "000PHN_CH"
+  },
+  {
+    "id": "SKU-PTB-330",
+    "product_id": "PTB",
+    "pack_size": "330ml",
+    "barcode": "000PTB"
+  },
+  {
+    "id": "SKU-PSTW-330",
+    "product_id": "PSTW",
+    "pack_size": "330ml",
+    "barcode": "000PSTW"
+  },
+  {
+    "id": "SKU-PHUDA-330",
+    "product_id": "PHUDA",
+    "pack_size": "330ml",
+    "barcode": "000PHUDA"
+  },
+  {
+    "id": "SKU-PVT-330",
+    "product_id": "PVT",
+    "pack_size": "330ml",
+    "barcode": "000PVT"
+  },
+  {
+    "id": "SKU-PCAR-330",
+    "product_id": "PCAR",
+    "pack_size": "330ml",
+    "barcode": "000PCAR"
+  },
+  {
+    "id": "SKU-PASP-330",
+    "product_id": "PASP",
+    "pack_size": "330ml",
+    "barcode": "000PASP"
+  },
+  {
+    "id": "SKU-PKIR-330",
+    "product_id": "PKIR",
+    "pack_size": "330ml",
+    "barcode": "000PKIR"
+  },
+  {
+    "id": "SKU-PTH_CH-330",
+    "product_id": "PTH_CH",
+    "pack_size": "330ml",
+    "barcode": "000PTH_CH"
+  },
+  {
+    "id": "SKU-PTH_SG-330",
+    "product_id": "PTH_SG",
+    "pack_size": "330ml",
+    "barcode": "000PTH_SG"
+  },
+  {
+    "id": "SKU-PDE_PA-330",
+    "product_id": "PDE_PA",
+    "pack_size": "330ml",
+    "barcode": "000PDE_PA"
+  },
+  {
+    "id": "SKU-PDE_WE-330",
+    "product_id": "PDE_WE",
+    "pack_size": "330ml",
+    "barcode": "000PDE_WE"
+  },
+  {
+    "id": "SKU-PAT_ED-330",
+    "product_id": "PAT_ED",
+    "pack_size": "330ml",
+    "barcode": "000PAT_ED"
+  },
+  {
+    "id": "SKU-PBE_HG-330",
+    "product_id": "PBE_HG",
+    "pack_size": "330ml",
+    "barcode": "000PBE_HG"
+  },
+  {
+    "id": "SKU-PBE_LF-330",
+    "product_id": "PBE_LF",
+    "pack_size": "330ml",
+    "barcode": "000PBE_LF"
+  },
+  {
+    "id": "SKU-PLA_LG-330",
+    "product_id": "PLA_LG",
+    "pack_size": "330ml",
+    "barcode": "000PLA_LG"
+  },
+  {
+    "id": "SKU-PLA_GD-330",
+    "product_id": "PLA_GD",
+    "pack_size": "330ml",
+    "barcode": "000PLA_GD"
+  },
+  {
+    "id": "SKU-PZ_BUD-330",
+    "product_id": "PZ_BUD",
+    "pack_size": "330ml",
+    "barcode": "000PZ_BUD"
   }
 ]

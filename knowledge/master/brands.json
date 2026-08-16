@@ -43,7 +43,7 @@
   },
   {
     "id": "BRAND-P333",
-    "name": "Larue"
+    "name": "Bia Larue"
   },
   {
     "id": "BRAND-P777",
@@ -212,5 +212,75 @@
   {
     "id": "BRAND-PCN_OB",
     "name": "Tsingtao"
+  },
+  {
+    "id": "BRAND-BIATRÚCBẠCH",
+    "name": "Bia Trúc Bạch",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-BIASƯTỬTRẮNG",
+    "name": "Bia Sư Tử Trắng",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-BIAHUDA",
+    "name": "Bia Huda",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-BIAVĨNHTUY",
+    "name": "Bia Vĩnh Tuy",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-CARLSBERG",
+    "name": "Carlsberg",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-KIRIN",
+    "name": "Kirin",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-CHANG",
+    "name": "Chang",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-SINGHA",
+    "name": "Singha",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-PAULANER",
+    "name": "Paulaner",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-WEIHENSTEPHANER",
+    "name": "Weihenstephaner",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-EDELWEISS",
+    "name": "Edelweiss",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-HOEGAARDEN",
+    "name": "Hoegaarden",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-LEFFE",
+    "name": "Leffe",
+    "country": "VN"
+  },
+  {
+    "id": "BRAND-BEERLAO",
+    "name": "Beerlao",
+    "country": "VN"
   }
 ]
