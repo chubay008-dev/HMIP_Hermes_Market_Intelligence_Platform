@@ -253,7 +253,7 @@ def build_collect_adapter() -> Any:
                     )
                 eff = pp.promotion_price or pp.regular_price
                 return {
-                    "brand": pp.source,
+                    "brand": None,
                     "product_name": name,
                     "price_text": f"{eff:,.0f}",
                     "currency": "VND",
