@@ -218,13 +218,34 @@ def build_collect_adapter() -> Any:
                         pp = _fc.FirecrawlCollector().collect(pid, name)
                     except Exception as _e:
                         print(f"[collect] Firecrawl err: {_e}")
-                # Tier 3: Jina scrape Tiki search (free, fallback cuối)
+                # Tier 3: ScraperAPI (render JS, vượt bot-protection) — thêm vào
+                # chain vì Jina Reader không render JS, hay miss giá trên SPA Tiki.
                 if not pp:
                     try:
-                        from . import jina_collector as _jc
-                        pp = _jc.JinaCollector().collect(pid, name)
+                        from . import scraperapi_collector as _sa
+                        pp = _sa.ScraperAPICollector().collect(pid, name)
                     except Exception as _e:
-                        print(f"[collect] Jina err: {_e}")
+                        print(f"[collect] ScraperAPI err: {_e}")
+                # Tier 4: ZenRows (render JS, fallback khi ScraperAPI hết credit)
+                if not pp:
+                    try:
+                        from . import zenrows_collector as _zr
+                        pp = _zr.ZenRowsCollector().collect(pid, name)
+                    except Exception as _e:
+                        print(f"[collect] ZenRows err: {_e}")
+                # Tier 5: Jina scrape Tiki search (free, fallback cuối) — thử 2 lần
+                # vì Jina hay transient fail / rate-limit trên shared IP (Render).
+                if not pp:
+                    from . import jina_collector as _jc
+                    for _attempt in (1, 2):
+                        try:
+                            pp = _jc.JinaCollector().collect(pid, name)
+                            if pp:
+                                break
+                        except Exception as _e:
+                            print(f"[collect] Jina err (try {_attempt}): {_e}")
+                        if _attempt == 1:
+                            time.sleep(2)
                 if not pp:
                     raise WorkflowExecutionException(
                         f"collect: không lấy được giá Tiki cho {pid} ({name})",
