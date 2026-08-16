@@ -159,8 +159,21 @@ class _PgConn:
     def executescript(self, sql: str) -> None:
         """Postgres: split theo ';' và execute từng statement (DDL)."""
         adapted = _adapt_schema_sql(sql)
-        # Postgres không cho forward-reference FK (bảng chưa tạo). Bỏ REFERENCES
-        # trong DDL — integrity check làm ở app layer (đã có trước đó cho SQLite).
+        # Postgres không cho forward-reference FK (bảng chưa tạo trong cùng
+        # script). Bỏ REFERENCES ở 2 dạng (thứ tự quan trọng: clause riêng
+        # trước, inline sau, nếu không inline sẽ ăn mất REFERENCES của clause
+        # và để lại FOREIGN KEY rỗng):
+        #  (b) clause riêng:    `, FOREIGN KEY (col) REFERENCES tbl(col)`
+        #      → bỏ cả comma + clause (tránh trailing comma / FK rỗng)
+        #  (a) inline column:  `col TEXT REFERENCES pi_brands(brand_id)`
+        #      → bỏ "REFERENCES ..." giữ lại `col TEXT`
+        # Integrity check làm ở app layer (đã có trước đó cho SQLite).
+        adapted = re.sub(
+            r",\s*FOREIGN KEY\s*\([^)]*\)\s+REFERENCES\s+\w+\([^)]*\)",
+            "",
+            adapted,
+            flags=re.IGNORECASE,
+        )
         adapted = re.sub(r"\s+REFERENCES\s+\w+\([^)]*\)", "", adapted, flags=re.IGNORECASE)
         cur = self._conn.cursor()
         # Split đơn giản theo ';' — đủ cho CREATE TABLE / CREATE INDEX
