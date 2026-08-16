@@ -68,6 +68,10 @@ python -m extensions.scheduler
 
 Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Crawl4AI tier 5 nếu `CRAWL4AI_ENABLED`).
 
+- **Circuit breaker Firecrawl:** khi API trả 402 (hết credit), `FirecrawlCollector._credit_exhausted=True` → các SP còn lại trong run skip Firecrawl ngay (0s thay vì 60s timeout mỗi SP), xuống ScraperAPI/ZenRows/Jina. Flag reset khi nhận 200 lại (credit refresh) hoặc process restart.
+- **Firecrawl credit schedule:** key `fc-abc42...` refresh credit định kỳ (kỳ tới ~14/09). Trong khi chờ, auto-scan incremental (`HMIP_PI_COLLECT_MIN=360` = 6h) dùng ScraperAPI/ZenRows/Jina. Chỉ ghi observation + notify khi giá **thay đổi** (noise threshold 1%); giá không đổi → skip (không re-seed toàn bộ).
+- **Notify:** `notifier.py` gửi alert Telegram (`TELEGRAM_HMIP_MARKET_BOT` + `TELEGRAM_CHAT_ID`) + Discord (`DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL` hoặc `DISCORD_DM_USER_ID` để DM trực tiếp tới user). Chỉ trigger khi `store_price_point_if_changed` phát hiện giá đổi.
+
 - `collect_smart(limit, path)` trong `persistent_collector.py` thử từng tier cho toàn bộ sản phẩm.
 - Tier thành công khi: thu được ≥1 observation mới (`collected>0`) HOẶC có giá không đổi (`skipped>0`, tức tier lấy được giá nhưng không cần ghi lại). Chỉ xuống tier sau khi cả hai đều 0.
 - **One-time seed:** `has_real_prices()` kiểm marker `real_price_seeded=true` trong `pi_skus.metadata`. Seed 1 lần → marker đặt → không re-seed synthetic nữa.

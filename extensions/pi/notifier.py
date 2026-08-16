@@ -3,6 +3,7 @@
 Thiết kế:
 - Đọc credential từ env (Render Dashboard / .env). Thiếu -> skip gracefully.
 - Discord: bot token + channel ID (post qua discord.com/api/v10).
+  Hỗ trợ DM trực tiếp tới user qua DISCORD_DM_USER_ID (tự tạo DM channel).
 - Telegram: bot token (TELEGRAM_HMIP_MARKET_BOT) + chat_id.
 - Chỉ gửi CRITICAL alert (tránh spam). Gọi từ events.detect_and_alert.
 - Không sửa core/domains.
@@ -17,7 +18,9 @@ import requests
 
 log = logging.getLogger("hmip.notifier")
 
-_DISCORD_API = "https://discord.com/api/v10/channels/{channel_id}/messages"
+_DISCORD_API = "https://discord.com/api/v10"
+_DISCORD_MSG = _DISCORD_API + "/channels/{channel_id}/messages"
+_DISCORD_DM = _DISCORD_API + "/users/@me/channels"
 _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 
 # Load .hermes/.env nếu env thiếu (chỉ cho local dev; Render set sẵn env).
@@ -43,7 +46,43 @@ def _maybe_load_env():
 
 
 def _discord_configured() -> bool:
-    return bool(os.getenv("DISCORD_BOT_TOKEN") and os.getenv("DISCORD_HOME_CHANNEL"))
+    """Discord sẵn sàng khi có bot token VÀ (channel ID HOẶC DM user ID)."""
+    has_token = bool(os.getenv("DISCORD_BOT_TOKEN"))
+    has_target = bool(os.getenv("DISCORD_HOME_CHANNEL") or os.getenv("DISCORD_DM_USER_ID"))
+    return has_token and has_target
+
+
+# Cache DM channel id để tránh tạo lại mỗi lần gửi (Discord trả cùng id cho 1 cặp).
+_dm_channel_cache: str | None = None
+
+
+def _resolve_discord_channel() -> str | None:
+    """Trả channel_id để post. Ưu tiên DISCORD_HOME_CHANNEL; nếu không có,
+    tạo DM channel với DISCORD_DM_USER_ID (bot phải share server với user)."""
+    global _dm_channel_cache
+    direct = os.getenv("DISCORD_HOME_CHANNEL")
+    if direct:
+        return direct
+    if _dm_channel_cache:
+        return _dm_channel_cache
+    user_id = os.getenv("DISCORD_DM_USER_ID")
+    if not user_id:
+        return None
+    token = os.getenv("DISCORD_BOT_TOKEN")
+    try:
+        r = requests.post(
+            _DISCORD_DM,
+            headers={"Authorization": f"Bot {token}", "Content-Type": "application/json"},
+            json={"recipient_id": user_id},
+            timeout=15,
+        )
+        if r.status_code in (200, 201):
+            _dm_channel_cache = r.json().get("id")
+            return _dm_channel_cache
+        log.warning("Discord DM create fail HTTP %s: %s", r.status_code, r.text[:200])
+    except Exception as exc:
+        log.warning("Discord DM create error: %s", exc)
+    return None
 
 
 def _telegram_configured() -> bool:
@@ -70,17 +109,21 @@ def _format(alert: dict) -> str:
 def send_discord(message: str) -> bool:
     _maybe_load_env()
     if not _discord_configured():
-        log.info("Discord chưa cấu hình (thiếu DISCORD_BOT_TOKEN/DISCORD_HOME_CHANNEL)")
+        log.info("Discord chưa cấu hình (thiếu DISCORD_BOT_TOKEN + target)")
         return False
-    url = _DISCORD_API.format(channel_id=os.getenv("DISCORD_HOME_CHANNEL"))
+    token = os.getenv("DISCORD_BOT_TOKEN")
+    channel_id = _resolve_discord_channel()
+    if not channel_id:
+        log.warning("Discord: không lấy được channel_id (DM create fail?)")
+        return False
     try:
         r = requests.post(
-            url,
+            _DISCORD_MSG.format(channel_id=channel_id),
             headers={
-                "Authorization": f"Bot {os.getenv('DISCORD_BOT_TOKEN')}",
+                "Authorization": f"Bot {token}",
                 "Content-Type": "application/json",
             },
-            json={"content": message},
+            json={"content": message, "allowed_mentions": {"parse": []}},
             timeout=15,
         )
         if r.status_code not in (200, 201):

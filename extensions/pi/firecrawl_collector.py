@@ -47,12 +47,20 @@ class FirecrawlCollector:
     source = "tiki-firecrawl"
     channel_id = "TIKI"
 
+    # Circuit breaker: set True khi API trả 402 (hết credit). Trong cùng
+    # runtime, search() sẽ trả [] ngay để collect_smart skip sang tier khác,
+    # tránh đốt thời gian gọi 68 lần timeout. Reset = restart process.
+    _credit_exhausted: bool = False
+
     def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.getenv("FIRECRAWL_API_KEY", "")
 
     def search(self, query: str) -> list[dict[str, Any]]:
         if not self.api_key:
             log.warning("Thiếu FIRECRAWL_API_KEY")
+            return []
+        if FirecrawlCollector._credit_exhausted:
+            log.info("Firecrawl skip (circuit breaker: hết credit trong runtime này)")
             return []
         try:
             r = requests.post(
@@ -69,9 +77,18 @@ class FirecrawlCollector:
             if r.status_code != 200:
                 if r.status_code == 402:
                     log.error("Firecrawl HẾT CREDIT (402). Cần nạp tại firecrawl.dev/pricing. Dừng quét để tránh đốt credit.")
+                    # Circuit breaker: flag tắt Firecrawl cho runtime hiện tại.
+                    # collect_smart sẽ skip tier này và xuống ScraperAPI/ZenRows/Jina.
+                    # Firecrawl tự bật lại khi credit refresh (402 → 200) sau khi
+                    # process restart (Render free restart mỗi 15p, hoặc manual).
+                    FirecrawlCollector._credit_exhausted = True
                 else:
                     log.warning("Firecrawl HTTP %s: %s", r.status_code, r.text[:200])
                 return []
+            # Thành công → credit đã có lại (sau khi refresh 14/09) → reset flag.
+            if FirecrawlCollector._credit_exhausted:
+                log.info("Firecrawl credit đã có lại (200 OK) → reset circuit breaker")
+                FirecrawlCollector._credit_exhausted = False
             data = r.json().get("data", {})
             extract = data.get("extract") or data.get("json") or {}
             return extract.get("products", []) or []
