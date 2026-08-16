@@ -91,12 +91,17 @@ def _mark_real_seeded(sku_id: str, path: str | None = None) -> None:
 # ---- latest price lookup ---------------------------------------------
 
 def _latest_observation(pp: PricePoint, path: str | None = None) -> dict[str, Any] | None:
-    """Observation gần nhất cho (sku, channel, region) — để so sánh giá."""
+    """Observation gần nhất cho (sku, channel, region) — để so sánh giá.
+
+    ORDER BY observation_id DESC: observation_id có timestamp suffix
+    (int(time.time()) % 100000) → đảm bảo lấy row MỚI NHẤT deterministic,
+    tránh ghi trùng khi trigger chạy nhiều lần trong cùng ngày.
+    """
     return pi_store.fetch_one(
         """SELECT effective_price, regular_price, observed_at
            FROM pi_observations
            WHERE sku_id = ? AND channel_id = ? AND region_id = ?
-           ORDER BY observed_at DESC LIMIT 1""",
+           ORDER BY observed_at DESC, observation_id DESC LIMIT 1""",
         [pp.sku_id, pp.channel_id, pp.region_id], path=path)
 
 
