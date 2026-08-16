@@ -160,3 +160,56 @@ def test_persistent_tracer_default_path_constant_matches_documented_location() -
     assert PersistentLineageTracer.DEFAULT_PATH == Path(
         "knowledge/dynamic/lineage/lineage.jsonl"
     )
+
+
+# --- Redaction (05_Interface_Contract.md §4.8 "Không ghi secret plaintext") ---
+
+
+def test_inmemory_tracer_redacts_sensitive_keys_by_default() -> None:
+    tracer = InMemoryLineageTracer()
+    tracer.record_trace(
+        "collect",
+        {"token": "abc", "ok": 1},
+        {"api_key": "fc-123", "price": 18500.0},
+        "m",
+    )
+
+    record = tracer.list_records()[0]
+    assert record.input_value == {"token": "***REDACTED***", "ok": 1}
+    assert record.output_value == {"api_key": "***REDACTED***", "price": 18500.0}
+
+
+def test_inmemory_tracer_redact_disabled_when_fields_none() -> None:
+    tracer = InMemoryLineageTracer(redact_fields=None)
+    tracer.record_trace("collect", {"token": "abc"}, {"secret": "s"}, "m")
+
+    record = tracer.list_records()[0]
+    assert record.input_value == {"token": "abc"}
+    assert record.output_value == {"secret": "s"}
+
+
+def test_inmemory_tracer_redacts_nested_payloads() -> None:
+    tracer = InMemoryLineageTracer()
+    tracer.record_trace(
+        "collect",
+        {"request": {"headers": {"password": "pw"}}},
+        {},
+        "m",
+    )
+
+    record = tracer.list_records()[0]
+    assert record.input_value["request"]["headers"]["password"] == "***REDACTED***"
+
+
+def test_persistent_tracer_redacts_sensitive_keys_in_persisted_file(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "lineage.jsonl"
+    PersistentLineageTracer(path).record_trace(
+        "collect", {"token": "leak-me"}, {"price": 1.0}, "m"
+    )
+
+    raw = path.read_text(encoding="utf-8")
+    assert "leak-me" not in raw
+    assert "***REDACTED***" in raw
+

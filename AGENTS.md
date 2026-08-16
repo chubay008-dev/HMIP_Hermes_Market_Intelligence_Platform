@@ -118,7 +118,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - `docker-compose.yml` token mặc định `changeme-in-production` — phải đổi khi deploy.
 - Dashboard `/`, `/pi`, `/workspace` + `/docs` exempt khỏi auth → lộ khi public.
 - ~~`logging.yaml` khai báo `redact_fields` nhưng không có logic redact (giả).~~ **ĐÃ SỬA (2026-08-16):** `core/observability.py` thêm `make_redact_processor` + `_redact_value` (đệ quy dict/list/tuple) → structlog processor redact giá trị các key nhạy cảm (`password`/`token`/`secret`/`api_key`). `core/bootstrap.py::_initialize_logging` wire `config.logging.redact_fields` vào processor. Override qua env `HMIP_LOG_REDACT_FIELDS` (comma-separated). Test: `tests/unit/test_observability_redact.py` (7 test). Lưu ý: chỉ redact qua structlog (core runtime); extensions/ dùng stdlib `logging` riêng, chưa qua processor này.
-- Lineage ghi nguyên payload không lọc.
+- ~~Lineage ghi nguyên payload không lọc.~~ **ĐÃ SỬA (2026-08-16):** `core/lineage.py` thêm `_scrub_payload` (dùng `_redact_value` từ observability) → cả `InMemoryLineageTracer` và `PersistentLineageTracer` redact sensitive keys (`password`/`token`/`secret`/`api_key`, đệ quy nested) trước khi ghi, tuân thủ `05_Interface_Contract.md §4.8` "Không ghi secret plaintext". Mặc định BẬT; truyền `redact_fields=None` để disable (test exact payload). Test: `tests/unit/test_lineage.py` (4 test redact mới).
 - Khi sửa auth: route exempt nằm trong `_EXEMPT_EXACT`/`_EXEMPT_PREFIX` trong `extensions/auth.py`.
 
 ## Kiến trúc — lưu ý dễ nhầm
