@@ -105,6 +105,13 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - Scheduler: `HMIP_AUTOSCAN=on`, `HMIP_SCAN_INTERVAL_MIN`, `HMIP_PI_COLLECT_MIN`.
 - Xem `.env.example` cho danh sách đầy đủ (ghi rõ biến nào đã/ chưa nối code).
 
+### Render API — CẨN TRỌNG
+
+- 🔴 **`PUT /v1/services/{id}/env-vars` REPLACE toàn bộ env vars** (không phải upsert). Nếu body chỉ có 2 vars → mọi var khác (telegram, discord, firecrawl, scraperapi, collect_mode...) BỊ XÓA. Phải gửi TẤT CẢ env vars trong 1 PUT, hoặc dùng PATCH/upsert từng var. Xem commit 04ad580 (sửa hậu quả).
+- **Postgres connection string**: dùng **pooler** hostname (`aws-0-{region}.pooler.supabase.com:6543`, user `postgres.{ref}`) — direct hostname `db.{ref}.supabase.co:5432` KHÔNG resolve DNS trên Render/Sandbox (IPv6/network). Pooler resolve OK + connection pooling.
+- **`executescript` Postgres**: không forward-reference FK trong cùng script. `db_backend.py` bỏ clause `FOREIGN KEY ... REFERENCES ...` (kèm comma) + inline `REFERENCES xxx(...)` (giữ column type). Thứ tự regex quan trọng: clause riêng trước, inline sau.
+- **`nonZeroExit:3`** trên Render = health check fail (grace 60s + retry) HOẶC app crash runtime. Build succeeded ≠ runtime OK.
+
 ## Bảo mật — CẨN TRỌNG
 
 - 🔴 ~~`render.yaml` hardcode `FIRECRAWL_API_KEY` thật~~ — **ĐÃ SỬA** (đổi sang `sync: false`). Nhưng key cũ (`fc-906d...`) đã nằm trong git history (commit `32335cb`) → **vẫn cần thu hồi key đó trên Firecrawl Dashboard và sinh key mới**, vì xoá khỏi working tree không xoá khỏi history. Xem `docs/CODEBASE_OVERVIEW.md` mục 20.
