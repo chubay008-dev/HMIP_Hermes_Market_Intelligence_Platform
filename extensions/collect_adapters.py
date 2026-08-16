@@ -214,7 +214,7 @@ def build_collect_adapter() -> Any:
                 # Tier 2: Firecrawl (có key trên Render) — scrape Tiki chuẩn, tin cậy
                 if not pp:
                     try:
-                        from . import firecrawl_collector as _fc
+                        from .pi import firecrawl_collector as _fc
                         pp = _fc.FirecrawlCollector().collect(pid, name)
                     except Exception as _e:
                         print(f"[collect] Firecrawl err: {_e}")
@@ -222,21 +222,21 @@ def build_collect_adapter() -> Any:
                 # chain vì Jina Reader không render JS, hay miss giá trên SPA Tiki.
                 if not pp:
                     try:
-                        from . import scraperapi_collector as _sa
+                        from .pi import scraperapi_collector as _sa
                         pp = _sa.ScraperAPICollector().collect(pid, name)
                     except Exception as _e:
                         print(f"[collect] ScraperAPI err: {_e}")
                 # Tier 4: ZenRows (render JS, fallback khi ScraperAPI hết credit)
                 if not pp:
                     try:
-                        from . import zenrows_collector as _zr
+                        from .pi import zenrows_collector as _zr
                         pp = _zr.ZenRowsCollector().collect(pid, name)
                     except Exception as _e:
                         print(f"[collect] ZenRows err: {_e}")
                 # Tier 5: Jina scrape Tiki search (free, fallback cuối) — thử 2 lần
                 # vì Jina hay transient fail / rate-limit trên shared IP (Render).
                 if not pp:
-                    from . import jina_collector as _jc
+                    from .pi import jina_collector as _jc
                     for _attempt in (1, 2):
                         try:
                             pp = _jc.JinaCollector().collect(pid, name)
