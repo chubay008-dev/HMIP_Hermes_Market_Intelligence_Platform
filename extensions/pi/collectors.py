@@ -219,57 +219,110 @@ def collect_product(channel: str, product_id: str, product_name: str, ref_vol: i
         return None
 
 
+_CATALOG_READY: set[str] = set()  # per-path cache: ensure_catalog chạy 1 lần/path
+
+
 def ensure_catalog(path: str | None = None) -> None:
     """Tạo bảng + bảng cha (category/channel/region/product/sku) nếu chưa có.
 
     Idempotent — KHÔNG xóa data. Dùng trước khi lưu observation từ collector.
+    Cache per-path: chỉ chạy 1 lần/path (catalog immutable) để tránh
+    ~90 round-trip lên PostgreSQL (Supabase pooler) mỗi lần collect.
+    Batch: toàn bộ catalog upsert trong 1 connection (1 commit cuối).
     """
+    from . import pi_store as _ps_for_default
+    cache_key = path or _ps_for_default.DEFAULT_PI_DB_PATH
+    if cache_key in _CATALOG_READY:
+        return
     from extensions.default_products import DEFAULT_PRODUCTS
     from . import pi_store as ps
 
-    ps.init_pi_db(path)  # tạo schema nếu chưa có
-    ps.upsert_category("BEER", "Beer & Beverage", path=path)
-    # Seller + Brand mặc định (observations cần FK hợp lệ).
-    ps.upsert_seller("UNKNOWN", "Unknown", "unknown", path=path)
-    ps.upsert_brand("", "Unknown", path=path)
-    for cid, cname, ctype in [
-        ("SHOPEE", "Shopee", "ecommerce"),
-        ("LAZADA", "Lazada", "ecommerce"),
-        ("TIKI", "Tiki", "ecommerce"),
-        ("AEON", "AEON", "retail"),
-        ("WINMART", "WinMart", "retail"),
-    ]:
-        ps.upsert_channel(cid, cname, ctype, path=path)
-    for rid, country, region, province in [
-        ("HANOI", "VN", "North", "Hà Nội"),
-        ("HCM", "VN", "South", "TP.HCM"),
-        ("DANANG", "VN", "Central", "Đà Nẵng"),
-        ("HAIPHONG", "VN", "North", "Hải Phòng"),
-        ("CANTHO", "VN", "Mekong", "Cần Thơ"),
-        ("ONLINE", "VN", "Online", "Online"),
-    ]:
-        ps.upsert_region(rid, country, region, province, city=province, path=path)
-    for pid, meta in DEFAULT_PRODUCTS.items():
-        brand = str(meta["brand"])
-        bid = f"BR-{brand.upper().replace(' ', '')}"
-        ps.upsert_brand(bid, brand, path=path)
-        ps.upsert_product(pid, bid, "BEER", str(meta["product_name"]),
-                         variant=None, pack_size=None, volume_ml=float(meta.get("volume_ml", 330)),
-                         unit="ml", path=path)
-        # v3.1 P0: tách Variant riêng (Brand→Product→Variant→SKU→Listing)
-        variant_name = str(meta.get("variant", "Original"))
-        vid = f"VAR-{pid}"
-        ps.upsert_variant(vid, pid, variant_name, slug=variant_name.lower().replace(" ", "-"),
-                          attributes=None, path=path)
-        ps.upsert_sku(f"SKU-{pid}", pid, barcode=None,
-                      pack_quantity=float(meta.get("pack_quantity", 1)),
-                      unit_volume_ml=float(meta.get("volume_ml", 330)),
-                      normalized_unit="100ml", path=path)
-        # v3.1 P0: Source Listing trên Tiki (per marketplace) cho SKU này
-        ps.upsert_source_listing(
-            listing_id=f"LST-TIKI-{pid}", sku_id=f"SKU-{pid}", channel_id="TIKI",
-            seller_id="UNKNOWN", region_id="ONLINE", source_url=None,
-            external_id=None, path=path)
+    ps.init_pi_db(path)  # tạo schema nếu chưa có (1 round-trip)
+    # Batch: 1 connection cho toàn bộ catalog upsert (tránh 90 round-trip).
+    with ps._session(path or ps.DEFAULT_PI_DB_PATH) as c:  # type: ignore[attr-defined]
+        # Dimension rows (category/seller/brand/channels/regions).
+        c.execute(
+            "INSERT INTO pi_categories (category_id, name) VALUES (?, ?) "
+            "ON CONFLICT(category_id) DO UPDATE SET name=excluded.name",
+            ("BEER", "Beer & Beverage"))
+        c.execute(
+            "INSERT INTO pi_sellers (seller_id, seller_name, seller_type) VALUES (?, ?, ?) "
+            "ON CONFLICT(seller_id) DO UPDATE SET seller_name=excluded.seller_name, "
+            "seller_type=excluded.seller_type",
+            ("UNKNOWN", "Unknown", "unknown"))
+        c.execute(
+            "INSERT INTO pi_brands (brand_id, name) VALUES (?, ?) "
+            "ON CONFLICT(brand_id) DO UPDATE SET name=excluded.name",
+            ("", "Unknown"))
+        for cid, cname, ctype in [
+            ("SHOPEE", "Shopee", "ecommerce"),
+            ("LAZADA", "Lazada", "ecommerce"),
+            ("TIKI", "Tiki", "ecommerce"),
+            ("AEON", "AEON", "retail"),
+            ("WINMART", "WinMart", "retail"),
+        ]:
+            c.execute(
+                "INSERT INTO pi_channels (channel_id, channel_name, channel_type) "
+                "VALUES (?, ?, ?) ON CONFLICT(channel_id) DO UPDATE SET "
+                "channel_name=excluded.channel_name, channel_type=excluded.channel_type",
+                (cid, cname, ctype))
+        for rid, country, region, province in [
+            ("HANOI", "VN", "North", "Hà Nội"),
+            ("HCM", "VN", "South", "TP.HCM"),
+            ("DANANG", "VN", "Central", "Đà Nẵng"),
+            ("HAIPHONG", "VN", "North", "Hải Phòng"),
+            ("CANTHO", "VN", "Mekong", "Cần Thơ"),
+            ("ONLINE", "VN", "Online", "Online"),
+        ]:
+            c.execute(
+                "INSERT INTO pi_regions (region_id, country, region, province, city) "
+                "VALUES (?, ?, ?, ?, ?) ON CONFLICT(region_id) DO UPDATE SET "
+                "country=excluded.country, region=excluded.region, "
+                "province=excluded.province, city=excluded.city",
+                (rid, country, region, province, province))
+        for pid, meta in DEFAULT_PRODUCTS.items():
+            brand = str(meta["brand"])
+            bid = f"BR-{brand.upper().replace(' ', '')}"
+            c.execute(
+                "INSERT INTO pi_brands (brand_id, name) VALUES (?, ?) "
+                "ON CONFLICT(brand_id) DO UPDATE SET name=excluded.name",
+                (bid, brand))
+            c.execute(
+                "INSERT INTO pi_products (product_id, brand_id, category_id, product_name, "
+                "variant, pack_size, volume_ml, unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(product_id) DO UPDATE SET brand_id=excluded.brand_id, "
+                "category_id=excluded.category_id, product_name=excluded.product_name, "
+                "variant=excluded.variant, pack_size=excluded.pack_size, "
+                "volume_ml=excluded.volume_ml, unit=excluded.unit",
+                (pid, bid, "BEER", str(meta["product_name"]), None, None,
+                 float(meta.get("volume_ml", 330)), "ml"))
+            variant_name = str(meta.get("variant", "Original"))
+            vid = f"VAR-{pid}"
+            c.execute(
+                "INSERT INTO pi_variants (variant_id, product_id, name, slug, attributes) "
+                "VALUES (?, ?, ?, ?, ?) ON CONFLICT(variant_id) DO UPDATE SET "
+                "product_id=excluded.product_id, name=excluded.name, "
+                "slug=excluded.slug, attributes=excluded.attributes",
+                (vid, pid, variant_name, variant_name.lower().replace(" ", "-"), None))
+            c.execute(
+                "INSERT INTO pi_skus (sku_id, product_id, barcode, pack_quantity, "
+                "unit_volume_ml, normalized_unit) VALUES (?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(sku_id) DO UPDATE SET product_id=excluded.product_id, "
+                "barcode=excluded.barcode, pack_quantity=excluded.pack_quantity, "
+                "unit_volume_ml=excluded.unit_volume_ml, "
+                "normalized_unit=excluded.normalized_unit",
+                (f"SKU-{pid}", pid, None, float(meta.get("pack_quantity", 1)),
+                 float(meta.get("volume_ml", 330)), "100ml"))
+            c.execute(
+                "INSERT INTO pi_source_listings "
+                "(listing_id, sku_id, channel_id, seller_id, region_id, source_url, "
+                "external_id) VALUES (?, ?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(listing_id) DO UPDATE SET sku_id=excluded.sku_id, "
+                "channel_id=excluded.channel_id, seller_id=excluded.seller_id, "
+                "region_id=excluded.region_id, source_url=excluded.source_url, "
+                "external_id=excluded.external_id",
+                (f"LST-TIKI-{pid}", f"SKU-{pid}", "TIKI", "UNKNOWN", "ONLINE", None, None))
+    _CATALOG_READY.add(cache_key)  # cache: skip các lần gọi sau (catalog immutable)
 
 
 def store_price_point(pp: PricePoint, today: str | None = None, path: str | None = None) -> None:
