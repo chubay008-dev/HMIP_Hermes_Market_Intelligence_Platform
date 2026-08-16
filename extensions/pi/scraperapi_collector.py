@@ -25,11 +25,29 @@ from urllib.parse import quote as _urlquote
 import requests
 
 from .collectors import PricePoint, _parse_pack_volume, _REQ_GAP_S, store_price_point
-from .price_extract import extract_product_price
 
 log = logging.getLogger("hmip.scraperapi")
 
 SCRAPERAPI_ENDPOINT = "http://api.scraperapi.com"
+
+# Stopwords — từ phổ biến không đặc trưng brand, bỏ qua khi match tên sản phẩm.
+_STOPWORDS = {
+    "bia", "beer", "lon", "chai", "lon", "ml", "l", "thùng", "thung", "x",
+    "lager", "special", "export", "gold", "black", "bạc", "bac", "premium",
+    "super", "dry", "ichiban", "extra", "stout", "draft", "draught", "crystal",
+    "tail", "330", "330ml", "450", "450ml", "440", "440ml", "500ml", "330ml/lon",
+    "white", "blanche", "witbier", "blonde", "hefe", "weiss", "weissbier",
+}
+
+
+def _brand_keywords(product_name: str) -> list[str]:
+    """Trích keyword ĐẶC TRƯNG từ tên sản phẩm (bỏ stopword).
+
+    VD "Bia Sài Gòn Special 330ml" → ["sài", "gòn"]; "Heineken Lager 330ml" → ["heineken"].
+    Dùng để match item trong Tiki API result — tránh match nhầm sang bia khác.
+    """
+    kws = [w.lower().strip(".,()/-") for w in product_name.lower().split()]
+    return [w for w in kws if w and w not in _STOPWORDS]
 
 
 class ScraperAPICollector:
@@ -68,23 +86,60 @@ class ScraperAPICollector:
             log.warning("ScraperAPI error: %s", exc)
             return None
 
+    def _api_search(self, query: str, limit: int = 10) -> list[dict[str, Any]] | None:
+        """Gọi Tiki public API qua ScraperAPI (render=false, 1 credit/call).
+
+        Tiki SPA chặn /api/v2/products trực tiếp (403), nhưng ScraperAPI proxy
+        bypass được. Trả JSON danh sách sản phẩm với giá thật chính xác.
+        """
+        if not self.api_key:
+            log.warning("Thiếu SCRAPERAPI_KEY")
+            return None
+        api_url = f"https://tiki.vn/api/v2/products?q={_urlquote(query)}&limit={limit}"
+        params: dict[str, Any] = {
+            "api_key": self.api_key,
+            "url": api_url,
+            "render": "false",
+            "country_code": self.country_code,
+        }
+        if self.premium:
+            params["premium"] = "true"
+        try:
+            r = requests.get(SCRAPERAPI_ENDPOINT, params=params, timeout=60)
+            if r.status_code != 200:
+                if r.status_code == 402 or "credits" in r.text.lower():
+                    log.error("ScraperAPI hết credit (402).")
+                else:
+                    log.warning("ScraperAPI API HTTP %s: %s", r.status_code, r.text[:200])
+                return None
+            data = r.json()
+            return data.get("data", []) or []
+        except Exception as exc:
+            log.warning("ScraperAPI API error: %s", exc)
+            return None
+
     def collect(self, product_id: str, product_name: str, ref_vol: int = 330) -> PricePoint | None:
-        search_url = f"https://tiki.vn/search?q={_urlquote(product_name)}"
-        html = self.scrape_html(search_url)
-        if not html:
+        items = self._api_search(product_name, limit=10)
+        if not items:
             return None
-        price = extract_product_price(html, brand=product_name)
-        if not price:
-            log.warning("ScraperAPI: không tìm thấy giá hợp lệ cho %s", product_name)
-            return None
+        kws = _brand_keywords(product_name)
         pack, v = _parse_pack_volume(product_name)
-        return PricePoint(
-            product_id=product_id, sku_id=f"SKU-{product_id}",
-            channel_id=self.channel_id, region_id="ONLINE",
-            regular_price=float(price), promotion_price=None,
-            pack_quantity=pack, unit_volume_ml=v, source=self.source,
-            raw={"url": search_url},
-        )
+        for it in items:
+            name = str(it.get("name", "")).lower()
+            price = it.get("price")
+            if price is None or price <= 0:
+                continue
+            if kws and not any(k in name for k in kws):
+                continue
+            return PricePoint(
+                product_id=product_id, sku_id=f"SKU-{product_id}",
+                channel_id=self.channel_id, region_id="ONLINE",
+                regular_price=float(price), promotion_price=None,
+                pack_quantity=pack, unit_volume_ml=v, source=self.source,
+                raw={"url": f"tiki://product/{it.get('id')}", "name": it.get("name", "")},
+            )
+        log.warning("ScraperAPI: không match sản phẩm %s trong %d kết quả", product_name, len(items))
+        return None
 
 
 def collect_realtime_scraperapi(channel: str = "TIKI", limit: int | None = None,
