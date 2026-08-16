@@ -1,0 +1,119 @@
+"""notifiers/discord.py — bọc gửi cảnh báo Discord (channel hoặc DM).
+
+Thiết kế:
+- Đọc bot token + target từ env:
+  - DISCORD_BOT_TOKEN (bắt buộc)
+  - DISCORD_HOME_CHANNEL (channel ID) HOẶC DISCORD_DM_USER_ID (user ID → DM)
+- Nếu chưa cấu hình, chuyển sang "console notifier" (ghi log).
+- DM: bot tự tạo DM channel (POST /users/@me/channels) rồi post message.
+  Bot phải share server với user để DM hoạt động.
+- allowed_mentions parse:[] để tránh ping @everyone/roles.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+
+import httpx
+
+log = logging.getLogger("hmip.notify.discord")
+
+_DISCORD_API = "https://discord.com/api/v10"
+_DISCORD_MSG = _DISCORD_API + "/channels/{channel_id}/messages"
+_DISCORD_DM = _DISCORD_API + "/users/@me/channels"
+
+BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
+HOME_CHANNEL = os.getenv("DISCORD_HOME_CHANNEL", "")
+DM_USER_ID = os.getenv("DISCORD_DM_USER_ID", "")
+
+# Cache DM channel id (Discord trả cùng id cho 1 cặp bot-user).
+_dm_channel_cache: str | None = None
+
+
+def is_configured() -> bool:
+    return bool(BOT_TOKEN and (HOME_CHANNEL or DM_USER_ID))
+
+
+def _format(decision: str, product_name: str, price, delta_percent, base_price) -> str:
+    arrow = "▲" if (delta_percent or 0) > 0 else "▼"
+    dp = f"{delta_percent:+.2f}%" if delta_percent is not None else "—"
+    p = f"{float(price):,.0f}" if price is not None else "—"
+    b = f"{float(base_price):,.0f}" if base_price is not None else "—"
+    emoji = {
+        "ALERT": "🟠",
+        "ESCALATE": "🔴",
+        "HUMAN_REVIEW": "🟡",
+    }.get(decision, "⚪")
+    return (
+        f"{emoji} **HMIP — Cảnh báo giá**\n"
+        f"**Sản phẩm:** {product_name}\n"
+        f"**Giá hiện tại:** {p} VND\n"
+        f"**Giá tham chiếu:** {b} VND\n"
+        f"**Biến động:** {arrow} {dp}\n"
+        f"**Quyết định:** {decision}"
+    )
+
+
+def _resolve_channel() -> str | None:
+    """Trả channel_id để post. Ưu tiên HOME_CHANNEL; nếu không, tạo DM."""
+    global _dm_channel_cache
+    if HOME_CHANNEL:
+        return HOME_CHANNEL
+    if _dm_channel_cache:
+        return _dm_channel_cache
+    if not DM_USER_ID:
+        return None
+    try:
+        resp = httpx.post(
+            _DISCORD_DM,
+            headers={"Authorization": f"Bot {BOT_TOKEN}", "Content-Type": "application/json"},
+            json={"recipient_id": DM_USER_ID},
+            timeout=15.0,
+        )
+        if resp.status_code in (200, 201):
+            _dm_channel_cache = resp.json().get("id")
+            return _dm_channel_cache
+        log.warning("Discord DM create fail HTTP %s: %s", resp.status_code, resp.text[:200])
+    except Exception as exc:
+        log.warning("Discord DM create error: %s", exc)
+    return None
+
+
+def notify(
+    decision: str,
+    product_name: str,
+    price=None,
+    delta_percent=None,
+    base_price=None,
+) -> bool:
+    """Gửi cảnh báo Discord. Trả True nếu gửi thành công hoặc console-fallback."""
+    message = _format(decision, product_name, price, delta_percent, base_price)
+
+    if not is_configured():
+        log.info("[notify:discord:console-fallback] %s", message.replace("*", ""))
+        return True
+
+    channel_id = _resolve_channel()
+    if not channel_id:
+        log.warning("Discord: không lấy được channel_id (DM create fail?)")
+        return False
+    try:
+        resp = httpx.post(
+            _DISCORD_MSG.format(channel_id=channel_id),
+            headers={"Authorization": f"Bot {BOT_TOKEN}", "Content-Type": "application/json"},
+            json={"content": message, "allowed_mentions": {"parse": []}},
+            timeout=15.0,
+        )
+        if resp.status_code not in (200, 201):
+            log.warning("Discord send fail HTTP %s: %s", resp.status_code, resp.text[:200])
+            return False
+        return True
+    except httpx.HTTPError as exc:
+        log.error("Discord notify failed: %s", exc)
+        return False
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    notify("ESCALATE", "Saigon Special 330ml", 20083.0, 11.57, 18000.0)

@@ -23,7 +23,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from extensions import db
 from extensions.collect_adapters import _DEMO_CATALOG
-from extensions.notifiers.telegram import is_configured, notify
+from extensions.notifiers import is_configured, notify_all as notify
 from extensions.run_workflow import run_prc_001
 
 log = logging.getLogger("hmip.scheduler")
@@ -61,7 +61,7 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     interval = int(os.getenv("HMIP_SCAN_INTERVAL_MIN", "30"))
-    mode = "Telegram" if is_configured() else "console-fallback (chưa cấu hình bot)"
+    mode = "Telegram+Discord" if is_configured() else "console-fallback (chưa cấu hình bot)"
     log.info("HMIP scheduler khởi động — chu kỳ %s phút, notify=%s", interval, mode)
     log.info("Quét ngay lần đầu…")
     scan_once()

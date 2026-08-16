@@ -49,3 +49,7 @@ services:
         sync: false                     # Discord channel ID nhận alert (để trống nếu dùng DM)
       - key: DISCORD_DM_USER_ID
         value: "1519733836819202078"   # Discord user ID nhận alert qua DM (bot tự tạo DM channel)
+      - key: HMIP_TELEGRAM_BOT_TOKEN
+        sync: false                     # 🔒 SECRET — bot token cho workflow PRC-001 alert (/api/run, scheduler scan_once)
+      - key: HMIP_TELEGRAM_CHAT_ID
+        value: "8891619372"             # chat_id nhận workflow alert Telegram

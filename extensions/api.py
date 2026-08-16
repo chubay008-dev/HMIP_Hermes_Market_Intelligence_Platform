@@ -30,7 +30,9 @@ from pydantic import BaseModel, Field
 
 from extensions import db
 from extensions.collect_adapters import COLLECT_MODE, _DEMO_CATALOG
+from extensions.notifiers import is_configured as any_notifier_configured
 from extensions.notifiers.telegram import is_configured as telegram_configured
+from extensions.notifiers.discord import is_configured as discord_configured
 from extensions.run_workflow import resolve_base_price, run_prc_001
 from extensions.scheduler import scan_once
 from extensions.auth import protect_app
@@ -175,6 +177,7 @@ def health() -> dict[str, Any]:
         "status": "ok",
         "collect_mode": COLLECT_MODE,
         "telegram": telegram_configured(),
+        "discord": discord_configured(),
         "auto_scan": _auto_scheduler.get_job(_auto_job_id) is not None,
     }
 
@@ -356,6 +359,7 @@ def autoscan_status() -> dict[str, Any]:
         "running": _auto_scheduler.get_job(_auto_job_id) is not None,
         "interval_minutes": int(os.getenv("HMIP_SCAN_INTERVAL_MIN", "30")),
         "telegram_configured": telegram_configured(),
+        "discord_configured": discord_configured(),
     }
 
 
