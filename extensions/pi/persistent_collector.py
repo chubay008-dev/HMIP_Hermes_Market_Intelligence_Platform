@@ -237,7 +237,12 @@ def _collect_via_chain(limit: int | None, path: str | None,
         return {"source_used": "none", "collected": 0, "failed": 0, "total": 0,
                 "error": "no collector configured"}
 
-    items = list(DEFAULT_PRODUCTS.items())[:limit]
+    _all = list(DEFAULT_PRODUCTS.items())
+    _prio = os.getenv("HMIP_PI_PRODUCTS", "").strip()
+    if _prio:
+        _pids = {p.strip() for p in _prio.split(",") if p.strip()}
+        _all = [(pid, m) for pid, m in _all if pid in _pids]
+    items = _all[:limit] if limit else _all
     total = len(items)
 
     for tier_name, collector in tiers:
