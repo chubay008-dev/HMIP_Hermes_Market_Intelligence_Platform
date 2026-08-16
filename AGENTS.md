@@ -22,7 +22,7 @@ HMIP là platform giám sát giá bia Việt Nam + workflow engine (AI OS). Hai 
 pip install -e ".[dev]"
 pip install fastapi "uvicorn[standard]" apscheduler httpx requests
 
-# Chạy test (37 file; hiện 257 pass / 11 fail — fail do mismatch data, xem phần Technical Debt)
+# Chạy test (37 file; hiện 268 pass / 0 fail)
 python -m pytest                        # toàn bộ + coverage gate 80%
 python -m pytest extensions/tests       # test lớp web (58 pass / 1 skip)
 python -m pytest extensions/tests/test_pi.py --no-cov  # test PI nhanh
@@ -92,7 +92,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 ## Kiểm thử
 
 - `tests/conftest.py` thêm repo root vào `sys.path` (không cần editable install để import).
-- Test fail hiện tại (11): do `knowledge/master/*.json` đổi tên "Saigon Beer"→"Bia Sài Gòn" nhưng test vẫn assert tên cũ. **Đây là nợ kỹ thuật, không phải regression của app.** Khi sửa, cập nhật assertion trong `tests/unit/test_ontology.py`, `domains/beer/pricing/tests/test_enrich_price.py`, `tests/workflow/test_prc_001_*.py`.
+- ~~Test fail hiện tại (11): do `knowledge/master/*.json` đổi tên "Saigon Beer"→"Bia Sài Gòn" nhưng test vẫn assert tên cũ.~~ **ĐÃ SỬA (2026-08-16):** đồng bộ mock collect adapter (`collect_price.py`) + assertion trong `tests/unit/test_ontology.py`, `domains/beer/pricing/tests/test_enrich_price.py`, `domains/beer/pricing/tests/test_skills.py`, và golden dataset (`tests/prompt/golden/extract_price_golden.json`) sang "Bia Sài Gòn" khớp master data. Full suite 268 pass / 0 fail.
 - Test PI (`extensions/tests/test_pi.py`) cần có thể seed DB — chạy trong tmp.
 
 ## Cấu hình & env

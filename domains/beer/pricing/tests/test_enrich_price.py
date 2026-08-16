@@ -83,7 +83,7 @@ def test_enrich_handler_reads_validated_price_key() -> None:
     handler = make_enrich_price_handler()
 
     result = handler(
-        {"validated_price": {"product_id": "P123", "brand": "Saigon Beer", "sku": None}},
+        {"validated_price": {"product_id": "P123", "brand": "Bia Sài Gòn", "sku": None}},
         CONTEXT,
     )
 
@@ -93,4 +93,4 @@ def test_enrich_handler_reads_validated_price_key() -> None:
 def test_load_default_ontology_dataset_loads_real_master_data() -> None:
     dataset = load_default_ontology_dataset()
 
-    assert dataset.get_brand_for_product("P123").name == "Saigon Beer"
+    assert dataset.get_brand_for_product("P123").name == "Bia Sài Gòn"
