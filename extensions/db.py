@@ -14,29 +14,25 @@ from __future__ import annotations
 
 import json
 import os
-import sqlite3
-from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
+from extensions.db_backend import connect as _backend_connect, is_postgres, session as _backend_session
+
 DEFAULT_DB_PATH = os.getenv("HMIP_DB_PATH", "hmip.db")
 
 
-def _connect(path: str = DEFAULT_DB_PATH) -> sqlite3.Connection:
-    conn = sqlite3.connect(path)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+def _connect(path: str = DEFAULT_DB_PATH):
+    return _backend_connect(path, "DATABASE_URL")
 
 
 def init_db(path: str | None = None) -> None:
     if path is None:
         path = DEFAULT_DB_PATH
     conn = _connect(path)
-    try:
-        conn.executescript(
-            """
+    pg = is_postgres("DATABASE_URL")
+    schema = """
             CREATE TABLE IF NOT EXISTS products (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -59,25 +55,22 @@ def init_db(path: str | None = None) -> None:
             );
             CREATE INDEX IF NOT EXISTS idx_pp_product ON price_points(product_id);
             """
-        )
-        # migration: add province column if older DB lacks it
+    if pg:
+        schema = schema.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "BIGSERIAL PRIMARY KEY")
+    conn.executescript(schema)
+    # migration: add province column if older DB lacks it
+    cols = conn.table_columns("price_points")
+    if "province" not in cols:
         try:
-            conn.execute("ALTER TABLE price_points ADD COLUMN province TEXT")
-        except sqlite3.OperationalError:
+            conn.add_column("price_points", "province TEXT")
+        except Exception:
             pass  # already exists
-        conn.commit()
-    finally:
-        conn.close()
+    conn.commit()
+    conn.close()
 
 
-@contextmanager
 def _session(path: str = DEFAULT_DB_PATH):
-    conn = _connect(path)
-    try:
-        yield conn
-        conn.commit()
-    finally:
-        conn.close()
+    return _backend_session(path, "DATABASE_URL")
 
 
 def upsert_product(
@@ -128,6 +121,16 @@ def record_price_point(
             if row:
                 province = row["province"]
     with _session(path) as c:
+        if is_postgres("DATABASE_URL"):
+            row = c.execute(
+                """INSERT INTO price_points
+                   (product_id, price, currency, captured_at, decision,
+                    delta_percent, source_url, province)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                   RETURNING id""",
+                (product_id, price, currency, now, decision, delta_percent, source_url, province),
+            ).fetchone()
+            return int(row["id"]) if row else 0
         cur = c.execute(
             """INSERT INTO price_points
                (product_id, price, currency, captured_at, decision,

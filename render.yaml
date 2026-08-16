@@ -53,3 +53,7 @@ services:
         sync: false                     # 🔒 SECRET — bot token cho workflow PRC-001 alert (/api/run, scheduler scan_once)
       - key: HMIP_TELEGRAM_CHAT_ID
         value: "8891619372"             # chat_id nhận workflow alert Telegram
+      - key: DATABASE_URL
+        sync: false                     # 🔒 SECRET — PostgreSQL (Supabase). Format: postgresql://user:pass@host:5432/db. Nếu set → DB chính dùng Postgres thay SQLite (bền vững qua deploy).
+      - key: HMIP_PI_DATABASE_URL
+        sync: false                     # 🔒 SECRET — PostgreSQL cho PI DB (có thể cùng Supabase project). Nếu set → PI DB dùng Postgres.

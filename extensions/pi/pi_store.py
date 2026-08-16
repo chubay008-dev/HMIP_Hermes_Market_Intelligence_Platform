@@ -28,14 +28,16 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
+from extensions.db_backend import connect as _backend_connect, is_postgres as _is_pg, session as _backend_session
+
 DEFAULT_PI_DB_PATH = os.getenv("HMIP_PI_DB_PATH", "hmip_pi.db")
 
 
-def _connect(path: str = DEFAULT_PI_DB_PATH) -> sqlite3.Connection:
-    conn = sqlite3.connect(path)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.execute("PRAGMA journal_mode = WAL")
+def _connect(path: str = DEFAULT_PI_DB_PATH) -> Any:
+    pg = _is_pg("HMIP_PI_DATABASE_URL")
+    conn = _backend_connect(path, "HMIP_PI_DATABASE_URL")
+    if not pg:
+        conn.execute("PRAGMA journal_mode = WAL")
     return conn
 
 
@@ -218,9 +220,12 @@ def init_pi_db(path: str | None = None) -> None:
         )
         # Migration: thêm cột metadata cho pi_skus (DB cũ chưa có) để lưu
         # marker "real_price_seeded" (one-time seed giá thật).
-        cols = {r["name"] for r in conn.execute("PRAGMA table_info(pi_skus)").fetchall()}
+        cols = conn.table_columns("pi_skus")
         if "metadata" not in cols:
-            conn.execute("ALTER TABLE pi_skus ADD COLUMN metadata TEXT")
+            try:
+                conn.add_column("pi_skus", "metadata TEXT")
+            except Exception:
+                pass
         conn.commit()
     finally:
         conn.close()
@@ -260,7 +265,6 @@ def _session(path: str | None = None):
         conn.commit()
     finally:
         conn.close()
-
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
