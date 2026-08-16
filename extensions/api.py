@@ -555,15 +555,29 @@ def pi_reset() -> dict[str, Any]:
 
 @app.post("/api/prices/collect")
 def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any]:
-    """Quét giá THẬT (Firecrawl ưu tiên, fallback Tiki API free).
+    """Quét giá THẬT bất đồng bộ (background thread, tránh Render request timeout).
 
-    Dùng collect_realtime_smart: Firecrawl trước, nếu hết credit (402) tự
-    chuyển Tiki API công khai (không tốn tiền). Trả summary + source_used.
+    Dùng collect_realtime_smart: Firecrawl trước (circuit breaker skip 402),
+    fallback ScraperAPI Tiki API. Trả ngay status=started; client poll
+    /api/price-intelligence/overview để xem dữ liệu mới.
     """
-    from extensions.pi import collectors as _col
+    import threading
     import os as _os
     _path = _os.getenv("HMIP_PI_DB_PATH") or None
-    return _col.collect_realtime_smart(limit=limit, path=_path)
+    from extensions.pi import collectors as _col
+    from extensions.pi import events as _ev
+
+    def _bg():
+        try:
+            r = _col.collect_realtime_smart(limit=limit, path=_path)
+            log.info("PI collect (trigger): %s", r)
+            _ev.detect_events(path=_path)
+        except Exception as exc:  # noqa: BLE001
+            log.exception("PI collect trigger lỗi: %s", exc)
+
+    threading.Thread(target=_bg, daemon=True).start()
+    return {"status": "started", "limit": limit,
+            "msg": "Đang quét nền. Poll /api/price-intelligence/overview sau 2-3 phút."}
 
 
 # ------------------------------------------------------------- static
