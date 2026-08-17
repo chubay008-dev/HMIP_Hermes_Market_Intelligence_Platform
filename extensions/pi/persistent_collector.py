@@ -192,6 +192,8 @@ def store_price_point_if_changed(
                 "change_pct": round(change, 2), "severity": sev.value,
                 "timestamp": _now_iso(),
                 "source": pp.source,
+                "pack_size": pp.pack_quantity or 24,
+                "unit_ml": pp.unit_volume_ml or 330,
             }
             result["notified"] = notifier.notify_alert(alert)
         except Exception as exc:

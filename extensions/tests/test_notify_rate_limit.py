@@ -144,3 +144,29 @@ def test_notify_alert_cooldown_persists_across_cache_clear(tmp_path, monkeypatch
     assert first == {"discord": True, "telegram": True}
     assert second == {"discord": False, "telegram": False}
     notifier._set_state_db_path(None)
+
+
+def test_pi_message_includes_unit_and_box_bottle(monkeypatch):
+    """Message Hệ 1 (PI) phải ghi rõ đơn vị lon + giá thùng + giá chai."""
+    sent: list[str] = []
+    notifier.reset_notify_state()
+    monkeypatch.setattr(notifier, "_maybe_load_env", lambda: None)
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    alert = _alert(change_pct=10.0)
+    alert["old_price"] = 18000.0
+    alert["new_price"] = 19800.0
+    alert["pack_size"] = 24
+    alert["unit_ml"] = 330
+    notifier.notify_alert(alert)
+
+    msg = sent[0]
+    # Đơn vị lon rõ ràng.
+    assert "₫/lon" in msg
+    # Giá thùng = 19800 * 24 = 475200.
+    assert "475,200" in msg
+    assert "₫/thùng" in msg
+    # Đơn vị chai (cùng dung tích ≈ lon).
+    assert "330ml" in msg
+    assert "₫/chai" in msg

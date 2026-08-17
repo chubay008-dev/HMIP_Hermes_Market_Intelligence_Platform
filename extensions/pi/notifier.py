@@ -226,19 +226,29 @@ def _telegram_configured() -> bool:
     return bool(os.getenv("TELEGRAM_HMIP_MARKET_BOT") and os.getenv("TELEGRAM_CHAT_ID"))
 
 
-def _format(alert: dict) -> str:
+def _format(alert: dict, pack_size: int = 24, unit_ml: int = 330) -> str:
     etype = alert.get("event_type", "PRICE")
     pname = alert.get("product_name") or alert.get("sku_id") or "?"
     chan = alert.get("channel_id", "?")
     reg = alert.get("region_id", "?")
     pct = alert.get("change_pct", alert.get("price_change_pct", "?"))
-    old = alert.get("old_price", "?")
-    new = alert.get("new_price", "?")
+    # Quy đổi giá/lon sang thùng (×pack_size) và chai (≈lon cùng dung tích).
+    def _fmt(v):
+        return f"{float(v):,.0f}" if isinstance(v, (int, float)) else "—"
+
+    old = alert.get("old_price")
+    new = alert.get("new_price")
+    old_s, new_s = _fmt(old), _fmt(new)
+    new_box = _fmt(float(new) * pack_size) if isinstance(new, (int, float)) else "—"
+    old_box = _fmt(float(old) * pack_size) if isinstance(old, (int, float)) else "—"
+    unit_label = f"{unit_ml}ml" if unit_ml else ""
     return (
         f"🔔 **HMIP Price Alert** [{etype}]\n"
         f"• Sản phẩm: {pname}\n"
         f"• Kênh: {chan} | Vùng: {reg}\n"
-        f"• Giá: {old}₫ → {new}₫ ({pct}%)\n"
+        f"• Giá (lon): {old_s}₫ → {new_s}₫/lon ({pct}%)\n"
+        f"• Giá thùng ({pack_size} lon): {old_box}₫ → {new_box}₫/thùng\n"
+        f"• Giá chai ({unit_label}): ≈{new_s}₫/chai\n"
         f"• Thời gian: {alert.get('timestamp', '?')}"
     )
 
@@ -318,7 +328,7 @@ def notify_alert(alert: dict) -> dict[str, bool]:
         log.info("Notify skip (cooldown): %s", _notify_key(alert))
         return {"discord": False, "telegram": False}
 
-    msg = _format(alert)
+    msg = _format(alert, alert.get("pack_size", 24), alert.get("unit_ml", 330))
     result = {"discord": send_discord(msg), "telegram": send_telegram(msg)}
     # Chỉ ghi nhận cooldown khi ít nhất 1 kênh gửi thành công — nếu gửi
     # fail (mạng/token), alert sau vẫn được thử lại.

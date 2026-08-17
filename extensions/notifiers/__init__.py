@@ -21,6 +21,8 @@ def notify_all(
     price=None,
     delta_percent=None,
     base_price=None,
+    pack_size: int = 24,
+    unit_ml: int = 330,
 ) -> dict[str, bool]:
     """Gửi alert tới Telegram + Discord. Trả {telegram, discord} thành công.
 
@@ -28,6 +30,9 @@ def notify_all(
     cooldown per sản phẩm (6h) + no-repeat (cùng decision+giá → skip).
     Chỉ gửi khi allow() trả True; nếu skip trả {telegram: False, discord: False}
     mà không đẩy message đi.
+
+    pack_size: số lon/thùng (mặc định 24 — thùng bia VN). Quy đổi giá thùng.
+    unit_ml: dung tích 1 lon/chai (mặc định 330ml). Hiển thị đơn vị chai.
     """
     if not rate_limit.allow(product_name, decision, price, delta_percent):
         log.info(
@@ -37,8 +42,8 @@ def notify_all(
         return {"telegram": False, "discord": False}
 
     result = {
-        "telegram": _telegram.notify(decision, product_name, price, delta_percent, base_price),
-        "discord": _discord.notify(decision, product_name, price, delta_percent, base_price),
+        "telegram": _telegram.notify(decision, product_name, price, delta_percent, base_price, pack_size, unit_ml),
+        "discord": _discord.notify(decision, product_name, price, delta_percent, base_price, pack_size, unit_ml),
     }
     # Chỉ ghi nhận state khi ≥1 kênh gửi thành công (fail → alert sau thử lại).
     if result["telegram"] or result["discord"]:
