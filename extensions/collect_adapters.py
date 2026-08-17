@@ -261,6 +261,12 @@ def build_collect_adapter() -> Any:
                 # chia pack_quantity (24 cho thùng, 1 cho lon lẻ) — tránh variance
                 # khổng lồ khi lấy giá thùng ~400k vs base lon ~38k (→ ESCALATE sai).
                 pack = pp.pack_quantity if pp.pack_quantity and pp.pack_quantity > 0 else 1
+                # Heuristic bảo vệ: collector HTML (Jina/ZenRows) parse pack từ tên
+                # config (lon=1) vì không có item name, nhưng extract_product_price có
+                # thể lấy giá THÙNG (~400k+). Nếu eff > 100000 mà pack==1 → gần như
+                # chắc chắn là thùng → chia 24 (thùng bia VN thường 24 lon).
+                if pack == 1 and eff > 100000:
+                    pack = 24
                 unit_price = eff / pack
                 return {
                     "brand": brand_name,

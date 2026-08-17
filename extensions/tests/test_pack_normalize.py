@@ -126,3 +126,43 @@ def test_tiki_real_adapter_returns_unit_price_per_lon(monkeypatch):
         assert got == "24,950", f"phải là giá/lon (598800/24=24950), got {got}"
     finally:
         importlib.reload(ca)
+
+
+def test_tiki_real_adapter_heuristic_thung_when_pack1(monkeypatch):
+    """Heuristic bảo vệ: Jina/ZenRows trả pack=1 (config) nhưng eff>100000 (thùng)
+    → adapter tự chia 24 (thùng bia VN thường 24 lon).
+    """
+    monkeypatch.setenv("HMIP_COLLECT_MODE", "http")
+    monkeypatch.delenv("HMIP_PRICE_API_BASE", raising=False)
+    import extensions.collect_adapters as ca
+
+    importlib.reload(ca)
+    try:
+        from extensions.pi import collectors as col
+        from extensions.pi import jina_collector as jc
+
+        # Jina trả PricePoint pack=1 (config) nhưng giá 736000 (thùng thật).
+        fake_pp = col.PricePoint(
+            product_id="PSG_BC", sku_id="SKU-PSG_BC", channel_id="TIKI",
+            region_id="ONLINE", regular_price=736000.0, promotion_price=None,
+            pack_quantity=1, unit_volume_ml=330, source="tiki-jina", raw={},
+        )
+        monkeypatch.setattr(jc.JinaCollector, "collect", lambda self, *a, **k: fake_pp)
+        # Stub các tier khác để chỉ Jina trả.
+        from extensions.pi import firecrawl_collector as fc
+        from extensions.pi import scraperapi_collector as sa
+        from extensions.pi import zenrows_collector as zr
+
+        monkeypatch.setattr(fc.FirecrawlCollector, "collect", lambda self, *a, **k: None)
+        monkeypatch.setattr(sa.ScraperAPICollector, "collect", lambda self, *a, **k: None)
+        monkeypatch.setattr(zr.ZenRowsCollector, "collect", lambda self, *a, **k: None)
+        # Tiki tier 1 cũng None để xuống Jina.
+        monkeypatch.setattr(col.TikiCollector, "collect", lambda self, *a, **k: None)
+
+        adapter = ca.build_collect_adapter()
+        out = adapter.fetch({"product_id": "PSG_BC", "product_name": "Bia Sài Gòn Bạc 330ml"})
+        # 736000 / 24 = 30666 (heuristic thùng), không phải 736000.
+        got = out["price_text"]
+        assert got == "30,667", f"heuristic phải chia 736000/24=30666.67≈30667, got {got}"
+    finally:
+        importlib.reload(ca)
