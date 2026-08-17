@@ -114,8 +114,21 @@ def test_migrate_brand_ids_backfill_empty(db):
         effective_price=20000, source="test", path=db,
     )
     # Confirm "Unknown" xuất hiện trước migrate.
+    # Analytics join qua product.brand_id (fix PR#12) nên "Unknown" không còn
+    # hiện trong price_index ngay cả khi observation có brand_id rỗng — đó chính
+    # là hành vi mong muốn. Kiểm tra cruft thật mà migrate sẽ dọn: observation có
+    # brand_id rỗng + brand "Unknown" còn trong pi_brands.
+    obs_pre = pi_store.fetch_all(
+        "SELECT brand_id FROM pi_observations WHERE observation_id = ?",
+        ["OBS-TEST-EMPTY-BRAND"], path=db)
+    assert obs_pre and not obs_pre[0]["brand_id"], "observation phải có brand_id rỗng"
+    cruft_pre = pi_store.fetch_all(
+        "SELECT brand_id FROM pi_brands WHERE brand_id = '' OR name = 'Unknown'",
+        [], path=db)
+    assert cruft_pre, "brand rỗng/Unknown phải tồn tại trước migrate"
     pre = analytics.price_index_by_brand(path=db)
-    assert any(b["brand"] == "Unknown" for b in pre["brands"])
+    assert not any(b["brand"] == "Unknown" for b in pre["brands"]), \
+        "join qua product.brand_id phải chặn 'Unknown' kể cả khi observation rỗng"
     # Migrate.
     updated = pi_store.migrate_brand_ids(path=db)
     assert updated >= 1
