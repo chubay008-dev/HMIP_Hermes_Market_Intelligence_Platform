@@ -49,16 +49,38 @@ def _stop_scheduler_after_test():
 
 
 @pytest.fixture(autouse=True)
-def _reset_notify_rate_limit():
-    """Reset state anti-spam notify (cả 2 hệ) giữa các test."""
-    yield
+def _reset_notify_rate_limit(tmp_path, monkeypatch):
+    """Reset state anti-spam notify (cả 2 hệ) giữa các test.
+
+    Dùng tmp DB path riêng cho state notify (không đụng DB test thật của
+    test_pi). Reset trước (xoá cache + xoá bảng tmp) và sau mỗi test.
+    """
+    state_db = str(tmp_path / "hmip_notify_state_test.db")
     try:
         from extensions.notifiers import rate_limit as _rl2
+        _rl2._set_state_db_path(state_db)
         _rl2.reset()
     except Exception:
         pass
     try:
         from extensions.pi import notifier as _pi_notifier
+        if hasattr(_pi_notifier, "_set_state_db_path"):
+            _pi_notifier._set_state_db_path(state_db)
+        if hasattr(_pi_notifier, "reset_notify_state"):
+            _pi_notifier.reset_notify_state()
+    except Exception:
+        pass
+    yield
+    try:
+        from extensions.notifiers import rate_limit as _rl2
+        _rl2._set_state_db_path(None)
+        _rl2.reset()
+    except Exception:
+        pass
+    try:
+        from extensions.pi import notifier as _pi_notifier
+        if hasattr(_pi_notifier, "_set_state_db_path"):
+            _pi_notifier._set_state_db_path(None)
         if hasattr(_pi_notifier, "reset_notify_state"):
             _pi_notifier.reset_notify_state()
     except Exception:

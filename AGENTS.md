@@ -52,8 +52,9 @@ python -m extensions.scheduler
   - `api.py` — FastAPI (tất cả endpoint `/api/*`), lifespan seed PI
   - `db.py` — SQLite lịch sử giá (path: `HMIP_DB_PATH`)
   - `pi/` — Price Intelligence (DB riêng `HMIP_PI_DB_PATH`, schema đầy đủ)
-    - `collectors.py` — `collect_realtime_smart` (delegate sang `collect_smart` 4-tier chain)
-    - `persistent_collector.py` — `has_real_prices` (marker), `store_price_point_if_changed` (incremental), `collect_smart` (4-tier chain)
+    - `collectors.py` — `collect_realtime_smart` (delegate sang `collect_smart` 4-tier chain); `TikiCollector` (API JSON), `ShopeeCollector`/`LazadaCollector` delegate sang ScraperAPI/ZenRows/Jina (collect_html, render JS) — không còn stub NotImplementedError
+    - `channels.py` — **channel registry** (TIKI/SHOPEE/LAZADA): search_url + api_url + strategy; `configured_channels()` đọc `HMIP_CHANNELS`
+    - `persistent_collector.py` — `has_real_prices` (marker), `store_price_point_if_changed` (incremental), `collect_smart` (4-tier chain, multi-channel)
     - `price_extract.py` — `extract_product_price(brand=)` dùng chung: filter hotline garbage + brand matching
     - `firecrawl_collector.py` (tier 1), `scraperapi_collector.py` (tier 2), `zenrows_collector.py` (tier 3), `jina_collector.py` (tier 4)
     - `service.py` — orchestration; `mark_ready` đã sửa `global _seed_state`
@@ -68,6 +69,14 @@ python -m extensions.scheduler
 
 Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Crawl4AI tier 5 nếu `CRAWL4AI_ENABLED`).
 
+### Multi-channel (Tiki + Shopee + Lazada)
+
+- **Channel registry:** `extensions/pi/channels.py` định nghĩa TIKI/SHOPEE/LAZADA — mỗi kênh có `search_url(query)` (URL trang search) + `api_url(query)` (API JSON nếu có). Tiki = strategy "api" (gọi `/api/v2/products` parse JSON chính xác); Shopee/Lazada = strategy "html" (scrape trang search + `extract_product_price` pack-aware, vì không có public API dễ gọi).
+- **Bật kênh qua env:** `HMIP_CHANNELS=tiki,shopee,lazada` (mặc định chỉ `tiki`). Mỗi kênh lưu observation riêng (`channel_id` khác) → so sánh giá cross-channel trong UI/analytics.
+- **Tier collectors đa kênh:** `FirecrawlCollector/ZenRowsCollector/JinaCollector.collect(channel=...)` nhận ChannelConfig, dùng `channel.search_url(query)` thay vì hardcode Tiki. `ScraperAPICollector.collect(channel=...)` dispatch: Tiki → API JSON (`_api_search`), Shopee/Lazada → HTML search (`collect_html`).
+- **`_collect_via_chain` quét multi-channel:** vòng ngoài = kênh, vòng trong = sản phẩm. Tier thành công nếu TỔNG collected/skipped qua các kênh > 0 (không yêu cầu tất cả kênh đều có giá — Shopee/Lazada có thể fail do bot protection mạnh).
+- **Giới hạn thực tế:** Shopee có bot protection mạnh (chống scrape) → ScraperAPI/ZenRows (render JS + proxy residential) có khả năng cao nhất cào được; Jina (không render JS) thường trả None cho SPA Shopee. Lazada (Akamai) khó hơn. Nếu một kênh fail, kênh khác vẫn ghi observation → không mất dữ liệu.
+
 ### Mismatch đơn vị thùng/lon (đã fix PR #6) — LƯU Ý QUAN TRỌNG
 
 **Vấn đề:** `base_price` (`ref_price` trong `DEFAULT_PRODUCTS`) là giá **1 LON** (~18k-40k). Collector cào Tiki thật, item match đầu tiên cho "Peroni 330ml" thường là **THÙNG 24 lon** (~240k-635k) chứ không lon lẻ → so giá thùng vs base lon → variance 479-1818% → ESCALATE sai liên tục (nguồn spam).
@@ -75,18 +84,18 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - `collectors._match_best`: score `(brand_match, -pack)` → **ưu tiên lon lẻ** (pack=1); thùng (pack 6/12/24) chỉ lấy khi không có lon lẻ.
 - `TikiCollector.collect` + `ScraperAPICollector.collect`: parse `pack_quantity` từ **tên ITEM thật** (`best.name`), fallback tên config.
 - `_TikiRealAdapter.fetch` (run_prc_001 path): trả `unit_price = eff / pack_quantity` (giá/lon) → `price_text` hiển thị + compare với base lon cùng đơn vị.
-**Giới hạn:** ZenRows/Jina dùng `extract_product_price` trên HTML (không có item name) → từng parse pack từ config (lon=1). Đã fix 2 lớp (PR #7 + #8):
+**Giới hạn:** ZenRows/Jina dùng `extract_product_price` trên HTML (không có item name) → từng parse pack từ config (lon=1). Đã fix 3 lớp (PR #7 + #8 + #9):
 - **PR #7:** adapter heuristic — nếu pack==1 (config) nhưng eff>100000 (ngưỡng thùng) → chia 24 (thùng bia VN thường 24 lon). 736000/24=30667/lon.
 - **PR #8:** `extract_product_price._pick_price` ưu tiên nhóm giá LON (≤50000đ) khi trang search có cả lon lẻ + thùng; nếu chỉ thùng → fallback median thùng (adapter PR #7 chia 24).
-- **Còn sót (giới hạn dữ liệu):** một số SP (Bia Sư Tử Trắng, Huda) trên Tiki chỉ có item THÙNG (lon lẻ hết hàng/không match brand) → extract lấy thùng → heuristic /24. Thùng/24 thường đắt hơn lon lẻ thật → variance +74-104% còn lại. Fix triệt để cần parse pack từ context HTML ("24 lon" gần giá) hoặc nguồn giá lon lẻ khác (API Tiki chính thức).
+- **PR #9 (fix dứt điểm):** `extract_product_price` nay **pack-aware** — parse `pack_quantity` từ context HTML SAU giá ("thùng 24 lon", "24 chai", "x24", "lon 24"...) và chuẩn hoá giá THÙNG về giá/LON ngay tại extract. Sửa triệt để mismatch cho SP chỉ có item THÙNG trên Tiki (Bia Sư Tử Trắng, Huda — lon lẻ hết hàng): extract trả giá/lon chính xác (vd 736000/24=30667) thay vì giá thùng → không còn lệch so base lon. Window context hẹp (32 ký tự SAU giá, KHÔNG dùng window trước) để tránh bắt pack token của sản phẩm khác (bleed). Fallback median thùng chỉ khi KHÔNG parse được pack → adapter heuristic /24 (lưới an toàn cuối). Test: `test_extract_price_pack_aware_normalizes_box_to_lon`, `test_extract_price_prefers_lon_when_both_present`, `test_extract_product_price_falls_back_to_thung_when_no_lon`.
 
 ### Tier chain & circuit breaker
 
 - **Circuit breaker Firecrawl:** khi API trả 402 (hết credit), `FirecrawlCollector._credit_exhausted=True` → các SP còn lại trong run skip Firecrawl ngay (0s thay vì 60s timeout mỗi SP), xuống ScraperAPI/ZenRows/Jina. Flag reset khi nhận 200 lại (credit refresh) hoặc process restart.
 - **Firecrawl credit schedule:** key `fc-abc42...` refresh credit định kỳ (kỳ tới ~14/09). Trong khi chờ, auto-scan incremental (`HMIP_PI_COLLECT_MIN=360` = 6h) dùng ScraperAPI/ZenRows/Jina. Chỉ ghi observation + notify khi giá **thay đổi** (noise threshold 1%); giá không đổi → skip (không re-seed toàn bộ).
-- **Hai hệ thống notify (tách biệt, cả hai đều có anti-spam):**
-  - **Hệ 1 (PI incremental):** `extensions/pi/notifier.py::notify_alert` — cho alert giá thay đổi từ `store_price_point_if_changed`. Anti-spam 2 lớp: min-change (`HMIP_NOTIFY_MIN_PCT`, mặc định 5) + cooldown per `(sku,channel,region)` (`HMIP_NOTIFY_COOLDOWN_MIN`, mặc định 360'=6h; `0`=tắt). In-memory, reset khi restart; chỉ ghi nhận khi ≥1 kênh gửi thành công (fail → alert sau thử lại).
-  - **Hệ 2 (PRC-001 scheduler):** `extensions/notifiers/notify_all` (telegram.py + discord.py) — cho alert từ `scheduler.scan_once` → `run_prc_001`. Anti-spam 3 lớp tại `extensions/notifiers/rate_limit.py::allow` (funnel chung): min-change (`HMIP_SCAN_NOTIFY_MIN_PCT`, mặc định 10 → chỉ ESCALATE đi qua) + cooldown per sản phẩm (`HMIP_SCAN_NOTIFY_COOLDOWN_MIN`, mặc định 360'=6h; `0`=tắt; giá đổi ≥5% thì vẫn báo) + no-repeat (cùng decision+giá → skip). Severity trong collector (hệ 1) tính theo magnitude thực (CRITICAL≥10/HIGH≥5/MEDIUM≥3/LOW), không cứng CRITICAL.
+- **Hai hệ thống notify (chạy song song, chia sẻ cross-scope cooldown để chống double-notify):**
+  - **Hệ 1 (PI incremental):** `extensions/pi/notifier.py::notify_alert` — cho alert giá thay đổi từ `store_price_point_if_changed`. Anti-spam 4 lớp: (0) **cross-hệ cooldown** (`HMIP_NOTIFY_SKU_COOLDOWN_MIN`, key `prod:<product_name>` scope `pi-sku`) — nếu hệ 2 (scheduler) đã notify SP này gần đây → skip, tránh 2 hệ gửi 2 messages cho cùng SP; (1) min-change (`HMIP_NOTIFY_MIN_PCT`, mặc định 5); (2) **per-sku cooldown** (cùng env, key `sku:sku_id|region_id`) — 1 SP đổi giá trên nhiều kênh (Tiki+Shopee+Lazada) cùng lúc → chỉ kênh đầu notify; (3) cooldown per `(sku,channel,region)` (`HMIP_NOTIFY_COOLDOWN_MIN`, mặc định 360'=6h; `0`=tắt). Ngoại lệ: giá đổi ≥5% so với mốc cross/per-sku → event mới → vẫn cho phép notify. State BỀN VỮNG (PR #9): ngoài cache in-memory, mốc lần gửi cuối ghi bảng `pi_notify_state` (scope "pi"/"pi-sku") qua `pi_store.set_notify_state`; restart → đọc DB → cooldown sống. Chỉ ghi nhận khi ≥1 kênh gửi thành công.
+  - **Hệ 2 (PRC-001 scheduler):** `extensions/notifiers/notify_all` (telegram.py + discord.py) — cho alert từ `scheduler.scan_once` → `run_prc_001`. Anti-spam 4 lớp tại `extensions/notifiers/rate_limit.py::allow` (funnel chung): min-change (`HMIP_SCAN_NOTIFY_MIN_PCT`, mặc định 10 → chỉ ESCALATE đi qua) + **cross-hệ cooldown** (đọc `prod:<name>` scope `pi-sku` — nếu hệ 1 PI collect đã notify SP gần đây → skip; giá đổi ≥5% thì cho phép) + cooldown per sản phẩm (`HMIP_SCAN_NOTIFY_COOLDOWN_MIN`, mặc định 360'=6h; `0`=tắt; giá đổi ≥5% thì vẫn báo) + no-repeat (cùng decision+giá → skip). State bền vững: `mark_sent` ghi `pi_notify_state` (scope "scan" + cross-scope "pi-sku"). Severity trong collector (hệ 1) theo magnitude thực (CRITICAL≥10/HIGH≥5/MEDIUM≥3/LOW), không cứng CRITICAL.
 - **Notify:** `notifier.py` gửi alert Telegram (`TELEGRAM_HMIP_MARKET_BOT` + `TELEGRAM_CHAT_ID`) + Discord (`DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL` hoặc `DISCORD_DM_USER_ID` để DM trực tiếp tới user). Chỉ trigger khi `store_price_point_if_changed` phát hiện giá đổi.
 
 - `collect_smart(limit, path)` trong `persistent_collector.py` thử từng tier cho toàn bộ sản phẩm.
@@ -94,7 +103,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - **One-time seed:** `has_real_prices()` kiểm marker `real_price_seeded=true` trong `pi_skus.metadata`. Seed 1 lần → marker đặt → không re-seed synthetic nữa.
 - **Incremental:** `store_price_point_if_changed` chỉ ghi observation khi giá mới (ngoài noise threshold). Giá không đổi → skip (không ghi đè).
 - **Lọc rác:** `extract_product_price(html, brand)` — loại token hotline ("1000 đ/phút"), chỉ nhận 5k-2tr; brand matching ưu tiên giá gần tên thương hiệu (tránh median sản phẩm khác).
-- Env: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render: `sync: false`). Code đọc `SCRAPERAPI_KEY`/`ZENROWS_KEY` (không phải `_API_KEY`).
+- Env: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render: `sync: false`). Code đọc `SCRAPERAPI_KEY`/`ZENROWS_KEY` (không phải `_API_KEY`). Multi-channel: `HMIP_CHANNELS=tiki,shopee,lazada` (mặc định `tiki`).
 
 ## Quy ước mã nguồn
 
@@ -120,6 +129,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - Thu thập giá: `HMIP_COLLECT_MODE` (demo|http). `http` mà không set `HMIP_PRICE_API_BASE` → fallback Tiki API.
 - Chain smart PI: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render `sync: false`).
 - Scheduler: `HMIP_AUTOSCAN=on`, `HMIP_SCAN_INTERVAL_MIN`, `HMIP_PI_COLLECT_MIN`.
+- Auto-scan khi vào trang: `HMIP_AUTO_SCAN_STALE_MIN` (mặc định 5'). Khi user truy cập `/`, `/pi`, `/workspace` → frontend gọi `/api/scan-if-stale` (+ `/api/price-intelligence/collect-if-stale` cho PI) → backend chỉ quét background nếu dữ liệu cũ hơn cửa sổ; fresh → skip (tránh spam Render/credit khi refresh). `0` = luôn quét.
 - Xem `.env.example` cho danh sách đầy đủ (ghi rõ biến nào đã/ chưa nối code).
 
 ### Render API — CẨN TRỌNG
@@ -156,7 +166,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 ## Kiểm thử — lưu ý isolation (PR #5)
 
 - **Scheduler thread leak (đã fix):** test dùng scheduler (`test_autoscan_lifecycle`, `test_api_endpoints`) start `BackgroundScheduler`. `scan_once` quét nhiều SP (68 trong `_DEMO_CATALOG`); nếu teardown `shutdown(wait=False)` không chờ job xong → thread sót chèn SP lạ vào `temp_db` của test sau (race → `test_db_upsert_is_idempotent` fail: 2 rows / tên SP lạ). Fix: (1) `extensions/tests/conftest.py` autouse `_stop_scheduler_after_test` — shutdown + remove_all_jobs + recreate scheduler (APScheduler không restart sau shutdown); (2) `test_autoscan_lifecycle` monkeypatch `_DEMO_CATALOG` thành 2 SP để scan_once <0.5s. Khi thêm test mới dùng scheduler, dùng catalog nhỏ hoặc dựa vào autouse teardown.
-- **State notify reset (đã fix):** autouse `_reset_notify_rate_limit` reset state anti-spam cả 2 hệ notify (PI `notifier.py` + scheduler `notifiers/rate_limit.py`) giữa test — tránh state leak khi test đụng notify.
+- **State notify reset (đã fix):** autouse `_reset_notify_rate_limit` reset state anti-spam cả 2 hệ notify (PI `notifier.py` + scheduler `notifiers/rate_limit.py`) giữa test — tránh state leak khi test đụng notify. Từ PR #9 state notify bền vững qua DB (`pi_notify_state`), nên fixture dùng tmp DB path riêng (`_set_state_db_path`) + reset trước/sau mỗi test để cô lập hoàn toàn (xoá cả cache in-memory VÀ bảng DB). Test persistence dùng `_set_state_db_path(tmp)` + `_state.clear()` để giả lập restart Render.
 
 ## Khi sửa đổi — nguyên tắc
 - **Đổi contract kernel:** cập nhật `05_Interface_Contract.md` + `12_Data_Contract.md` trước.

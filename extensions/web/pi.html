@@ -732,8 +732,31 @@ function showAI(r){
 // ---- Apply filters ----
 $('#applyBtn').onclick = loadAll;
 
+/* ---- Tự thu thập giá PI khi vào trang (collect-if-stale) ----
+ * Backend chỉ collect nếu dữ liệu PI cũ (mặc định >5'). Tránh spam credit.
+ * Nếu triggered → đổi label seed button + poll loadAll() 5s/lần trong 60s. */
+async function autoPiCollectIfStale(){
+  try{
+    const r = await api('/api/price-intelligence/collect-if-stale', {method:'POST'});
+    if(r && r.triggered){
+      const btn = $('#seedBtn');
+      const orig = btn ? btn.textContent : '';
+      if(btn){ btn.disabled = true; btn.textContent = '⏳ Đang thu thập giá nền...'; }
+      let n = 0;
+      const iv = setInterval(async () => {
+        n++;
+        try{ await loadAll(); }catch(_){}
+        if(n >= 12){
+          clearInterval(iv);
+          if(btn){ btn.disabled = false; btn.textContent = orig || '⟳ Seed dữ liệu'; }
+        }
+      }, 5000);
+    }
+  }catch(e){ /* non-fatal */ }
+}
+
 // ---- init ----
-loadCatalog().then(()=>loadAll()).catch(e=>{
+loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }).catch(e=>{
   $('#kpis').innerHTML='<div class="err">'+t('noData')+'</div>';
   console.error(e);
 });

@@ -35,7 +35,15 @@ def is_configured() -> bool:
     return bool(BOT_TOKEN and (HOME_CHANNEL or DM_USER_ID))
 
 
-def _format(decision: str, product_name: str, price, delta_percent, base_price) -> str:
+def _format(
+    decision: str,
+    product_name: str,
+    price,
+    delta_percent,
+    base_price,
+    pack_size: int = 24,
+    unit_ml: int = 330,
+) -> str:
     arrow = "▲" if (delta_percent or 0) > 0 else "▼"
     dp = f"{delta_percent:+.2f}%" if delta_percent is not None else "—"
     p = f"{float(price):,.0f}" if price is not None else "—"
@@ -45,11 +53,19 @@ def _format(decision: str, product_name: str, price, delta_percent, base_price) 
         "ESCALATE": "🔴",
         "HUMAN_REVIEW": "🟡",
     }.get(decision, "⚪")
+    # Quy đổi giá/lon sang các đơn vị khác (lon là đơn vị gốc đã chuẩn hoá):
+    # - Thùng: × pack_size (bia VN thường 24 lon/thùng).
+    # - Chai: 1 chai cùng dung tích (unit_ml) ≈ 1 lon cùng dung tích → giá/chai = giá/lon.
+    p_box = f"{float(price) * pack_size:,.0f}" if price is not None else "—"
+    b_box = f"{float(base_price) * pack_size:,.0f}" if base_price is not None else "—"
+    unit_label = f"{unit_ml}ml" if unit_ml else ""
     return (
         f"{emoji} **HMIP — Cảnh báo giá**\n"
         f"**Sản phẩm:** {product_name}\n"
-        f"**Giá hiện tại:** {p} VND\n"
-        f"**Giá tham chiếu:** {b} VND\n"
+        f"**Giá hiện tại (lon):** {p} VND/lon\n"
+        f"**Giá tham chiếu (lon):** {b} VND/lon\n"
+        f"**Giá thùng ({pack_size} lon):** {p_box} VND/thùng\n"
+        f"**Giá chai ({unit_label}):** {p} VND/chai\n"
         f"**Biến động:** {arrow} {dp}\n"
         f"**Quyết định:** {decision}"
     )
@@ -86,9 +102,15 @@ def notify(
     price=None,
     delta_percent=None,
     base_price=None,
+    pack_size: int = 24,
+    unit_ml: int = 330,
 ) -> bool:
-    """Gửi cảnh báo Discord. Trả True nếu gửi thành công hoặc console-fallback."""
-    message = _format(decision, product_name, price, delta_percent, base_price)
+    """Gửi cảnh báo Discord. Trả True nếu gửi thành công hoặc console-fallback.
+
+    pack_size: số lon/thùng (mặc định 24 — thùng bia VN). Dùng quy đổi giá thùng.
+    unit_ml: dung tích 1 lon/chai (mặc định 330ml). Dùng hiển thị đơn vị chai.
+    """
+    message = _format(decision, product_name, price, delta_percent, base_price, pack_size, unit_ml)
 
     if not is_configured():
         log.info("[notify:discord:console-fallback] %s", message.replace("*", ""))

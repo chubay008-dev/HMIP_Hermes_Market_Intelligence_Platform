@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -29,14 +29,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from extensions import db
-from extensions.collect_adapters import COLLECT_MODE, _DEMO_CATALOG
-from extensions.notifiers import is_configured as any_notifier_configured
-from extensions.notifiers.telegram import is_configured as telegram_configured
+from extensions.auth import protect_app
+from extensions.collect_adapters import _DEMO_CATALOG, COLLECT_MODE
 from extensions.notifiers.discord import is_configured as discord_configured
+from extensions.notifiers.telegram import is_configured as telegram_configured
+from extensions.pi import service as pi_service
 from extensions.run_workflow import resolve_base_price, run_prc_001
 from extensions.scheduler import scan_once
-from extensions.auth import protect_app
-from extensions.pi import service as pi_service
 
 _STATIC_DIR = Path(__file__).resolve().parent / "web"
 log = logging.getLogger("hmip.api")
@@ -60,8 +59,9 @@ def _pi_collect_job() -> None:
     Dừng tại tier đầu tiên thành công: Firecrawl → ScraperAPI → ZenRows → Jina.
     """
     try:
-        from extensions.pi import collectors as _col
         import os as _os
+
+        from extensions.pi import collectors as _col
         _path = _os.getenv("HMIP_PI_DB_PATH") or None
         r = _col.collect_realtime_smart(limit=None, path=_path)
         log.info("PI collect: %s", r)
@@ -247,7 +247,7 @@ def chart(range: str = "all") -> dict[str, Any]:
     since = None
     if range in ("1h", "24h", "7d"):
         hours = {"1h": 1, "24h": 24, "7d": 168}[range]
-        since = (datetime.now(timezone.utc) - timedelta(hours=hours)).isoformat()
+        since = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
     raw = db.get_history_all(since=since, limit=2000)
     products = {}
     for pid, rows in raw.items():
@@ -561,8 +561,8 @@ def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any
     fallback ScraperAPI Tiki API. Trả ngay status=started; client poll
     /api/price-intelligence/overview để xem dữ liệu mới.
     """
-    import threading
     import os as _os
+    import threading
     _path = _os.getenv("HMIP_PI_DB_PATH") or None
     from extensions.pi import collectors as _col
     from extensions.pi import events as _ev
@@ -578,6 +578,158 @@ def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any
     threading.Thread(target=_bg, daemon=True).start()
     return {"status": "started", "limit": limit,
             "msg": "Đang quét nền. Poll /api/price-intelligence/overview sau 2-3 phút."}
+
+
+# ----------------------- auto-scan khi vào trang (scan-if-stale) -----------
+# Tránh quét lại nếu dữ liệu còn mới (user refresh liên tục). Flag in-memory
+# chống trigger trùng (2 tab cùng vào) — reset khi scan xong.
+
+_AUTO_SCAN_IN_PROGRESS = False
+_AUTO_PI_COLLECT_IN_PROGRESS = False
+
+
+def _stale_minutes() -> float:
+    """Cửa sổ 'fresh' (phút). Dữ liệu mới hơn cửa sổ này → không quét lại.
+    Env `HMIP_AUTO_SCAN_STALE_MIN` (mặc định 5'). 0 = luôn quét."""
+    try:
+        return float(os.getenv("HMIP_AUTO_SCAN_STALE_MIN", "5"))
+    except ValueError:
+        return 5.0
+
+
+def _latest_scan_ts() -> datetime | None:
+    """Timestamp observation mới nhất trong DB chính (trang chủ /)."""
+    try:
+        db.init_db()  # đảm bảo schema tồn tại (DB Render ephemeral có thể rỗng)
+        latest = db.get_latest()
+    except Exception:  # noqa: BLE001
+        return None
+    ts = None
+    for row in latest:
+        cap = row.get("captured_at")
+        if cap:
+            try:
+                t = datetime.fromisoformat(cap)
+                if ts is None or t > ts:
+                    ts = t
+            except (ValueError, TypeError):
+                continue
+    return ts
+
+
+def _latest_pi_obs_ts() -> datetime | None:
+    """Timestamp observation PI mới nhất (trang /pi, /workspace)."""
+    try:
+        from extensions.pi import pi_store
+        _path = os.getenv("HMIP_PI_DB_PATH") or None
+        rows = pi_store.fetch_all(
+            "SELECT MAX(observed_at) AS m FROM pi_observations", [],
+            path=_path,
+        )
+        if rows and rows[0].get("m"):
+            return datetime.fromisoformat(rows[0]["m"])
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+@app.post("/api/scan-if-stale")
+def scan_if_stale() -> dict[str, Any]:
+    """Tự quét (run-all) nền nếu dữ liệu cũ/empty — gọi khi user vào trang /.
+
+    Trả ``triggered=true`` nếu đã kick scan background (user nên poll
+    ``/api/latest`` để xem dữ liệu mới). Trả ``triggered=false`` nếu dữ liệu
+    còn fresh (không quét lại — tránh spam Render/credit khi refresh).
+    """
+    global _AUTO_SCAN_IN_PROGRESS
+    stale_min = _stale_minutes()
+    last = _latest_scan_ts()
+    now = datetime.now(UTC)
+    is_stale = (
+        last is None
+        or (now - (last if last.tzinfo else last.replace(tzinfo=UTC)))
+        > timedelta(minutes=stale_min)
+    )
+    if not is_stale:
+        return {"triggered": False, "reason": "fresh",
+                "last_scan": (last.isoformat() if last else None)}
+    if _AUTO_SCAN_IN_PROGRESS:
+        return {"triggered": False, "reason": "already-scanning",
+                "last_scan": (last.isoformat() if last else None)}
+
+    import threading
+
+    def _bg_run_all() -> None:
+        global _AUTO_SCAN_IN_PROGRESS
+        try:
+            for pid, meta in _DEMO_CATALOG.items():
+                db.add_product(pid, meta.get("product_name", pid),
+                               meta.get("brand", ""), "catalog")
+            products = db.get_products()
+            pids = [p["id"] for p in products] or list(_DEMO_CATALOG.keys())
+            for pid in pids:
+                try:
+                    run_prc_001(pid, "batch")
+                except Exception as exc:  # noqa: BLE001
+                    log.warning("Auto-scan run_prc_001 %s lỗi: %s", pid, exc)
+            log.info("Auto-scan-if-stale xong: %d SP", len(pids))
+        except Exception as exc:  # noqa: BLE001
+            log.exception("Auto-scan-if-stale lỗi: %s", exc)
+        finally:
+            _AUTO_SCAN_IN_PROGRESS = False
+
+    _AUTO_SCAN_IN_PROGRESS = True
+    threading.Thread(target=_bg_run_all, daemon=True).start()
+    return {"triggered": True, "reason": "stale" if last else "empty",
+            "last_scan": (last.isoformat() if last else None),
+            "msg": "Đang quét nền. Dữ liệu sẽ cập nhật sau vài giây."}
+
+
+@app.post("/api/price-intelligence/collect-if-stale")
+def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
+    """Tự thu thập giá PI nền nếu dữ liệu PI cũ/empty — gọi khi vào /pi, /workspace.
+
+    Trả ``triggered=true`` nếu đã kick collect background (poll
+    ``/api/price-intelligence/overview``). Trả ``triggered=false`` nếu fresh.
+    """
+    global _AUTO_PI_COLLECT_IN_PROGRESS
+    stale_min = _stale_minutes()
+    last = _latest_pi_obs_ts()
+    now = datetime.now(UTC)
+    is_stale = (
+        last is None
+        or (now - (last if last.tzinfo else last.replace(tzinfo=UTC)))
+        > timedelta(minutes=stale_min)
+    )
+    if not is_stale:
+        return {"triggered": False, "reason": "fresh",
+                "last_scan": (last.isoformat() if last else None)}
+    if _AUTO_PI_COLLECT_IN_PROGRESS:
+        return {"triggered": False, "reason": "already-collecting",
+                "last_scan": (last.isoformat() if last else None)}
+
+    import os as _os
+    import threading
+    _path = _os.getenv("HMIP_PI_DB_PATH") or None
+    from extensions.pi import collectors as _col
+    from extensions.pi import events as _ev
+
+    def _bg() -> None:
+        global _AUTO_PI_COLLECT_IN_PROGRESS
+        try:
+            r = _col.collect_realtime_smart(limit=limit, path=_path)
+            log.info("PI collect-if-stale xong: %s", r)
+            _ev.detect_events(path=_path)
+        except Exception as exc:  # noqa: BLE001
+            log.exception("PI collect-if-stale lỗi: %s", exc)
+        finally:
+            _AUTO_PI_COLLECT_IN_PROGRESS = False
+
+    _AUTO_PI_COLLECT_IN_PROGRESS = True
+    threading.Thread(target=_bg, daemon=True).start()
+    return {"triggered": True, "reason": "stale" if last else "empty",
+            "last_scan": (last.isoformat() if last else None),
+            "msg": "Đang thu thập giá nền. Poll /api/price-intelligence/overview."}
 
 
 # ------------------------------------------------------------- static

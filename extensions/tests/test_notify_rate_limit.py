@@ -12,6 +12,8 @@ Sau fix, `notify_alert` (điểm funnel duy nhất) áp 2 lớp:
 
 from __future__ import annotations
 
+import os
+
 import pytest
 
 from extensions.pi import notifier
@@ -111,8 +113,10 @@ def test_notify_alert_respects_custom_min_pct_env(monkeypatch):
 
 
 def test_notify_alert_respects_custom_cooldown_env(monkeypatch):
-    """HMIP_NOTIFY_COOLDOWN_MIN=0 → không cooldown, alert lặp vẫn gửi."""
+    """HMIP_NOTIFY_COOLDOWN_MIN=0 + HMIP_NOTIFY_SKU_COOLDOWN_MIN=0 → không cooldown,
+    alert lặp vẫn gửi."""
     monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
     sent = []
     monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
     monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
@@ -123,3 +127,203 @@ def test_notify_alert_respects_custom_cooldown_env(monkeypatch):
     assert r1 == {"discord": True, "telegram": True}
     assert r2 == {"discord": True, "telegram": True}
     assert len(sent) == 4
+
+
+def test_notify_alert_cooldown_persists_across_cache_clear(tmp_path, monkeypatch):
+    """State BỀN VỮNG (PR #9): sau khi notify, xoá cache in-memory (giả lập
+    restart Render) → cooldown vẫn sống (đọc từ DB) → alert cùng key bị skip.
+    """
+    notifier._set_state_db_path(str(tmp_path / "pi_state.db"))
+    notifier.reset_notify_state()
+    monkeypatch.setattr(notifier, "_maybe_load_env", lambda: None)
+    monkeypatch.setattr(notifier, "send_discord", lambda m: True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: True)
+
+    first = notifier.notify_alert(_alert(change_pct=10.0))
+    # Giả lập restart: xoá cache in-memory.
+    notifier._notify_state.clear()
+    # Cùng (sku,channel,region) trong cooldown → skip (đọc từ DB).
+    second = notifier.notify_alert(_alert(change_pct=12.0))
+
+    assert first == {"discord": True, "telegram": True}
+    assert second == {"discord": False, "telegram": False}
+    notifier._set_state_db_path(None)
+
+
+def test_pi_message_includes_unit_and_box_bottle(monkeypatch):
+    """Message Hệ 1 (PI) phải ghi rõ đơn vị lon + giá thùng + giá chai."""
+    sent: list[str] = []
+    notifier.reset_notify_state()
+    monkeypatch.setattr(notifier, "_maybe_load_env", lambda: None)
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    alert = _alert(change_pct=10.0)
+    alert["old_price"] = 18000.0
+    alert["new_price"] = 19800.0
+    alert["pack_size"] = 24
+    alert["unit_ml"] = 330
+    notifier.notify_alert(alert)
+
+    msg = sent[0]
+    # Đơn vị lon rõ ràng.
+    assert "₫/lon" in msg
+    # Giá thùng = 19800 * 24 = 475200.
+    assert "475,200" in msg
+    assert "₫/thùng" in msg
+    # Đơn vị chai (cùng dung tích ≈ lon).
+    assert "330ml" in msg
+    assert "₫/chai" in msg
+
+
+def test_per_sku_cooldown_suppresses_multi_channel_spam(monkeypatch):
+    """Anti-spam multi-channel: 1 SP đổi giá trên Tiki+Shopee+Lazada cùng lúc
+    → chỉ kênh đầu (Tiki) notify; 2 kênh còn lại bị per-sku cooldown skip.
+
+    Giả lập: notify alert Tiki (gửi), rồi alert Shopee + Lazada cùng SKU
+    trong cửa sổ per-sku (30') → cả 2 skip.
+    """
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "30")
+    sent = []
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    r_tiki = notifier.notify_alert(_alert(sku="SKU-X", channel="TIKI", change_pct=10.0))
+    r_shopee = notifier.notify_alert(_alert(sku="SKU-X", channel="SHOPEE", change_pct=10.0))
+    r_lazada = notifier.notify_alert(_alert(sku="SKU-X", channel="LAZADA", change_pct=10.0))
+
+    assert r_tiki == {"discord": True, "telegram": True}
+    assert r_shopee == {"discord": False, "telegram": False}  # per-sku skip
+    assert r_lazada == {"discord": False, "telegram": False}  # per-sku skip
+    # Chỉ 2 message (1 discord + 1 telegram) cho kênh đầu.
+    assert len(sent) == 2
+
+
+def test_per_sku_cooldown_independent_per_sku(monkeypatch):
+    """2 SP khác nhau trên cùng nhiều kênh → mỗi SP notify đúng 1 lần (kênh đầu).
+    SKU-A Tiki gửi, SKU-B Tiki gửi; SKU-A Shopee skip, SKU-B Shopee skip
+    (per-sku: mỗi SP chỉ 1 notify trong cửa sổ)."""
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "30")
+    sent = []
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    r1 = notifier.notify_alert(_alert(sku="SKU-A", channel="TIKI", change_pct=10.0))
+    r2 = notifier.notify_alert(_alert(sku="SKU-B", channel="TIKI", change_pct=10.0))
+    r3 = notifier.notify_alert(_alert(sku="SKU-A", channel="SHOPEE", change_pct=10.0))
+    r4 = notifier.notify_alert(_alert(sku="SKU-B", channel="SHOPEE", change_pct=10.0))
+
+    assert r1 == {"discord": True, "telegram": True}
+    assert r2 == {"discord": True, "telegram": True}
+    assert r3 == {"discord": False, "telegram": False}  # SKU-A per-sku skip
+    assert r4 == {"discord": False, "telegram": False}  # SKU-B per-sku skip
+    assert len(sent) == 4  # 2 gửi × 2 kênh (discord+telegram)
+
+
+def test_per_sku_cooldown_disabled(monkeypatch):
+    """HMIP_NOTIFY_SKU_COOLDOWN_MIN=0 → tắt per-sku, multi-channel gửi hết."""
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
+    sent = []
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    r1 = notifier.notify_alert(_alert(sku="SKU-X", channel="TIKI", change_pct=10.0))
+    r2 = notifier.notify_alert(_alert(sku="SKU-X", channel="SHOPEE", change_pct=10.0))
+
+    assert r1 == {"discord": True, "telegram": True}
+    assert r2 == {"discord": True, "telegram": True}
+    assert len(sent) == 4
+
+
+def test_per_sku_cooldown_persists_across_cache_clear(tmp_path, monkeypatch):
+    """Per-sku state bền vững: notify Tiki → xoá cache (giả restart) →
+    alert Shopee cùng SKU vẫn bị skip (đọc từ DB)."""
+    notifier._set_state_db_path(str(tmp_path / "pi_state.db"))
+    notifier.reset_notify_state()
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "30")
+    monkeypatch.setattr(notifier, "_maybe_load_env", lambda: None)
+    sent = []
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    notifier.notify_alert(_alert(sku="SKU-P", channel="TIKI", change_pct=10.0))
+    # Giả restart: xoá cache in-memory (DB vẫn còn).
+    notifier._sku_notify_state.clear()
+    notifier._notify_state.clear()
+    r_shopee = notifier.notify_alert(_alert(sku="SKU-P", channel="SHOPEE", change_pct=10.0))
+
+    assert r_shopee == {"discord": False, "telegram": False}
+    assert len(sent) == 2  # chỉ Tiki gửi
+
+
+def test_shopee_collector_delegates_to_scraperapi(monkeypatch):
+    """ShopeeCollector.collect() delegate sang ScraperAPI.collect_html (SHOPEE)
+    — không raise NotImplementedError."""
+    from extensions.pi.collectors import ShopeeCollector
+    from extensions.pi.scraperapi_collector import ScraperAPICollector
+
+    sc = ShopeeCollector()
+    # Monkeypatch ScraperAPICollector.collect_html để verify nó được gọi.
+    called: list[str] = []
+    def fake_collect_html(self, pid, name, chan, ref_vol=330):
+        called.append(chan.channel_id)
+        from extensions.pi.collectors import PricePoint
+        return PricePoint(product_id=pid, sku_id=f"SKU-{pid}",
+                          channel_id=chan.channel_id, region_id="ONLINE",
+                          regular_price=19500.0, promotion_price=None,
+                          pack_quantity=1, unit_volume_ml=330,
+                          source="shopee-scraperapi", raw={})
+    monkeypatch.setattr(ScraperAPICollector, "collect_html", fake_collect_html)
+    os.environ["SCRAPERAPI_KEY"] = "fake-key"
+    try:
+        pp = sc.collect("P456", "Heineken 330ml")
+    finally:
+        os.environ.pop("SCRAPERAPI_KEY", None)
+    assert pp is not None
+    assert pp.channel_id == "SHOPEE"
+    assert called == ["SHOPEE"]
+
+
+def test_lazada_collector_delegates_to_scraperapi(monkeypatch):
+    """LazadaCollector.collect() delegate sang ScraperAPI.collect_html (LAZADA)."""
+    from extensions.pi.collectors import LazadaCollector
+    from extensions.pi.scraperapi_collector import ScraperAPICollector
+
+    lc = LazadaCollector()
+    called: list[str] = []
+    def fake_collect_html(self, pid, name, chan, ref_vol=330):
+        called.append(chan.channel_id)
+        from extensions.pi.collectors import PricePoint
+        return PricePoint(product_id=pid, sku_id=f"SKU-{pid}",
+                          channel_id=chan.channel_id, region_id="ONLINE",
+                          regular_price=21000.0, promotion_price=None,
+                          pack_quantity=1, unit_volume_ml=330,
+                          source="lazada-scraperapi", raw={})
+    monkeypatch.setattr(ScraperAPICollector, "collect_html", fake_collect_html)
+    os.environ["SCRAPERAPI_KEY"] = "fake-key"
+    try:
+        pp = lc.collect("P456", "Heineken 330ml")
+    finally:
+        os.environ.pop("SCRAPERAPI_KEY", None)
+    assert pp is not None
+    assert pp.channel_id == "LAZADA"
+    assert called == ["LAZADA"]
+
+
+def test_shopee_collector_no_key_falls_back_to_jina(monkeypatch):
+    """Không có SCRAPERAPI/ZENROWS key → fallback Jina (không raise)."""
+    from extensions.pi.collectors import ShopeeCollector
+    from extensions.pi.jina_collector import JinaCollector
+
+    for k in ("SCRAPERAPI_KEY", "ZENROWS_KEY"):
+        os.environ.pop(k, None)
+    sc = ShopeeCollector()
+    # Monkeypatch JinaCollector.collect để verify fallback tới nó.
+    monkeypatch.setattr(
+        JinaCollector, "collect",
+        lambda self, pid, name, ref_vol=330, channel=None: None,
+    )
+    result = sc.collect("P1", "Heineken 330ml")
+    # Jina trả None (không raise) → result None.
+    assert result is None

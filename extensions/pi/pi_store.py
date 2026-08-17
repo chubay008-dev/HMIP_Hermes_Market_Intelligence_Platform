@@ -216,6 +216,18 @@ def init_pi_db(path: str | None = None) -> None:
             CREATE INDEX IF NOT EXISTS idx_pi_var_product   ON pi_variants(product_id);
             CREATE INDEX IF NOT EXISTS idx_pi_listing_sku   ON pi_source_listings(sku_id);
             CREATE INDEX IF NOT EXISTS idx_pi_listing_chan  ON pi_source_listings(channel_id);
+
+            -- Bảng state notify bền vững (chống spam). Lưu mốc lần gửi
+            -- cuối cho mỗi (scope, key) để cooldown sống qua restart Render.
+            CREATE TABLE IF NOT EXISTS pi_notify_state (
+                state_key     TEXT PRIMARY KEY,
+                scope          TEXT NOT NULL,
+                last_sent_at   TEXT NOT NULL,
+                last_price     REAL,
+                last_decision  TEXT,
+                payload        TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_pi_notify_scope ON pi_notify_state(scope);
             """
         )
         # Migration: thêm cột metadata cho pi_skus (DB cũ chưa có) để lưu
@@ -577,3 +589,82 @@ def clear_observations(path: str | None = None) -> int:
             cur = c.execute(f"DELETE FROM {tbl}").rowcount
             total += cur or 0
     return total
+
+
+# ---------------------------------------------------------------------------
+# Notify state (bền vững qua restart — chống spam cross-process)
+# ---------------------------------------------------------------------------
+
+NOTIFY_SCOPE_PI = "pi"
+NOTIFY_SCOPE_SCAN = "scan"
+
+
+def get_notify_state(state_key: str, path: str | None = None) -> dict[str, Any] | None:
+    """Đọc mốc notify cuối cho state_key. Trả None nếu chưa có.
+
+    state_key là khoá funnel của từng hệ notify (PI: sku|channel|region;
+    scheduler: product_name). Dùng chung bảng cho cả 2 hệ (phân biệt qua scope).
+
+    Idempotent: tạo schema trước để SELECT không lỗi "no such table".
+    """
+    try:
+        init_pi_db(path)
+    except Exception:
+        pass
+    with _session(path) as c:
+        row = c.execute(
+            "SELECT last_sent_at, last_price, last_decision, payload "
+            "FROM pi_notify_state WHERE state_key = ?",
+            [state_key],
+        ).fetchone()
+    if not row:
+        return None
+    payload = row["payload"]
+    return {
+        "last_sent_at": row["last_sent_at"],
+        "last_price": row["last_price"],
+        "last_decision": row["last_decision"],
+        "payload": payload,
+    }
+
+
+def set_notify_state(
+    state_key: str,
+    scope: str,
+    *,
+    last_price: float | None = None,
+    last_decision: str | None = None,
+    payload: str | None = None,
+    path: str | None = None,
+) -> None:
+    """Ghi/upsert mốc notify cuối cho state_key (bền vững qua restart)."""
+    # Đảm bảo schema tồn tại (CREATE TABLE IF NOT EXISTS) — DB PI test/mới
+    # có thể chưa được init_pi_db, gây "no such table". Idempotent + rẻ.
+    try:
+        init_pi_db(path)
+    except Exception:
+        pass
+    ts = _now_iso()
+    with _session(path) as c:
+        c.execute(
+            "INSERT INTO pi_notify_state (state_key, scope, last_sent_at, "
+            "last_price, last_decision, payload) VALUES (?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(state_key) DO UPDATE SET scope=excluded.scope, "
+            "last_sent_at=excluded.last_sent_at, last_price=excluded.last_price, "
+            "last_decision=excluded.last_decision, payload=excluded.payload",
+            [state_key, scope, ts, last_price, last_decision, payload],
+        )
+
+
+def clear_notify_state(path: str | None = None) -> None:
+    """Xoá toàn bộ state notify (test / reset tay).
+
+    Idempotent: tạo schema trước (CREATE TABLE IF NOT EXISTS) để DELETE không
+    lỗi "no such table" khi DB chưa được init.
+    """
+    try:
+        init_pi_db(path)
+    except Exception:
+        pass
+    with _session(path) as c:
+        c.execute("DELETE FROM pi_notify_state")

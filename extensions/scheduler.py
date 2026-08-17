@@ -28,6 +28,30 @@ from extensions.run_workflow import run_prc_001
 
 log = logging.getLogger("hmip.scheduler")
 
+# Bia VN: thùng thường 24 lon. Một số SP (Hà Nội 450ml) thùng 12 lon/24 chai.
+_DEFAULT_PACK = 24
+_DEFAULT_ML = 330
+
+
+def _derive_pack_unit(product_name: str) -> tuple[int, int]:
+    """Suy pack_size + unit_ml từ tên SP (dùng hiển thị đơn vị quy đổi trong notify).
+
+    Trả (pack_size, unit_ml). Mặc định (24, 330) cho bia lon VN.
+    Parse "330ml"/"450ml" từ tên; "thùng 12"/"24 lon" nếu có trong tên.
+    """
+    import re
+
+    name = product_name or ""
+    ml = _DEFAULT_ML
+    m = re.search(r"(\d+)\s*ml", name, re.I)
+    if m:
+        ml = int(m.group(1))
+    pack = _DEFAULT_PACK
+    pm = re.search(r"th[ùu]ng\s*(\d+)", name, re.I) or re.search(r"(\d+)\s*lon", name, re.I)
+    if pm:
+        pack = int(pm.group(1))
+    return pack, ml
+
 
 def scan_once() -> dict[str, int]:
     """Quét 1 lượt; trả số liệu tóm tắt."""
@@ -42,12 +66,16 @@ def scan_once() -> dict[str, int]:
                 counts["alerts"] += 1
                 if decision == "ESCALATE":
                     counts["escalations"] += 1
+                pname = meta["product_name"]
+                pack_size, unit_ml = _derive_pack_unit(pname)
                 notify(
                     decision=decision,
-                    product_name=meta["product_name"],
+                    product_name=pname,
                     price=(steps.get("compare") or {}).get("current_price"),
                     delta_percent=(steps.get("compare") or {}).get("delta_percent"),
                     base_price=result.get("base_price"),
+                    pack_size=pack_size,
+                    unit_ml=unit_ml,
                 )
         except Exception as exc:  # noqa: BLE001
             counts["errors"] += 1

@@ -74,12 +74,12 @@ class JinaCollector:
             log.warning("Jina err: %s", exc)
             return None
 
-    def collect(self, product_id: str, product_name: str, ref_vol: int = 330) -> PricePoint | None:
-        # Jina scrape Tiki SEARCH trực tiếp (không qua Tiki API công khai) ->
-        # tránh bị block IP từ server cloud (Render) như Tiki API hay gặp.
-        import requests as _req
-        q = _req.utils.quote(product_name)
-        search_url = f"https://tiki.vn/search?q={q}"
+    def collect(self, product_id: str, product_name: str, ref_vol: int = 330,
+                channel=None) -> PricePoint | None:
+        # Jina scrape trang search kênh (mặc định TIKI) trực tiếp qua r.jina.ai.
+        from .channels import get_channel
+        chan = channel or get_channel("TIKI")
+        search_url = chan.search_url(product_name)
         price = self.scrape_price(search_url, brand=product_name)
         if not price:
             return None
@@ -87,24 +87,29 @@ class JinaCollector:
         promo = None
         return PricePoint(
             product_id=product_id, sku_id=f"SKU-{product_id}",
-            channel_id=self.channel_id, region_id="ONLINE",
+            channel_id=chan.channel_id, region_id="ONLINE",
             regular_price=float(price), promotion_price=promo,
-            pack_quantity=pack, unit_volume_ml=v, source=self.source, raw={"url": search_url},
+            pack_quantity=pack, unit_volume_ml=v,
+            source=f"{chan.channel_id.lower()}-jina", raw={"url": search_url},
         )
 
 
 def collect_realtime_jina(channel: str = "TIKI", limit: int | None = None,
-                          path: str | None = None) -> dict[str, Any]:
+                          path: str | None = None,
+                          channels: list | None = None) -> dict[str, Any]:
     from extensions.default_products import DEFAULT_PRODUCTS
+    from .channels import get_channel
     col = JinaCollector()
+    chan_list = channels or [get_channel(channel)]
     collected = failed = total = 0
-    for pid, meta in list(DEFAULT_PRODUCTS.items())[:limit]:
-        total += 1
-        pp = col.collect(pid, str(meta["product_name"]))
-        if pp:
-            store_price_point(pp, path=path)
-            collected += 1
-        else:
-            failed += 1
-        time.sleep(_REQ_GAP_S * 2)
+    for chan in chan_list:
+        for pid, meta in list(DEFAULT_PRODUCTS.items())[:limit]:
+            total += 1
+            pp = col.collect(pid, str(meta["product_name"]), channel=chan)
+            if pp:
+                store_price_point(pp, path=path)
+                collected += 1
+            else:
+                failed += 1
+            time.sleep(_REQ_GAP_S * 2)
     return {"channel": "jina", "collected": collected, "failed": failed, "total": total}

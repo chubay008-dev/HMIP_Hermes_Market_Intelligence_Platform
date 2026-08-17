@@ -26,11 +26,15 @@ services:
       - key: HMIP_COLLECT_MODE
         value: "http"          # dùng nguồn giá thật (chain 4-tier: Firecrawl→ScraperAPI→ZenRows→Jina)
       - key: HMIP_API_TOKEN
-        generateValue: true    # Render tự sinh 1 chuỗi ngẫu nhiên (dùng login web)
+        sync: false          # 🔒 SECRET — API auth token (dùng login web). Sinh/chỉnh tại Render Dashboard; không hardcode (bảo mật — tránh lộ token trong git).
       - key: HMIP_PI_DB_PATH
         value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → marker giữ giá thật cố định)
       - key: HMIP_PI_COLLECT_MIN
         value: "360"                    # quét gia tăng mỗi 6h (chỉ ghi khi giá đổi + notify; tiết kiệm credit)
+      - key: HMIP_CHANNELS
+        value: "tiki,shopee,lazada"     # kênh thu thập: tiki (API JSON), shopee/lazada (HTML search). Mỗi kênh = observation riêng → so sánh cross-channel.
+      - key: HMIP_NOTIFY_SKU_COOLDOWN_MIN
+        value: "30"                    # anti-spam multi-channel: 1 SP đổi giá trên nhiều kênh → chỉ kênh đầu notify (30'). 0 = tắt.
       - key: TELEGRAM_HMIP_MARKET_BOT
         sync: false                     # 🔒 SECRET — token bot HMIP Market (Discord/Telegram alert). Điền tại Render Dashboard.
       - key: TELEGRAM_CHAT_ID

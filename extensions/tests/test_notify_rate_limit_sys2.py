@@ -113,3 +113,155 @@ def test_no_mark_sent_when_both_fail(monkeypatch):
     monkeypatch.setattr(notify_pkg._discord, "notify", lambda *a, **k: False)
     notify_pkg.notify_all("ESCALATE", "Bia A", 400000.0, 2000.0, 18000.0)
     assert "Bia A" not in rate_limit._state
+
+
+def test_cooldown_persists_across_cache_clear(tmp_path):
+    """State BỀN VỮNG (PR #9): sau mark_sent, xoá cache in-memory (giả lập
+    restart Render) → cooldown vẫn sống (đọc từ DB) → alert cùng giá bị skip.
+    """
+    rate_limit.reset()
+    rate_limit._set_state_db_path(str(tmp_path / "scan_state.db"))
+    rate_limit.mark_sent("Bia A", "ESCALATE", 400000.0)
+    # Giả lập restart: xoá cache in-memory.
+    rate_limit._state.clear()
+    # Cùng giá, cùng decision ngay sau → skip (cooldown đọc từ DB).
+    assert rate_limit.allow("Bia A", "ESCALATE", 400000.0, 2000.0) is False
+    rate_limit._set_state_db_path(None)
+
+
+def test_cooldown_after_restart_allows_significant_change(tmp_path):
+    """Sau 'restart' (cache clear), giá đổi đáng kể → vẫn cho phép notify."""
+    rate_limit.reset()
+    rate_limit._set_state_db_path(str(tmp_path / "scan_state2.db"))
+    rate_limit.mark_sent("Bia A", "ESCALATE", 400000.0)
+    rate_limit._state.clear()
+    # Giá đổi 50% → đáng báo dù cooldown.
+    assert rate_limit.allow("Bia A", "ESCALATE", 600000.0, 3000.0) is True
+    rate_limit._set_state_db_path(None)
+
+
+def test_sys2_message_includes_unit_box_bottle():
+    """Message Hệ 2 (scheduler) phải ghi rõ đơn vị lon + giá thùng + giá chai."""
+    from extensions.notifiers import telegram, discord
+
+    msg = telegram._format("ESCALATE", "Bia Sài Gòn Special 330ml", 18000.0, 20.0, 15000.0, 24, 330)
+    assert "VND/lon" in msg
+    # Giá thùng = 18000 * 24 = 432000.
+    assert "432,000" in msg
+    assert "VND/thùng" in msg
+    assert "330ml" in msg
+    assert "VND/chai" in msg
+    # Discord cũng cùng format.
+    dmsg = discord._format("ESCALATE", "Bia Sài Gòn Special 330ml", 18000.0, 20.0, 15000.0, 24, 330)
+    assert "VND/lon" in dmsg
+    assert "432,000" in dmsg
+
+
+# ---- Cross-hệ (PI collect ↔ scheduler scan) — chống double-notify ----------
+
+
+def test_cross_scope_skips_when_pi_collect_already_notified(tmp_path, monkeypatch):
+    """Hệ 1 (PI collect, notify_alert) đã notify SP → Hệ 2 (scheduler) skip."""
+    from extensions.pi import notifier
+
+    dbp = str(tmp_path / "cross_state.db")
+    notifier._set_state_db_path(dbp)
+    notifier.reset_notify_state()
+    rate_limit._set_state_db_path(dbp)
+    rate_limit.reset()
+    # Stub send để đếm (không gọi API thật).
+    monkeypatch.setattr(notifier, "send_discord", lambda m: True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: True)
+
+    # Hệ 1 notify alert CRITICAL cho "Bia Heineken".
+    alert = {
+        "event_type": "PRICE_INCREASE", "sku_id": "SKU-P1",
+        "product_name": "Bia Heineken", "channel_id": "TIKI",
+        "region_id": "ONLINE", "old_price": 18000, "new_price": 20160,
+        "change_pct": 12.0, "severity": "CRITICAL",
+        "timestamp": "2026-08-17T10:00:00Z",
+    }
+    r1 = notifier.notify_alert(alert)
+    assert r1["discord"] and r1["telegram"]
+
+    # Hệ 2 (scheduler) cùng SP, ESCALATE → phải bị cross-scope skip.
+    r2 = rate_limit.allow("Bia Heineken", "ESCALATE", price=20160, delta_percent=12.0)
+    assert r2 is False
+    notifier._set_state_db_path(None)
+    rate_limit._set_state_db_path(None)
+
+
+def test_cross_scope_allows_when_window_expired(tmp_path, monkeypatch):
+    """Hết cửa sổ cross-scope (cooldown per-sku) → Hệ 2 cho phép gửi lại."""
+    from extensions.pi import notifier
+
+    dbp = str(tmp_path / "cross_state2.db")
+    notifier._set_state_db_path(dbp)
+    notifier.reset_notify_state()
+    rate_limit._set_state_db_path(dbp)
+    rate_limit.reset()
+    monkeypatch.setattr(notifier, "send_discord", lambda m: True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: True)
+
+    alert = {
+        "event_type": "PRICE_INCREASE", "sku_id": "SKU-P1",
+        "product_name": "Bia Larue", "channel_id": "TIKI",
+        "region_id": "ONLINE", "old_price": 18000, "new_price": 19800,
+        "change_pct": 10.0, "severity": "HIGH",
+        "timestamp": "2026-08-17T10:00:00Z",
+    }
+    notifier.notify_alert(alert)
+    # Giả lập hết cửa sổ: rollback mốc prod: trong DB 1h trước.
+    import datetime as _dt
+    import sqlite3 as _sqlite3
+
+    from extensions.pi import pi_store
+
+    old = (_dt.datetime.now(_dt.UTC) - _dt.timedelta(hours=1)).isoformat()
+    pi_store.set_notify_state(
+        "prod:Bia Larue", "pi-sku", last_decision="PRICE_INCREASE",
+        path=dbp,
+    )
+    # Ghi đè last_sent_at cũ (1h trước) bằng UPDATE trực tiếp.
+    with _sqlite3.connect(dbp) as c:
+        c.execute(
+            "UPDATE pi_notify_state SET last_sent_at=? WHERE state_key=?",
+            [old, "prod:Bia Larue"],
+        )
+    notifier._sku_notify_state.clear()
+
+    # Cửa sổ 30' đã hết (mốc 1h trước) → Hệ 2 cho phép.
+    r2 = rate_limit.allow("Bia Larue", "ESCALATE", price=19800, delta_percent=10.0)
+    assert r2 is True
+    notifier._set_state_db_path(None)
+    rate_limit._set_state_db_path(None)
+
+
+def test_cross_scope_disabled_when_env_zero(tmp_path, monkeypatch):
+    """HMIP_NOTIFY_SKU_COOLDOWN_MIN=0 → tắt cross-scope → Hệ 2 vẫn notify."""
+    from extensions.pi import notifier
+
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    dbp = str(tmp_path / "cross_state3.db")
+    notifier._set_state_db_path(dbp)
+    notifier.reset_notify_state()
+    rate_limit._set_state_db_path(dbp)
+    rate_limit.reset()
+    monkeypatch.setattr(notifier, "send_discord", lambda m: True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: True)
+
+    alert = {
+        "event_type": "PRICE_INCREASE", "sku_id": "SKU-P1",
+        "product_name": "Bia Sư Tử Trắng", "channel_id": "TIKI",
+        "region_id": "ONLINE", "old_price": 18000, "new_price": 19800,
+        "change_pct": 10.0, "severity": "HIGH",
+        "timestamp": "2026-08-17T10:00:00Z",
+    }
+    notifier.notify_alert(alert)
+    # cross-scope tắt → Hệ 2 vẫn cho phép.
+    r2 = rate_limit.allow("Bia Sư Tử Trắng", "ESCALATE", price=19800, delta_percent=10.0)
+    assert r2 is True
+    notifier._set_state_db_path(None)
+    rate_limit._set_state_db_path(None)
+    monkeypatch.delenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", raising=False)
+
