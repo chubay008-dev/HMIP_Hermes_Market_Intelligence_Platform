@@ -40,7 +40,6 @@ def _format(
     arrow = "▲" if (delta_percent or 0) > 0 else "▼"
     dp = f"{delta_percent:+.2f}%" if delta_percent is not None else "—"
     p = f"{float(price):,.0f}" if price is not None else "—"
-    b = f"{float(base_price):,.0f}" if base_price is not None else "—"
     emoji = {
         "ALERT": "🟠",
         "ESCALATE": "🔴",
@@ -50,13 +49,11 @@ def _format(
     # - Thùng: × pack_size (bia VN thường 24 lon/thùng).
     # - Chai: 1 chai cùng dung tích (unit_ml) ≈ 1 lon cùng dung tích → giá/chai = giá/lon.
     p_box = f"{float(price) * pack_size:,.0f}" if price is not None else "—"
-    b_box = f"{float(base_price) * pack_size:,.0f}" if base_price is not None else "—"
     unit_label = f"{unit_ml}ml" if unit_ml else ""
     return (
         f"{emoji} *HMIP — Cảnh báo giá*\n"
         f"*Sản phẩm:* {product_name}\n"
         f"*Giá hiện tại (lon):* {p} VND/lon\n"
-        f"*Giá tham chiếu (lon):* {b} VND/lon\n"
         f"*Giá thùng ({pack_size} lon):* {p_box} VND/thùng\n"
         f"*Giá chai ({unit_label}):* {p} VND/chai\n"
         f"*Biến động:* {arrow} {dp}\n"
