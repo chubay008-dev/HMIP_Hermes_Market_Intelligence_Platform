@@ -57,8 +57,15 @@ REGIONS: dict[str, tuple[str, str, str]] = {
     "HAIPHONG": ("VN", "North", "Hải Phòng"),
 }
 _CHANNEL_FACTOR = {
-    "SHOPEE": 0.93, "LAZADA": 0.94, "TIKI": 0.95,
-    "WINMART": 1.04, "AEON": 1.02,
+    # E-commerce (giá rẻ hơn do cạnh tranh + freeship)
+    "SHOPEE": 0.90, "LAZADA": 0.92, "TIKI": 0.94,
+    "TIKTOK": 0.91, "SHOPEEFOOD": 0.96, "GRABMART": 1.08,
+    # Modern trade / siêu thị (giá chuẩn, có thể cao hơn)
+    "WINMART": 1.05, "AEON": 1.03, "COOPMART": 0.99, "BIGC": 0.98,
+    "LOTTE": 1.01, "MEGAMARKET": 0.97,
+    # Điện máy / tiện lợi (giá cao hơn do tiện lợi)
+    "DIENMAYXANH": 1.06, "TGDD": 1.07,
+    "GS25": 1.09, "CIRCLEK": 1.10, "FAMIMA": 1.08, "CONCUNG": 1.04,
 }
 _REGION_FACTOR = {
     "HCMC": 1.00, "HANOI": 1.01, "DANANG": 0.99,
@@ -87,8 +94,17 @@ def _parse_pack(product_name: str, ref_price: float) -> tuple[float, float]:
 
 
 def _brand_id(product_id: str, brand: str) -> str:
-    safe = "".join(ch if ch.isalnum() else "_" for ch in brand)
-    return f"BR-{safe}"
+    """Brand_id chuẩn: uppercase + ASCII-safe (loại dấu tiếng Việt).
+
+    Quan trọng: brand_id phải KHỚP giữa pi_products, pi_brands và
+    pi_observations. Observation resolve brand_id từ product (migrate +
+    persistent_collector) nên chỉ cần _brand_id ở seed nhất quán.
+    Uppercase để khớp dữ liệu cũ (pre-PR#12 dùng .upper())."""
+    import unicodedata
+    nfkd = unicodedata.normalize("NFKD", brand)
+    ascii_only = "".join(ch for ch in nfkd if not unicodedata.combining(ch))
+    safe = "".join(ch if ch.isalnum() else "_" for ch in ascii_only)
+    return f"BR-{safe.upper()}"
 
 
 def seed_full(history_days: int | None = None, path: str | None = None,

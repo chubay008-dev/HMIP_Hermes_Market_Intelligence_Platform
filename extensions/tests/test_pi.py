@@ -58,7 +58,9 @@ def test_channel_comparison(db):
     ch = analytics.channel_comparison(path=db)
     assert len(ch["channels"]) == 18
     assert ch["lowest_channel"]["channel_id"] == "SHOPEE"
-    assert ch["highest_channel"]["channel_id"] == "WINMART"
+    # PR #12: diversify _CHANNEL_FACTOR — convenience store (Circle K 1.10)
+    # giờ đắt hơn modern trade (WinMart 1.05), phản ánh thực tế thị trường.
+    assert ch["highest_channel"]["channel_id"] == "CIRCLEK"
 
 
 def test_regional_pricing(db):
@@ -84,6 +86,60 @@ def test_promotion_intelligence(db):
     assert promo["total_promotions"] > 0
     assert 5 < promo["avg_discount_pct"] < 20
     assert "Flash Sale" in promo["promotion_by_type"]
+    # PR #12: promotion_by_brand + promotion_timeline (chart phong phú hơn).
+    assert "promotion_by_brand" in promo
+    assert "promotion_timeline" in promo
+    assert len(promo["promotion_by_brand"]) > 0
+    assert len(promo["promotion_timeline"]) > 0
+    # Mỗi brand entry có brand name + avg_discount_pct hợp lệ.
+    b0 = promo["promotion_by_brand"][0]
+    assert b0["brand"]
+    assert 0 <= b0["avg_discount_pct"] <= 100
+    # Mỗi timeline entry có day + count + avg_discount_pct.
+    t0 = promo["promotion_timeline"][0]
+    assert t0["day"]
+    assert t0["count"] > 0
+
+
+def test_migrate_brand_ids_backfill_empty(db):
+    """migrate_brand_ids() backfill observation có brand_id rỗng/không khớp
+    product → tránh 'Unknown' trong Competitor Comparison / Price Index."""
+    # Chèn brand rỗng + 1 observation với brand_id rỗng (giả dữ liệu pre-PR#12).
+    pi_store.upsert_brand("", "Unknown", path=db)  # brand rỗng (giả seed cũ)
+    pi_store.insert_observation(
+        observation_id="OBS-TEST-EMPTY-BRAND", sku_id="SKU-P123",
+        product_id="P123", brand_id="", channel_id="TIKI", seller_id="SELLER-TIKI-HCMC",
+        region_id="HCMC", observed_at="2026-08-17T00:00:00",
+        collected_at="2026-08-17T00:00:00", regular_price=20000,
+        effective_price=20000, source="test", path=db,
+    )
+    # Confirm "Unknown" xuất hiện trước migrate.
+    pre = analytics.price_index_by_brand(path=db)
+    assert any(b["brand"] == "Unknown" for b in pre["brands"])
+    # Migrate.
+    updated = pi_store.migrate_brand_ids(path=db)
+    assert updated >= 1
+    # Sau migrate: không còn "Unknown" trong index.
+    post = analytics.price_index_by_brand(path=db)
+    assert not any(b["brand"] == "Unknown" for b in post["brands"]), \
+        f"Unknown vẫn còn sau migrate: {[b['brand'] for b in post['brands']]}"
+    # Brand rỗng đã bị xoá khỏi pi_brands.
+    leftover = pi_store.fetch_all(
+        "SELECT brand_id FROM pi_brands WHERE brand_id = '' OR name = 'Unknown'",
+        [], path=db)
+    assert not leftover
+    # Idempotent: chạy lại không update thêm.
+    second = pi_store.migrate_brand_ids(path=db)
+    assert second == 0
+
+
+def test_brand_id_uppercase_ascii_safe():
+    """_brand_id() seed phải ra uppercase + ASCII-safe (loại dấu tiếng Việt)
+    để khớp giữa pi_products, pi_brands, pi_observations."""
+    from extensions.pi.seed import _brand_id
+    assert _brand_id("P1", "Bia Sài Gòn") == "BR-BIA_SAI_GON"
+    assert _brand_id("P2", "Heineken") == "BR-HEINEKEN"
+    assert _brand_id("P3", "Bia Sư Tử Trắng") == "BR-BIA_SU_TU_TRANG"
 
 
 def test_price_trend_channel_breakdown(db):

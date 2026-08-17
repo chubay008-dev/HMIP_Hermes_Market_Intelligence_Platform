@@ -574,6 +574,35 @@ def db_path_resolved(path: str | None = None) -> str:
     return path or DEFAULT_PI_DB_PATH
 
 
+def migrate_brand_ids(path: str | None = None) -> int:
+    """Đồng bộ brand_id observation về pi_products.brand_id.
+
+    Vấn đề "Unknown" + duplicate brand trong analytics:
+    - Observation cũ (pre-PR#12) ghi brand_id='' → JOIN pi_brands match
+      ('','Unknown') → Competitor Comparison / Price Index hiện "Unknown".
+    - Synthetic seed + collector thật sinh brand_id khác dạng (VD "BR-Edelweiss"
+      vs "BR-EDELWEISS") cho cùng product → analytics hiện 2 brand trùng tên.
+
+    Fix: gán brand_id observation = brand_id của product tương ứng (lookup qua
+    product_id), rồi xoá brand rỗng/Unknown + brand_id không còn observation
+    nào tham chiếu khỏi pi_brands. Idempotent."""
+    if path is None:
+        path = DEFAULT_PI_DB_PATH
+    init_pi_db(path)
+    with _session(path) as c:
+        cur = c.execute(
+            """UPDATE pi_observations
+               SET brand_id = (SELECT p.brand_id FROM pi_products p
+                               WHERE p.product_id = pi_observations.product_id)
+               WHERE (brand_id IS NULL OR brand_id = ''
+                      OR brand_id NOT IN (SELECT brand_id FROM pi_products))""",
+        )
+        updated = cur.rowcount or 0
+        # Xoá brand rỗng/Unknown khỏi pi_brands.
+        c.execute("DELETE FROM pi_brands WHERE brand_id = '' OR name = 'Unknown'")
+        return updated
+
+
 def clear_observations(path: str | None = None) -> int:
     """Xóa sạch observation + event + alert (demo/thật) — giữ catalog/schema.
 

@@ -89,10 +89,40 @@ class LazadaChannel(ChannelConfig):
         return None
 
 
+class TikTokShopChannel(ChannelConfig):
+    """TikTok Shop — strategy html (bot protection mạnh, không có public API)."""
+    channel_id = "TIKTOK"
+    channel_name = "TikTok Shop"
+    strategy = "html"
+
+    def search_url(self, query: str) -> str:
+        return f"https://shop.tiktok.com/view/search?q={_urlquote(query)}"
+
+    def api_url(self, query: str, limit: int = 10) -> str | None:
+        return None
+
+
+class GrabMartChannel(ChannelConfig):
+    """GrabMart — strategy html (grocery/retail delivery, không có public API)."""
+    channel_id = "GRABMART"
+    channel_name = "GrabMart"
+    channel_type = "ecommerce"
+    strategy = "html"
+
+    def search_url(self, query: str) -> str:
+        # GrabMart search theo category/keyword; URL public dạng web.
+        return f"https://food.grab.com/vn/vi/search?keyword={_urlquote(query)}"
+
+    def api_url(self, query: str, limit: int = 10) -> str | None:
+        return None
+
+
 REGISTRY: dict[str, ChannelConfig] = {
     "TIKI": TikiChannel(),
     "SHOPEE": ShopeeChannel(),
     "LAZADA": LazadaChannel(),
+    "TIKTOK": TikTokShopChannel(),
+    "GRABMART": GrabMartChannel(),
 }
 
 
@@ -105,18 +135,21 @@ def get_channel(channel_id: str) -> ChannelConfig:
 
 
 def configured_channels() -> list[ChannelConfig]:
-    """Trả danh sách kênh bật qua env HMIP_CHANNELS (mặc định chỉ TIKI).
+    """Trả danh sách kênh bật qua env HMIP_CHANNELS.
 
+    Mặc định (PR #12): bật 5 kênh TIKI, SHOPEE, LAZADA, TIKTOK, GRABMART.
     VD: HMIP_CHANNELS=tiki,shopee,lazada → 3 kênh.
+    Empty/garbage env → fallback default 5 kênh.
     """
     import os
 
-    raw = os.getenv("HMIP_CHANNELS", "TIKI")
+    default = "TIKI,SHOPEE,LAZADA,TIKTOK,GRABMART"
+    raw = os.getenv("HMIP_CHANNELS") or default
     ids = [c.strip().upper() for c in raw.split(",") if c.strip()]
     channels: list[ChannelConfig] = []
     for cid in ids:
         if cid in REGISTRY and REGISTRY[cid] not in channels:
             channels.append(REGISTRY[cid])
     if not channels:
-        channels = [REGISTRY["TIKI"]]
+        channels = [REGISTRY[c] for c in default.split(",")]
     return channels

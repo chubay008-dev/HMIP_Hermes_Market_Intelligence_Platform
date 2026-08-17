@@ -1,10 +1,10 @@
 """test_channels.py — test channel registry + multi-channel collect dispatch.
 
 Kiểm tra:
-- Channel registry: TIKI/SHOPEE/LAZADA có search_url + api_url đúng.
+- Channel registry: TIKI/SHOPEE/LAZADA/TIKTOK/GRABMART có search_url + api_url đúng.
 - configured_channels() đọc env HMIP_CHANNELS.
 - ScraperAPICollector.collect() dispatch đúng strategy:
-  Tiki → API JSON (collect), Shopee/Lazada → HTML search (collect_html).
+  Tiki → API JSON (collect), Shopee/Lazada/TikTok/GrabMart → HTML search (collect_html).
 """
 
 from __future__ import annotations
@@ -19,6 +19,9 @@ def test_registry_has_tiki_shopee_lazada():
     assert "TIKI" in REGISTRY
     assert "SHOPEE" in REGISTRY
     assert "LAZADA" in REGISTRY
+    # PR #12: mở rộng registry thêm TikTok Shop + GrabMart.
+    assert "TIKTOK" in REGISTRY
+    assert "GRABMART" in REGISTRY
 
 
 def test_tiki_channel_api_strategy():
@@ -52,6 +55,26 @@ def test_lazada_channel_html_strategy():
     assert l.api_url("Heineken") is None
 
 
+def test_tiktok_channel_html_strategy():
+    tk = get_channel("tiktok")
+    assert tk.channel_id == "TIKTOK"
+    assert tk.channel_name == "TikTok Shop"
+    assert tk.strategy == "html"
+    url = tk.search_url("Heineken 330ml")
+    assert "shop.tiktok.com" in url
+    assert tk.api_url("Heineken") is None
+
+
+def test_grabmart_channel_html_strategy():
+    gm = get_channel("grabmart")
+    assert gm.channel_id == "GRABMART"
+    assert gm.channel_name == "GrabMart"
+    assert gm.strategy == "html"
+    url = gm.search_url("Heineken 330ml")
+    assert "grab.com" in url
+    assert gm.api_url("Heineken") is None
+
+
 def test_get_channel_case_insensitive():
     assert get_channel("tiki").channel_id == "TIKI"
     assert get_channel("Shopee").channel_id == "SHOPEE"
@@ -65,10 +88,11 @@ def test_get_channel_unknown_raises():
         pass
 
 
-def test_configured_channels_default_tiki(monkeypatch):
+def test_configured_channels_default_all_five(monkeypatch):
     monkeypatch.delenv("HMIP_CHANNELS", raising=False)
     chans = configured_channels()
-    assert [c.channel_id for c in chans] == ["TIKI"]
+    # PR #12: mặc định bật 5 kênh (TIKI, SHOPEE, LAZADA, TIKTOK, GRABMART).
+    assert [c.channel_id for c in chans] == ["TIKI", "SHOPEE", "LAZADA", "TIKTOK", "GRABMART"]
 
 
 def test_configured_channels_multi(monkeypatch):
@@ -83,10 +107,11 @@ def test_configured_channels_dedup(monkeypatch):
     assert [c.channel_id for c in chans] == ["TIKI", "SHOPEE"]
 
 
-def test_configured_channels_empty_falls_back_tiki(monkeypatch):
+def test_configured_channels_empty_falls_back_default(monkeypatch):
     monkeypatch.setenv("HMIP_CHANNELS", "")
     chans = configured_channels()
-    assert [c.channel_id for c in chans] == ["TIKI"]
+    # Empty/garbage env → fallback default 5 kênh (PR #12).
+    assert [c.channel_id for c in chans] == ["TIKI", "SHOPEE", "LAZADA", "TIKTOK", "GRABMART"]
 
 
 def test_scraperapi_dispatches_html_for_shopee(monkeypatch):

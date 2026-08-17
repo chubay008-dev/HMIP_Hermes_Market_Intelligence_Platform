@@ -107,6 +107,18 @@ def _latest_observation(pp: PricePoint, path: str | None = None) -> dict[str, An
 
 # ---- incremental store + notify --------------------------------------
 
+def _resolve_brand_id(product_id: str, path: str | None = None) -> str:
+    """Lấy brand_id chuẩn từ pi_products (không dùng brand_id trống).
+
+    Observation ghi brand_id rỗng → JOIN pi_brands match ('', 'Unknown') →
+    Competitor Comparison / Price Index hiển thị "Unknown". Resolve từ product
+    để observation kế thừa brand chuẩn."""
+    row = pi_store.fetch_one(
+        "SELECT brand_id FROM pi_products WHERE product_id = ?",
+        [product_id], path=path)
+    return (row["brand_id"] if row and row["brand_id"] else "")
+
+
 def store_price_point_if_changed(
     pp: PricePoint, today: str | None = None, path: str | None = None,
     notify: bool = True, threshold_pct: float = 1.0,
@@ -149,9 +161,12 @@ def store_price_point_if_changed(
     )
     ts = today or time.strftime("%Y-%m-%d")
     obs_id = f"OBS-{pp.source}-{pp.sku_id}-{ts}-{int(time.time()) % 100000}"
+    # Resolve brand_id chuẩn từ product (không hardcode "" → tránh "Unknown"
+    # trong Competitor Comparison / Price Index khi JOIN pi_brands).
+    brand_id = _resolve_brand_id(pp.product_id, path=path)
     pi_store.insert_observation(
         observation_id=obs_id,
-        sku_id=pp.sku_id, product_id=pp.product_id, brand_id="",
+        sku_id=pp.sku_id, product_id=pp.product_id, brand_id=brand_id,
         channel_id=pp.channel_id, seller_id="UNKNOWN", region_id=pp.region_id,
         observed_at=ts, collected_at=ts,
         regular_price=pp.regular_price, effective_price=float(new_eff),
