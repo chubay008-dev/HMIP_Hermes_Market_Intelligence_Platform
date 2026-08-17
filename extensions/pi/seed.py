@@ -311,3 +311,157 @@ def seed_full(history_days: int | None = None, path: str | None = None,
         "history_days": history_days,
         "db_path": pi_store.db_path_resolved(path),
     }
+
+
+def backfill_new_channels(path: str | None = None,
+                          history_days: int | None = None,
+                          seed: int = 20260812) -> dict[str, Any]:
+    """Thêm các kênh mới (chưa có observation) + sinh dữ liệu synthetic.
+
+    Idempotent: chỉ thêm kênh + observation cho kênh nào CHƯA có observation.
+    KHÔNG xoá dữ liệu thật/đã có (giữ Tiki real prices, marker nguyên vẹn).
+
+    Dùng khi mở rộng CHANNELS registry (vd PR #13: 18→24 kênh) trên DB đã
+    seed — tránh phải seed_full lại (mất giá trị thật). Lifespan gọi sau
+    seed check để Render/persistent DB tự pick up kênh mới.
+    """
+    if history_days is None:
+        try:
+            history_days = int(os.getenv("HMIP_SEED_DAYS", "30"))
+        except (TypeError, ValueError):
+            history_days = 30
+    history_days = max(7, min(history_days, 365))
+    rng = random.Random(seed + 1)
+    init = pi_store
+    init.init_pi_db(path)
+    conn = init._connect(path or init.DEFAULT_PI_DB_PATH)  # type: ignore[attr-defined]
+
+    # Kênh đã có trong DB + số observation
+    existing: dict[str, int] = {}
+    for r in conn.execute("SELECT channel_id, COUNT(*) n FROM pi_observations "
+                          "GROUP BY channel_id"):
+        existing[r["channel_id"] if isinstance(r, dict) else r[0]] = (
+            r["n"] if isinstance(r, dict) else r[1])
+    registered: set[str] = set()
+    for r in conn.execute("SELECT channel_id FROM pi_channels"):
+        registered.add(r["channel_id"] if isinstance(r, dict) else r[0])
+
+    new_channels = [cid for cid in CHANNELS if existing.get(cid, 0) == 0]
+    if not new_channels:
+        conn.close()
+        return {"status": "noop", "new_channels": [], "observations": 0,
+                "db_path": pi_store.db_path_resolved(path)}
+
+    # Đảm bảo kênh + seller + region đăng ký (cho kênh mới).
+    for rid, (country, region, province) in REGIONS.items():
+        init.upsert_region(rid, country, region, province, city=province, path=path)
+    for cid in new_channels:
+        name, ctype = CHANNELS[cid]
+        init.upsert_channel(cid, name, ctype, path=path)
+        for rid in REGIONS:
+            sid = f"SELLER-{cid}-{rid}"
+            init.upsert_seller(sid, f"{name} {REGIONS[rid][2]} Store",
+                               seller_type=ctype, verification_status="verified",
+                               path=path)
+
+    # Lấy metadata sản phẩm đã có trong DB (ref_price từ catalog).
+    prods: list[dict[str, Any]] = []
+    for pid, meta in DEFAULT_PRODUCTS.items():
+        brand = str(meta["brand"]); pname = str(meta["product_name"])
+        ref = float(meta["ref_price"]); bid = _brand_id(pid, brand)
+        qty, vol = _parse_pack(pname, ref)
+        prods.append({"product_id": pid, "brand_id": bid,
+                      "sku_id": f"SKU-{pid}", "name": pname, "brand": brand,
+                      "ref_price": ref, "qty": qty, "vol": vol})
+
+    end_date = datetime(2026, 8, 12, tzinfo=timezone.utc)
+    start_date = end_date - timedelta(days=history_days)
+    obs_rows: list[dict[str, Any]] = []
+    promo_rows: list[dict[str, Any]] = []
+    n_obs = 0; n_promo = 0
+
+    for pid_dict in prods:
+        ref = pid_dict["ref_price"]; qty = pid_dict["qty"]; vol = pid_dict["vol"]
+        bid = pid_dict["brand_id"]; sku_id = pid_dict["sku_id"]; pid = pid_dict["product_id"]
+        jump_day = (rng.randint(10, max(11, history_days - 3))
+                    if (rng.random() < 0.30 and history_days > 12) else None)
+        jump_sign = 1 if rng.random() < 0.5 else -1
+        jump_pct = rng.uniform(0.06, 0.15)
+        for cid in new_channels:
+            cf = _CHANNEL_FACTOR.get(cid, 1.0)
+            for rid in REGIONS:
+                rf = _REGION_FACTOR.get(rid, 1.0)
+                base = ref * cf * rf
+                price = base; prev_price = base; day = 0
+                while day < history_days:
+                    cur_date = start_date + timedelta(days=day)
+                    shock = rng.gauss(0, 0.0015) * base
+                    price = base + (price - base) * 0.6 + shock
+                    if jump_day is not None and day == jump_day:
+                        price = price * (1 + jump_sign * jump_pct)
+                    price = max(price, base * 0.6)
+                    is_weekend = cur_date.weekday() >= 5
+                    promo = None
+                    if is_weekend and rng.random() < 0.55:
+                        promo = rng.uniform(0.05, 0.18)
+                    elif rng.random() < 0.10:
+                        promo = rng.uniform(0.03, 0.10)
+                    regular = round(price, -2)
+                    promo_price = round(regular * (1 - promo), -2) if promo else None
+                    eff = promo_price if promo_price else regular
+                    norm = normalization.normalize_price(
+                        regular_price=regular, pack_quantity=qty, unit_volume_ml=vol,
+                        promotion_price=promo_price, effective_price=eff)
+                    obs_rows.append({
+                        "observation_id": f"OBS-{pid}-{cid}-{rid}-{day}",
+                        "sku_id": sku_id, "product_id": pid, "brand_id": bid,
+                        "channel_id": cid, "seller_id": f"SELLER-{cid}-{rid}",
+                        "region_id": rid, "observed_at": cur_date.isoformat(),
+                        "collected_at": (cur_date + timedelta(
+                            minutes=rng.randint(0, 59))).isoformat(),
+                        "regular_price": regular, "effective_price": eff,
+                        "promotion_price": promo_price, "currency": "VND",
+                        "unit_price": norm.price_per_unit,
+                        "normalized_price": norm.price_per_100ml,
+                        "availability": "in_stock", "source": CHANNELS[cid][0],
+                        "source_url": f"https://{cid.lower()}.vn/p/{pid}",
+                        "extraction_method": "seed_simulator", "confidence": 0.92,
+                        "metadata": None,
+                    })
+                    n_obs += 1
+                    if promo_price:
+                        n_promo += 1
+                        ptype = "Flash Sale" if is_weekend else "Campaign"
+                        promo_rows.append({
+                            "promotion_id": f"PRM-{pid}-{cid}-{rid}-{day}",
+                            "sku_id": sku_id, "channel_id": cid,
+                            "seller_id": f"SELLER-{cid}-{rid}", "region_id": rid,
+                            "start_time": cur_date.isoformat(),
+                            "end_time": (cur_date + timedelta(days=2)).isoformat(),
+                            "regular_price": regular, "promotion_price": promo_price,
+                            "discount_percent": round((promo or 0) * 100, 2),
+                            "promotion_type": ptype,
+                            "campaign": f"{ptype} {cur_date.strftime('%Y-%m')}",
+                            "source_url": f"https://{cid.lower()}.vn/p/{pid}",
+                        })
+                    if len(obs_rows) >= 5000:
+                        init.bulk_insert_observations(obs_rows, path=path)
+                        obs_rows.clear()
+                    if len(promo_rows) >= 5000:
+                        init.bulk_insert_promotions(promo_rows, path=path)
+                        promo_rows.clear()
+                    prev_price = price
+                    day += 1
+    conn.close()
+    init.bulk_insert_observations(obs_rows, path=path)
+    init.bulk_insert_promotions(promo_rows, path=path)
+    # Cache analytics nằm ở service layer — xoá để workspace thấy kênh mới.
+    try:
+        from extensions.pi import service as _svc
+        _svc.invalidate_cache()
+    except Exception:
+        pass
+    return {"status": "backfilled", "new_channels": new_channels,
+            "observations": n_obs, "promotions": n_promo,
+            "history_days": history_days,
+            "db_path": pi_store.db_path_resolved(path)}

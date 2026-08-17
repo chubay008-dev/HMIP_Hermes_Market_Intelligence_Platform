@@ -126,6 +126,17 @@ async def lifespan(_app: FastAPI):
                     pi_service.seed_async()
                 else:
                     pi_service.mark_ready(path=_pi_path)
+        # Backfill kênh mới (PR #13: registry 18→24) trên DB đã seed/đã có giá
+        # thật — thêm observation cho kênh chưa có data, KHÔNG xoá data thật.
+        # Idempotent: noop nếu mọi kênh đã có observation.
+        try:
+            from extensions.pi.seed import backfill_new_channels as _bf
+            _bf_r = _bf(path=os.getenv("HMIP_PI_DB_PATH") or None)
+            if _bf_r.get("status") == "backfilled":
+                print(f"[PI] backfilled {_bf_r['new_channels']} "
+                      f"({_bf_r['observations']} obs)")
+        except Exception as _exc:
+            print(f"[PI] backfill skip/error: {_exc}")
     except Exception as exc:  # không block startup nếu seed lỗi
         print(f"[PI] seed skip/error: {exc}")
     # Tự động bật auto-scan nếu env yêu cầu (mặc định TẮT để user chủ động).
