@@ -88,6 +88,91 @@ def _mark_real_seeded(sku_id: str, path: str | None = None) -> None:
     _set_sku_metadata(sku_id, meta, path=path)
 
 
+# ---- cleanup historical box-as-lon contamination -----------------------
+
+_BOX_LON_THRESHOLD = 80_000.0  # trên 80k₫/lon gần như chắc là giá THÙNG
+_BOX_PACK = 24.0               # thùng bia VN tiêu chuẩn
+
+
+def cleanup_box_contamination(path: str | None = None) -> dict[str, Any]:
+    """Dọn dữ liệu box-as-lon nhiễm từ TRƯỚC khi có guard (commit 0c152e1).
+
+    Guard trong store_price_point_if_changed giờ chặn contamination MỚI tại
+    thời điểm lưu, nhưng DB đã có observation cũ với giá THÙNG lưu làm
+    unit_price (pack_quantity=1, eff>80k). Chúng sinh:
+      - price_events giả (box-vs-lon → change ±60%..950%),
+      - alerts CRITICAL giả,
+      - kéo avg "Online" lên ~82k (idx 7292).
+    Idempotent — chạy an toàn mỗi startup.
+
+    Hai bước:
+    1. Chuẩn hoá observation có unit_price > 80k → /24 (về giá/lon thật).
+    2. Xoá price_events + alerts box-contamination (signature: TIKI/ONLINE,
+       old hoặc new > 80k, hoặc |change| > 50% — seeded events tối đa ~15%).
+    """
+    conn = pi_store._connect(path or pi_store.DEFAULT_PI_DB_PATH)  # type: ignore[attr-defined]
+    n_norm = 0
+    try:
+        # 1. Chuẩn hoá observation có cột nào ở mức giá THÙNG (>80k) → /24.
+        # Mỗi cột độc lập: unit_price có thể đã được _infer_pack_from_price
+        # chuẩn hoá lúc collect (vd 635000/24=26458) nhưng regular/effective
+        # vẫn giữ giá thùng → KPI max / Regional avg vẫn bị kéo lên.
+        rows = conn.execute(
+            "SELECT observation_id, regular_price, effective_price, "
+            "unit_price, normalized_price, promotion_price "
+            "FROM pi_observations WHERE regular_price > ? OR effective_price > ? "
+            "OR unit_price > ? OR (promotion_price IS NOT NULL AND promotion_price > ?)",
+            (_BOX_LON_THRESHOLD,) * 4).fetchall()
+        for r in rows:
+            r = dict(r) if not isinstance(r, dict) else r
+            upd: dict[str, float] = {}
+            for col in ("regular_price", "effective_price", "unit_price",
+                        "normalized_price"):
+                v = r.get(col)
+                if v is not None and v > _BOX_LON_THRESHOLD:
+                    upd[col] = v / _BOX_PACK
+            pv = r.get("promotion_price")
+            if pv is not None and pv > _BOX_LON_THRESHOLD:
+                upd["promotion_price"] = pv / _BOX_PACK
+            if not upd:
+                continue
+            cols = ", ".join(f"{k} = ?" for k in upd)
+            conn.execute(
+                f"UPDATE pi_observations SET {cols} WHERE observation_id = ?",
+                (*upd.values(), r["observation_id"]))
+            n_norm += 1
+        conn.commit()
+
+        # 2. Xoá price_events box-contamination + alerts liên quan.
+        false_events = [dict(r) if not isinstance(r, dict) else r for r in conn.execute(
+            "SELECT event_id FROM pi_price_events WHERE channel_id = 'TIKI' "
+            "AND region_id = 'ONLINE' AND (old_price > ? OR new_price > ? "
+            "OR ABS(change_percent) > 50)",
+            (_BOX_LON_THRESHOLD, _BOX_LON_THRESHOLD)).fetchall()]
+        n_evt = len(false_events)
+        if false_events:
+            ids = tuple(e["event_id"] for e in false_events)
+            placeholders = ",".join("?" * len(ids))
+            n_alert = conn.execute(
+                f"DELETE FROM pi_alerts WHERE event_id IN ({placeholders})", ids
+            ).rowcount
+            conn.executemany("DELETE FROM pi_price_events WHERE event_id = ?",
+                             [(e["event_id"],) for e in false_events])
+            conn.commit()
+        else:
+            n_alert = 0
+    finally:
+        conn.close()
+    if n_norm or n_evt:
+        try:
+            from . import service as _svc
+            _svc.invalidate_cache()
+        except Exception:
+            pass
+    return {"normalized_observations": n_norm, "deleted_events": n_evt,
+            "deleted_alerts": n_alert}
+
+
 # ---- latest price lookup ---------------------------------------------
 
 def _latest_observation(pp: PricePoint, path: str | None = None) -> dict[str, Any] | None:

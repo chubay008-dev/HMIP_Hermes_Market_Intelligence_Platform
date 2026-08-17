@@ -137,6 +137,18 @@ async def lifespan(_app: FastAPI):
                       f"({_bf_r['observations']} obs)")
         except Exception as _exc:
             print(f"[PI] backfill skip/error: {_exc}")
+        # Dọn contamination box-as-lon lịch sử (pre-guard): chuẩn hoá obs có
+        # giá thùng lưu làm giá/lon + xoá events/alerts giả. Idempotent.
+        try:
+            from extensions.pi.persistent_collector import cleanup_box_contamination as _cb
+            _cb_r = _cb(path=os.getenv("HMIP_PI_DB_PATH") or None)
+            if _cb_r["normalized_observations"] or _cb_r["deleted_events"]:
+                print(f"[PI] cleaned box-contamination: "
+                      f"{_cb_r['normalized_observations']} obs normalized, "
+                      f"{_cb_r['deleted_events']} events, "
+                      f"{_cb_r['deleted_alerts']} alerts")
+        except Exception as _exc:
+            print(f"[PI] cleanup skip/error: {_exc}")
     except Exception as exc:  # không block startup nếu seed lỗi
         print(f"[PI] seed skip/error: {exc}")
     # Tự động bật auto-scan nếu env yêu cầu (mặc định TẮT để user chủ động).

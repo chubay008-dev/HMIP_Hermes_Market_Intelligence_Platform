@@ -400,20 +400,21 @@ def channel_comparison(filters: dict[str, Any] | None = None,
     for r in rows:
         ch = by_ch.setdefault(r["channel_id"], {
             "channel_id": r["channel_id"], "channel": r["channel_name"],
-            "type": r["channel_type"], "prices": [], "norm": [],
+            "type": r["channel_type"], "prices": [],
         })
         ch["prices"].append(float(r["effective_price"]))
-        if r["normalized_price"] is not None:
-            ch["norm"].append(float(r["normalized_price"]))
     out = []
-    all_norm = [v for ch in by_ch.values() for v in ch["norm"]] or [0.0]
-    ref = _median(all_norm)
+    # Index dựa trên effective_price (per-lon, nhất quán cho mọi obs) thay vì
+    # normalized_price (per-100ml) — normalized_price bị lệch khi trộn real
+    # (pack=1) với synthetic (pack=24): kênh/vùng có cả 2 loại bị index phồng.
+    all_eff = [v for ch in by_ch.values() for v in ch["prices"]] or [0.0]
+    ref = _median(all_eff)
     for ch in by_ch.values():
         avg = statistics.mean(ch["prices"])
         out.append({
             "channel_id": ch["channel_id"], "channel": ch["channel"],
             "type": ch["type"], "avg_price": round(avg, 2),
-            "price_index": price_index_for_value(statistics.mean(ch["norm"]) if ch["norm"] else avg, ref),
+            "price_index": price_index_for_value(avg, ref),
             "n": len(ch["prices"]),
         })
     out.sort(key=lambda x: x["avg_price"])
@@ -449,13 +450,12 @@ def regional_pricing(filters: dict[str, Any] | None = None,
         rg = by_rg.setdefault(r["region_id"], {
             "region_id": r["region_id"], "region": r["region"],
             "province": r["province"], "city": r["city"],
-            "prices": [], "norm": [],
+            "prices": [],
         })
         rg["prices"].append(float(r["effective_price"]))
-        if r["normalized_price"] is not None:
-            rg["norm"].append(float(r["normalized_price"]))
-    all_norm = [v for rg in by_rg.values() for v in rg["norm"]] or [0.0]
-    ref = _median(all_norm)
+    # Index dựa trên effective_price (per-lon, nhất quán) — xem channel_comparison.
+    all_eff = [v for rg in by_rg.values() for v in rg["prices"]] or [0.0]
+    ref = _median(all_eff)
     out = []
     for rg in by_rg.values():
         avg = statistics.mean(rg["prices"])
@@ -463,7 +463,7 @@ def regional_pricing(filters: dict[str, Any] | None = None,
             "region_id": rg["region_id"], "region": rg["region"],
             "province": rg["province"], "city": rg["city"],
             "avg_price": round(avg, 2),
-            "price_index": price_index_for_value(statistics.mean(rg["norm"]) if rg["norm"] else avg, ref),
+            "price_index": price_index_for_value(avg, ref),
             "n": len(rg["prices"]),
         })
     out.sort(key=lambda x: x["avg_price"], reverse=True)
