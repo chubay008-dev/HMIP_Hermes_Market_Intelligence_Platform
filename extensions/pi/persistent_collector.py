@@ -149,6 +149,26 @@ def store_price_point_if_changed(
     # (vd box 1.15M vs lon 15k → "-98.67%" giả tạo). Giờ so trên per-lon.
     new_eff = float(norm.effective_price)
     new_lon = float(norm.price_per_unit)
+    # ---- Sanity guard (chống box-as-lon) ----
+    # Collector đôi khi parse pack_quantity=1 cho item THÙNG (vd Tiki trả item
+    # thùng 24 nhưng tên không nêu "24 lon") → unit_price = giá thùng (vd 736000)
+    # lưu như giá/LON → alert "-98%" giả tạo. Lưới an toàn: nếu giá/LON vượt
+    # ngưỡng lon hợp lý (bia VN tối đa ~80k/lon) → chia 24 (thùng bia VN phổ
+    # biến nhất). Ưu tiên /24 cứng thay vì suy pack từ tỷ số giá (base_price
+    # catalog) vì hộp thực tế thường giảm giá → tỷ số sai → suy pack 12 sai
+    # (PR #11 inference chỉ tin dùng cho extract path có context HTML).
+    _LON_SANITY_MAX = 80000.0  # trên 80k/lon → chắc chắn giá thùng nhầm làm lon
+    _BOX_LON_DEFAULT = 24      # thùng bia VN tiêu chuẩn
+
+    def _guard_lon(lon: float, eff: float) -> float:
+        if lon <= _LON_SANITY_MAX:
+            return lon
+        cand = round(eff / _BOX_LON_DEFAULT, 2)
+        # Nếu /24 vẫn > ngưỡng (vd thùng 6 lon giá cực cao) → vẫn chia 24 làm
+        # xấp xỉ; tốt hơn lưu raw box làm lon.
+        return cand
+
+    new_lon = _guard_lon(new_lon, new_eff)
 
     result: dict[str, Any] = {
         "inserted": False, "old_price": None, "new_price": round(new_lon, 2),
@@ -164,6 +184,11 @@ def store_price_point_if_changed(
             old_pack = float(latest.get("pack_quantity") or pp.pack_quantity or 1) or 1
             old_lon = old_eff / old_pack
         old_lon = float(old_lon)
+        # Sanity guard cho old_lon: observation cũ trong DB có thể lưu giá
+        # THÙNG làm unit_price (pre-fix, pack=1) → old_lon=736000 → so với
+        # new_lon=30667 sinh "-95%" giả. Sửa lại như new_lon.
+        old_eff = float(latest["effective_price"])
+        old_lon = _guard_lon(old_lon, old_eff)
         result["old_price"] = round(old_lon, 2)
         if old_lon > 0:
             change_pct = abs(new_lon - old_lon) / old_lon * 100.0

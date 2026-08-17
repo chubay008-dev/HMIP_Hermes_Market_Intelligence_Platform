@@ -41,6 +41,11 @@ CHANNELS: dict[str, tuple[str, str]] = {
     "BIGC": ("BigC / GO!", "modern_trade"),
     "LOTTE": ("Lotte Mart", "modern_trade"),
     "MEGAMARKET": ("MM Mega Market", "modern_trade"),
+    "BACHHOAXANH": ("Bách Hóa Xanh", "modern_trade"),
+    "COOPSMILE": ("Co.op Online", "ecommerce"),
+    "LOTTEONLINE": ("Lotte Online", "ecommerce"),
+    "SATRAMART": ("Satra", "modern_trade"),
+    "VINSHOP": ("VinShop", "convenience"),
     # Điện máy / tiện lợi
     "DIENMAYXANH": ("Điện Máy Xanh", "modern_trade"),
     "TGDD": ("Thế Giới Di Động", "modern_trade"),
@@ -48,6 +53,7 @@ CHANNELS: dict[str, tuple[str, str]] = {
     "CIRCLEK": ("Circle K", "convenience"),
     "FAMIMA": ("Famima", "convenience"),
     "CONCUNG": ("ConCung", "convenience"),
+    "MINISTOP": ("Ministop", "convenience"),
 }
 REGIONS: dict[str, tuple[str, str, str]] = {
     "HCMC": ("VN", "South", "TP.HCM"),
@@ -62,10 +68,12 @@ _CHANNEL_FACTOR = {
     "TIKTOK": 0.91, "SHOPEEFOOD": 0.96, "GRABMART": 1.08,
     # Modern trade / siêu thị (giá chuẩn, có thể cao hơn)
     "WINMART": 1.05, "AEON": 1.03, "COOPMART": 0.99, "BIGC": 0.98,
-    "LOTTE": 1.01, "MEGAMARKET": 0.97,
+    "LOTTE": 1.01, "MEGAMARKET": 0.97, "BACHHOAXANH": 1.00,
+    "COOPSMILE": 0.98, "LOTTEONLINE": 1.00, "SATRAMART": 0.99,
     # Điện máy / tiện lợi (giá cao hơn do tiện lợi)
-    "DIENMAYXANH": 1.06, "TGDD": 1.07,
+    "DIENMAYXANH": 1.06, "TGDD": 1.07, "VINSHOP": 1.03,
     "GS25": 1.09, "CIRCLEK": 1.10, "FAMIMA": 1.08, "CONCUNG": 1.04,
+    "MINISTOP": 1.09,
 }
 _REGION_FACTOR = {
     "HCMC": 1.00, "HANOI": 1.01, "DANANG": 0.99,

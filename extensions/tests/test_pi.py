@@ -56,7 +56,7 @@ def test_seed_counts(db):
 
 def test_channel_comparison(db):
     ch = analytics.channel_comparison(path=db)
-    assert len(ch["channels"]) == 18
+    assert len(ch["channels"]) == 24
     assert ch["lowest_channel"]["channel_id"] == "SHOPEE"
     # PR #12: diversify _CHANNEL_FACTOR — convenience store (Circle K 1.10)
     # giờ đắt hơn modern trade (WinMart 1.05), phản ánh thực tế thị trường.
@@ -159,7 +159,7 @@ def test_price_trend_channel_breakdown(db):
     """price_trend series 'channel_breakdown' → multi-line per kênh."""
     t = analytics.price_trend({}, series=["market_avg", "channel_breakdown"], path=db)
     cb = t["series"].get("channel_breakdown", {})
-    assert len(cb) == 18, f"expected 18 channels, got {len(cb)}"
+    assert len(cb) == 24, f"expected 24 channels, got {len(cb)}"
     # Mỗi kênh là list [{t,v}] — giá TB theo ngày
     for name, arr in list(cb.items())[:3]:
         assert isinstance(arr, list) and arr
@@ -182,7 +182,7 @@ def test_promotion_intelligence_by_channel(db):
     """promotion_by_channel → so sánh độ sâu KM cross-channel."""
     promo = analytics.promotion_intelligence(path=db)
     bc = promo.get("promotion_by_channel", [])
-    assert len(bc) == 18, f"expected 18 channels, got {len(bc)}"
+    assert len(bc) == 24, f"expected 24 channels, got {len(bc)}"
     assert all("channel" in c and "avg_discount_pct" in c for c in bc)
     assert all(0 <= c["avg_discount_pct"] <= 100 for c in bc)
     # Sắp xếp giảm dần theo avg_discount
@@ -426,7 +426,9 @@ def test_persistent_changed_price_notifies(db, monkeypatch):
                      pack_quantity=1, unit_volume_ml=330, source="tiki-jina", raw={})
     r = pc.store_price_point_if_changed(pp2, path=db, notify=True)
     assert r["inserted"] is True and r["changed"] is True
-    assert r["old_price"] == 598800.0 and r["new_price"] == 550000.0
+    # Sanity guard: box prices (598800, 550000 > 80k) → /24 per-lon.
+    assert r["old_price"] == pytest.approx(598800.0 / 24)
+    assert r["new_price"] == pytest.approx(550000.0 / 24)
     assert "alert" in called
     assert called["alert"]["event_type"] == "PRICE_DECREASE"
 
