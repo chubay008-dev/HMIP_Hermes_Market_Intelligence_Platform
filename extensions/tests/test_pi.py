@@ -34,7 +34,7 @@ def test_schema_init():
     for t in ("pi_observations", "pi_price_events", "pi_alerts",
               "pi_promotions", "pi_products", "pi_skus", "pi_brands"):
         row = pi_store.fetch_one(
-            f"SELECT name FROM sqlite_master WHERE type='table' AND name=?", (t,), path=p)
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (t,), path=p)
         assert row, f"missing table {t}"
 
 
@@ -86,6 +86,40 @@ def test_promotion_intelligence(db):
     assert "Flash Sale" in promo["promotion_by_type"]
 
 
+def test_price_trend_channel_breakdown(db):
+    """price_trend series 'channel_breakdown' → multi-line per kênh."""
+    t = analytics.price_trend({}, series=["market_avg", "channel_breakdown"], path=db)
+    cb = t["series"].get("channel_breakdown", {})
+    assert len(cb) == 18, f"expected 18 channels, got {len(cb)}"
+    # Mỗi kênh là list [{t,v}] — giá TB theo ngày
+    for name, arr in list(cb.items())[:3]:
+        assert isinstance(arr, list) and arr
+        assert all("t" in p and "v" in p for p in arr), f"bad shape for {name}"
+        assert all(p["v"] > 0 for p in arr), f"non-positive price for {name}"
+    # Tên hiển thị (channel_name) thay vì channel_id thô
+    assert "Shopee" in cb or "TIKI" in cb or any("Shop" in n for n in cb)
+
+
+def test_price_trend_channel_breakdown_with_product_filter(db):
+    """Filter theo product → channel_breakdown chỉ cho SP đó."""
+    t = analytics.price_trend({"product_id": "P123"},
+                              series=["sku_price", "channel_breakdown"], path=db)
+    cb = t["series"].get("channel_breakdown", {})
+    assert len(cb) > 0
+    assert t["series"]["sku_price"]  # series chính vẫn có
+
+
+def test_promotion_intelligence_by_channel(db):
+    """promotion_by_channel → so sánh độ sâu KM cross-channel."""
+    promo = analytics.promotion_intelligence(path=db)
+    bc = promo.get("promotion_by_channel", [])
+    assert len(bc) == 18, f"expected 18 channels, got {len(bc)}"
+    assert all("channel" in c and "avg_discount_pct" in c for c in bc)
+    assert all(0 <= c["avg_discount_pct"] <= 100 for c in bc)
+    # Sắp xếp giảm dần theo avg_discount
+    assert bc[0]["avg_discount_pct"] >= bc[-1]["avg_discount_pct"]
+
+
 def test_events_and_alerts(db):
     evs = events.list_events(limit=10, path=db)
     assert len(evs) > 0
@@ -121,8 +155,11 @@ def test_collector_tiki_real(db, monkeypatch):
     Test offline: mock Tiki search trả JSON mẫu để không phụ thuộc mạng/
     rate-limit Tiki. Test gọi mạng thật nằm ở test_collector_tiki_live (skip).
     """
-    import tempfile, os
-    from extensions.pi import collectors as col, analytics as an
+    import os
+    import tempfile
+
+    from extensions.pi import analytics as an
+    from extensions.pi import collectors as col
 
     fake_item = {
         "name": "Bia Heineken Lager (330ml / Lon) thùng 24 lon",
@@ -240,7 +277,6 @@ def test_extract_price_range_and_format():
 
 def test_persistent_marker_and_incremental(db):
     """collect_smart seed 1 lần (marker), lần 2 cùng giá → skipped (không re-seed)."""
-    import os
     from extensions.pi import persistent_collector as pc
     from extensions.pi.collectors import PricePoint
 

@@ -216,7 +216,8 @@ def full_workspace(filters: dict[str, Any] | None = None, path: str | None = Non
         return hit
     payload = {
         "kpi": overview(filters, path=path),
-        "trend": trend(filters, path=path),
+        "trend": trend(filters, series=["sku_price", "market_avg", "regular_price",
+                                        "promotion_price", "channel_breakdown"], path=path),
         "index": index(filters, path=path),
         "competitor": competitor(filters, path=path),
         "channel": channel(filters, path=path),
