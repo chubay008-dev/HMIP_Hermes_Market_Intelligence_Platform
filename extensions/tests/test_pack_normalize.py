@@ -166,3 +166,25 @@ def test_tiki_real_adapter_heuristic_thung_when_pack1(monkeypatch):
         assert got == "30,667", f"heuristic phải chia 736000/24=30666.67≈30667, got {got}"
     finally:
         importlib.reload(ca)
+
+
+def test_extract_product_price_prefers_lon_over_thung():
+    """Trang search có cả lon lẻ (18000) + thùng (432000) → extract lấy lon.
+
+    base_price là giá lon nên phải ưu tiên lon lẻ để so sánh đúng.
+    """
+    from extensions.pi.price_extract import extract_product_price
+
+    html = "432.000₫ HEINEKEN ### Thùng 24 lon; 18.000₫ HEINEKEN ### Lon 330ml"
+    val = extract_product_price(html, brand="Heineken")
+    assert val == 18000.0, f"phải lấy lon lẻ (18000), không thùng (432000), got {val}"
+
+
+def test_extract_product_price_falls_back_to_thung_when_no_lon():
+    """Trang chỉ có thùng → extract lấy thùng (adapter sẽ chia 24)."""
+    from extensions.pi.price_extract import extract_product_price
+
+    html = "432.000₫ HEINEKEN ### Thùng 24 lon; 598.800₫ HEINEKEN ### Thùng"
+    val = extract_product_price(html, brand="Heineken")
+    # Cả 2 đều > LON_MAX → median của [432000, 598800] = 598800
+    assert val == 598800.0
