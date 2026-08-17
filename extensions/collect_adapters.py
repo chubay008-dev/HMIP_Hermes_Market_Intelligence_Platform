@@ -256,10 +256,16 @@ def build_collect_adapter() -> Any:
                         code="COLLECT_PRICE_SOURCE_UNAVAILABLE",
                     )
                 eff = pp.promotion_price or pp.regular_price
+                # base_price (ref_price) là giá 1 LON; pp.eff là giá PACK (thùng hoặc
+                # lon tuỳ item match). Chuẩn hoá về giá/lon để so sánh apples-to-apples:
+                # chia pack_quantity (24 cho thùng, 1 cho lon lẻ) — tránh variance
+                # khổng lồ khi lấy giá thùng ~400k vs base lon ~38k (→ ESCALATE sai).
+                pack = pp.pack_quantity if pp.pack_quantity and pp.pack_quantity > 0 else 1
+                unit_price = eff / pack
                 return {
                     "brand": brand_name,
                     "product_name": name,
-                    "price_text": f"{eff:,.0f}",
+                    "price_text": f"{unit_price:,.0f}",
                     "currency": "VND",
                     "store": "tiki",
                     "province": pp.region_id,

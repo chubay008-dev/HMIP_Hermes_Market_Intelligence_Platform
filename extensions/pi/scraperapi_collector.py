@@ -123,7 +123,9 @@ class ScraperAPICollector:
         if not items:
             return None
         kws = _brand_keywords(product_name)
-        pack, v = _parse_pack_volume(product_name)
+        _cfg_pack, cfg_vol = _parse_pack_volume(product_name)
+        # Ưu tiên lon lẻ (pack=1) để so sánh apples-to-apples với base_price (lon).
+        best = None
         for it in items:
             name = str(it.get("name", "")).lower()
             price = it.get("price")
@@ -131,15 +133,20 @@ class ScraperAPICollector:
                 continue
             if kws and not any(k in name for k in kws):
                 continue
-            return PricePoint(
-                product_id=product_id, sku_id=f"SKU-{product_id}",
-                channel_id=self.channel_id, region_id="ONLINE",
-                regular_price=float(price), promotion_price=None,
-                pack_quantity=pack, unit_volume_ml=v, source=self.source,
-                raw={"url": f"tiki://product/{it.get('id')}", "name": it.get("name", "")},
-            )
-        log.warning("ScraperAPI: không match sản phẩm %s trong %d kết quả", product_name, len(items))
-        return None
+            pack, v = _parse_pack_volume(it.get("name") or product_name)
+            if best is None or pack < best[0]:
+                best = (pack, v, it, float(price))
+        if not best:
+            log.warning("ScraperAPI: không match sản phẩm %s trong %d kết quả", product_name, len(items))
+            return None
+        pack, v, it, price = best
+        return PricePoint(
+            product_id=product_id, sku_id=f"SKU-{product_id}",
+            channel_id=self.channel_id, region_id="ONLINE",
+            regular_price=price, promotion_price=None,
+            pack_quantity=pack, unit_volume_ml=v or cfg_vol or ref_vol, source=self.source,
+            raw={"url": f"tiki://product/{it.get('id')}", "name": it.get("name", "")},
+        )
 
 
 def collect_realtime_scraperapi(channel: str = "TIKI", limit: int | None = None,
