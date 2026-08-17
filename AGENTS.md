@@ -138,6 +138,13 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - **Thêm domain mới:** theo mẫu `domains/<domain>/<subdomain>/` (registrar + skills + workflow YAML + decision_engine).
 - **Thêm sản phẩm giám sát:** cập nhật `extensions/default_products.py` (`DEFAULT_PRODUCTS`) + `extensions/run_workflow.py` (`_BASE_PRICES`). UI thêm SP tự sync vào ontology qua `db.sync_to_ontology`.
 - **ĐỒNG BỘ `DEFAULT_PRODUCTS` ↔ `knowledge/master/*.json` (quan trọng):** Khi thêm SP vào `DEFAULT_PRODUCTS`, PHẢI thêm entry tương ứng vào `products.json` (id/brand_id/name/category) + `brands.json` (id/name) + `skus.json`. Nếu không, task `enrich` (enrich_price.py) raise `ENRICH_PRICE_UNKNOWN_PRODUCT` → workflow FAILED → UI "chọn SP quét báo lỗi". `sync_to_ontology` (db.py) chỉ chạy khi user thêm SP mới từ UI (POST /api/products), không tự chạy cho SP có sẵn trong `DEFAULT_PRODUCTS`. Đã fix 1 lần (2026-08): thêm 24 SP thiếu + sửa brand mismatch P333 (Larue→Bia Larue). Lỗi tái diễn nếu `DEFAULT_PRODUCTS` có SP chưa có trong master.
+
+## Kiểm thử — lưu ý isolation (PR #5)
+
+- **Scheduler thread leak (đã fix):** test dùng scheduler (`test_autoscan_lifecycle`, `test_api_endpoints`) start `BackgroundScheduler`. `scan_once` quét nhiều SP (68 trong `_DEMO_CATALOG`); nếu teardown `shutdown(wait=False)` không chờ job xong → thread sót chèn SP lạ vào `temp_db` của test sau (race → `test_db_upsert_is_idempotent` fail: 2 rows / tên SP lạ). Fix: (1) `extensions/tests/conftest.py` autouse `_stop_scheduler_after_test` — shutdown + remove_all_jobs + recreate scheduler (APScheduler không restart sau shutdown); (2) `test_autoscan_lifecycle` monkeypatch `_DEMO_CATALOG` thành 2 SP để scan_once <0.5s. Khi thêm test mới dùng scheduler, dùng catalog nhỏ hoặc dựa vào autouse teardown.
+- **State notify reset (đã fix):** autouse `_reset_notify_rate_limit` reset state anti-spam cả 2 hệ notify (PI `notifier.py` + scheduler `notifiers/rate_limit.py`) giữa test — tránh state leak khi test đụng notify.
+
+## Khi sửa đổi — nguyên tắc
 - **Đổi contract kernel:** cập nhật `05_Interface_Contract.md` + `12_Data_Contract.md` trước.
 - **Đừng tạo file mới trùng tên/phiên bản** — sửa file gốc trực tiếp.
 
