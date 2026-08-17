@@ -879,7 +879,8 @@ function renderPositioning(p){
   const tierName=pi=> pi>=110?(t('posPremium')||'Premium'): pi<=90?(t('posValue')||'Value'):(t('posStandard')||'Standard');
   let svg=`<svg viewBox="0 0 ${W} ${H}" class="chart-svg" preserveAspectRatio="xMidYMid meet" style="font-family:var(--font-sans,inherit)">`;
   // --- Background tier bands (Premium/Standard/Value) ---
-  svg+=`<rect x="${x(xLo)}" y="${padT}" width="${x(110)-x(xLo)}" height="${iH}" fill="rgba(248,81,73,0.05)"/>`;
+  // Premium (đỏ) = bên phải index≥110; Standard (tím) 90-110; Value (xanh) ≤90.
+  svg+=`<rect x="${x(110)}" y="${padT}" width="${x(xHi)-x(110)}" height="${iH}" fill="rgba(248,81,73,0.05)"/>`;
   svg+=`<rect x="${x(90)}" y="${padT}" width="${x(110)-x(90)}" height="${iH}" fill="rgba(124,92,255,0.04)"/>`;
   svg+=`<rect x="${x(xLo)}" y="${padT}" width="${x(90)-x(xLo)}" height="${iH}" fill="rgba(46,160,67,0.05)"/>`;
   // --- Gridlines + ticks (X: mỗi 20; Y: 4 bước) ---
@@ -903,9 +904,7 @@ function renderPositioning(p){
   svg+=`<line x1="${x(100)}" y1="${padT}" x2="${x(100)}" y2="${padT+iH}" stroke="#4f9cff" stroke-width="1.5" stroke-dasharray="5 4"/>`;
   svg+=`<text x="${x(100)+5}" y="${padT+12}" fill="#4f9cff" font-size="10" font-weight="600">Index 100</text>`;
   // --- Bubbles (radius capped, opacity, hover tooltip) ---
-  // Để tránh chồng label, chỉ hiển thị text cho SP outlier (index ≥110 hoặc ≤90)
-  // hoặc presence cao nhất; SP còn lại chỉ bubble + hover <title>.
-  const maxPres=Math.max(...pres,1);
+  // Chỉ label SP outlier giá (Premium/Value); SP Standard chỉ bubble + hover.
   pts.forEach(q=>{
     const r=Math.min(18, 5+ q.presence*0.9);
     const col=tierCol(q.price_index);
@@ -917,7 +916,6 @@ function renderPositioning(p){
   pts.slice().sort((a,b)=>b.price_index-a.price_index).forEach(q=>{
     const out=q.price_index>=110 || q.price_index<=90;
     if(!out) return;
-    const key=q.brand+Math.round(q.price_index);
     // Tránh label trùng Y gần nhau: bỏ nếu label đã có trong ±14px Y.
     const ly=y(q.presence); let ok=true;
     labelled.forEach(k=>{ if(Math.abs(k-ly)<14) ok=false; });
