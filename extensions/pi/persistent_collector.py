@@ -98,10 +98,12 @@ def _latest_observation(pp: PricePoint, path: str | None = None) -> dict[str, An
     tránh ghi trùng khi trigger chạy nhiều lần trong cùng ngày.
     """
     return pi_store.fetch_one(
-        """SELECT effective_price, regular_price, observed_at
-           FROM pi_observations
-           WHERE sku_id = ? AND channel_id = ? AND region_id = ?
-           ORDER BY observed_at DESC, observation_id DESC LIMIT 1""",
+        """SELECT o.effective_price, o.regular_price, o.unit_price,
+                  s.pack_quantity, o.observed_at
+           FROM pi_observations o
+           LEFT JOIN pi_skus s ON s.sku_id = o.sku_id
+           WHERE o.sku_id = ? AND o.channel_id = ? AND o.region_id = ?
+           ORDER BY o.observed_at DESC, o.observation_id DESC LIMIT 1""",
         [pp.sku_id, pp.channel_id, pp.region_id], path=path)
 
 
@@ -135,30 +137,42 @@ def store_price_point_if_changed(
     """
     ensure_catalog(path=path)
     latest = _latest_observation(pp, path=path)
-    new_eff = pp.promotion_price if pp.promotion_price else pp.regular_price
-
-    result: dict[str, Any] = {
-        "inserted": False, "old_price": None, "new_price": float(new_eff),
-        "changed": False, "notified": {"discord": False, "telegram": False},
-    }
-
-    if latest:
-        old_eff = float(latest["effective_price"])
-        result["old_price"] = old_eff
-        if old_eff > 0:
-            change_pct = abs(new_eff - old_eff) / old_eff * 100.0
-            if change_pct < threshold_pct:
-                # Giá không đổi (trong noise threshold) → không ghi, không notify.
-                return result
-        result["changed"] = True
-
-    # Giá mới (hoặc chưa có observation nào) → ghi observation mới.
     norm = normalize_price(
         regular_price=pp.regular_price,
         promotion_price=pp.promotion_price,
         pack_quantity=pp.pack_quantity,
         unit_volume_ml=pp.unit_volume_ml,
     )
+    # Giá hiệu lực & giá/LON (per-unit). So sánh/alert dùng giá/LON để
+    # apples-to-apples giữa các observation có pack khác nhau (thùng 24 vs lon lẻ).
+    # Trước đây so sánh raw effective_price → pack-mismatch sinh alert sai
+    # (vd box 1.15M vs lon 15k → "-98.67%" giả tạo). Giờ so trên per-lon.
+    new_eff = float(norm.effective_price)
+    new_lon = float(norm.price_per_unit)
+
+    result: dict[str, Any] = {
+        "inserted": False, "old_price": None, "new_price": round(new_lon, 2),
+        "changed": False, "notified": {"discord": False, "telegram": False},
+    }
+
+    if latest:
+        # Ưu tiên unit_price (giá/LON đã chuẩn hoá lúc insert). Nếu DB cũ chưa
+        # có unit_price (pre-fix) → suy lại từ effective_price / pack_quantity.
+        old_lon = latest.get("unit_price")
+        if old_lon is None or float(old_lon or 0) <= 0:
+            old_eff = float(latest["effective_price"])
+            old_pack = float(latest.get("pack_quantity") or pp.pack_quantity or 1) or 1
+            old_lon = old_eff / old_pack
+        old_lon = float(old_lon)
+        result["old_price"] = round(old_lon, 2)
+        if old_lon > 0:
+            change_pct = abs(new_lon - old_lon) / old_lon * 100.0
+            if change_pct < threshold_pct:
+                # Giá/LON không đổi (trong noise threshold) → không ghi, không notify.
+                return result
+        result["changed"] = True
+
+    # Giá mới (hoặc chưa có observation nào) → ghi observation mới.
     ts = today or time.strftime("%Y-%m-%d")
     obs_id = f"OBS-{pp.source}-{pp.sku_id}-{ts}-{int(time.time()) % 100000}"
     # Resolve brand_id chuẩn từ product (không hardcode "" → tránh "Unknown"
@@ -169,9 +183,9 @@ def store_price_point_if_changed(
         sku_id=pp.sku_id, product_id=pp.product_id, brand_id=brand_id,
         channel_id=pp.channel_id, seller_id="UNKNOWN", region_id=pp.region_id,
         observed_at=ts, collected_at=ts,
-        regular_price=pp.regular_price, effective_price=float(new_eff),
+        regular_price=pp.regular_price, effective_price=new_eff,
         currency="VND", promotion_price=pp.promotion_price,
-        unit_price=norm.price_per_unit, normalized_price=norm.price_per_100ml,
+        unit_price=new_lon, normalized_price=norm.price_per_100ml,
         availability="in_stock", source=pp.source, source_url=None,
         extraction_method=pp.source, confidence=0.9, metadata=None, path=path,
     )
@@ -180,7 +194,7 @@ def store_price_point_if_changed(
     # Đánh dấu SKU đã có giá thật (marker one-time seed).
     _mark_real_seeded(pp.sku_id, path=path)
 
-    # Notify khi có sự thay đổi giá (không phải lần đầu ghi).
+    # Notify khi có sự thay đổi giá/LON (không phải lần đầu ghi).
     if notify and result["changed"] and result["old_price"]:
         try:
             from . import notifier
@@ -212,6 +226,7 @@ def store_price_point_if_changed(
                 "event_type": "PRICE_INCREASE" if change > 0 else "PRICE_DECREASE",
                 "sku_id": pp.sku_id, "product_name": pname,
                 "channel_id": pp.channel_id, "region_id": pp.region_id,
+                # Giá/LON (đã chuẩn hoá) — luôn cùng đơn vị, so sánh đúng.
                 "old_price": round(old, 2), "new_price": round(new, 2),
                 "change_pct": round(change, 2), "severity": sev.value,
                 "timestamp": _now_iso(),
