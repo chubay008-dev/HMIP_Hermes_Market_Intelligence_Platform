@@ -13,7 +13,6 @@ import pytest
 from extensions import db
 from extensions.collect_adapters import SimulatedPriceAdapter
 from extensions.run_workflow import resolve_base_price, run_prc_001
-from core.exceptions import WorkflowExecutionException
 
 
 @pytest.fixture()
@@ -156,6 +155,7 @@ def test_run_prc_001_no_save_flag(temp_db):
 def test_api_endpoints(temp_db, monkeypatch):
     monkeypatch.delenv("HMIP_API_TOKEN", raising=False)
     from fastapi.testclient import TestClient
+
     from extensions.api import app
 
     client = TestClient(app)
@@ -182,6 +182,7 @@ def test_api_run_unknown_product_still_executes(temp_db, monkeypatch):
     # Kịch bản thực tế: thêm SP mới qua /api/products (sync ontology) rồi /api/run
     monkeypatch.delenv("HMIP_API_TOKEN", raising=False)
     from fastapi.testclient import TestClient
+
     from extensions.api import app
 
     client = TestClient(app)
@@ -191,7 +192,8 @@ def test_api_run_unknown_product_still_executes(temp_db, monkeypatch):
     assert resp.status_code == 200
     assert resp.json()["status"] in {"COMPLETED", "FAILED"}
     # cleanup ontology
-    import json as _j, pathlib
+    import json as _j
+    import pathlib
     master = pathlib.Path(__file__).resolve().parents[2] / "knowledge" / "master"
     for fn in ("products", "brands", "skus"):
         fp = master / f"{fn}.json"
@@ -199,3 +201,41 @@ def test_api_run_unknown_product_still_executes(temp_db, monkeypatch):
         d = [x for x in d if x.get("id") != "P999" and x.get("product_id") != "P999"
              and x.get("brand_id") != "BRAND-P999"]
         fp.write_text(_j.dumps(d, ensure_ascii=False, indent=2))
+
+
+def test_scan_if_stale_triggers_when_empty(temp_db, monkeypatch):
+    """DB rỗng → scan-if-stale trả triggered=true (reason empty)."""
+    monkeypatch.delenv("HMIP_API_TOKEN", raising=False)
+    monkeypatch.setenv("HMIP_AUTO_SCAN_STALE_MIN", "5")
+    from fastapi.testclient import TestClient
+
+    from extensions import api as api_mod
+    from extensions.api import app
+    api_mod._AUTO_SCAN_IN_PROGRESS = False
+    client = TestClient(app)
+    body = client.post("/api/scan-if-stale").json()
+    assert body["triggered"] is True
+    assert body["reason"] == "empty"
+    # Lần 2 ngay sau → already-scanning (flag set, chưa kịp xong bg thread)
+    body2 = client.post("/api/scan-if-stale").json()
+    assert body2["triggered"] is False
+    assert body2["reason"] == "already-scanning"
+
+
+def test_scan_if_stale_fresh_after_scan(temp_db, monkeypatch):
+    """Sau khi có dữ liệu mới (< stale window) → triggered=false (fresh)."""
+    monkeypatch.delenv("HMIP_API_TOKEN", raising=False)
+    monkeypatch.setenv("HMIP_AUTO_SCAN_STALE_MIN", "5")
+    from fastapi.testclient import TestClient
+
+    from extensions import api as api_mod
+    from extensions.api import app
+    api_mod._AUTO_SCAN_IN_PROGRESS = False
+    client = TestClient(app)
+    # Seed 1 observation qua /api/run
+    client.post("/api/run", json={"product_id": "P123", "source": "test"})
+    body = client.post("/api/scan-if-stale").json()
+    assert body["triggered"] is False
+    assert body["reason"] == "fresh"
+    assert body["last_scan"] is not None
+

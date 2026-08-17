@@ -876,7 +876,7 @@ async function init(){
   const tok = localStorage.getItem(TOK_KEY);
   if(tok){
     // Đã có token → verify rồi vào dashboard
-    try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); return; }
+    try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
     catch(e){ /* token sai → xoá + hiện overlay */ localStorage.removeItem(TOK_KEY); }
   }
   // Chưa có token: kiểm tra xem auth có bật không (gọi health KHÔNG kèm token)
@@ -884,11 +884,29 @@ async function init(){
     const r = await fetch('/api/health');
     if(r.ok){
       // Auth TẮT → vào dashboard luôn, không cần token
-      $('#login').style.display='none'; load(); syncAuto(); return;
+      $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return;
     }
   }catch(_){}
   // Auth BẬT (401) → giữ overlay, focus ô token
   $('#tok').focus();
+}
+
+/* ---- Tự quét dữ liệu khi vào trang (scan-if-stale) ----
+ * Backend chỉ quét nếu dữ liệu cũ (mặc định >5'). Tránh spam khi refresh.
+ * Nếu triggered → toast + poll load() 5s/lần trong 60s để cập nhật UI. */
+async function autoScanIfStale(){
+  try{
+    const r = await api('/api/scan-if-stale', {method:'POST'});
+    if(r && r.triggered){
+      toast('⏳ ' + (r.msg || 'Đang quét dữ liệu mới...'));
+      let n = 0;
+      const iv = setInterval(async () => {
+        n++;
+        try{ await load(); }catch(_){}
+        if(n >= 12) clearInterval(iv); // 60s @ 5s
+      }, 5000);
+    }
+  }catch(e){ /* non-fatal — không block UI */ }
 }
 init();
 // Auto-refresh 30s, nhưng tạm dừng khi tab ẩn để tiết kiệm băng thông/CPU.
