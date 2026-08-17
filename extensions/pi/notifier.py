@@ -89,6 +89,20 @@ def _sku_notify_key(alert: dict) -> str:
     return f"sku:{base}"
 
 
+def _product_notify_key(alert: dict) -> str | None:
+    """Key cross-hệ (cross-scope): 'prod:' + product_name.
+
+    Dùng chung giữa hệ 1 (PI collect, notify_alert) và hệ 2 (scheduler scan,
+    rate_limit). Khi 1 SP giá đổi, dù hệ nào gửi trước → ghi key này → hệ kia
+    check thấy trong cửa sổ per-sku → skip → tránh DOUBLE NOTIFY (2 messages
+    Telegram+Discord cho cùng 1 SP từ 2 hệ chạy song song).
+    """
+    pname = alert.get("product_name")
+    if not pname:
+        return None
+    return f"prod:{pname}"
+
+
 def _sku_cooldown_seconds() -> float:
     """Số giây giữa 2 lần notify cho cùng SP (bất kể kênh).
 
@@ -123,6 +137,34 @@ def _load_sku_last_sent(key: str) -> float | None:
     return None
 
 
+def _load_sku_last_price(key: str) -> float | None:
+    """Đọc last_price cho state_key cross-hệ/per-sku (scope='pi-sku')."""
+    try:
+        from . import pi_store
+        rec = pi_store.get_notify_state(key, path=_state_path())
+        if rec and rec.get("last_price") is not None:
+            try:
+                return float(rec["last_price"])
+            except (TypeError, ValueError):
+                return None
+    except Exception:
+        pass
+    return None
+
+
+def _cross_price_changed_significantly(old: float | None, new) -> bool:
+    """Giá đổi ≥5% so với mốc cross-hệ → event mới (cho phép notify lại)."""
+    if old is None or new is None:
+        return False
+    try:
+        cur, last = float(new), float(old)
+    except (TypeError, ValueError):
+        return False
+    if last <= 0:
+        return True
+    return abs(cur - last) / last * 100.0 >= 5.0
+
+
 def _load_last_sent(key: str) -> float | None:
     """Đọc mốc lần gửi cuối cho key: cache in-memory first, rồi DB.
 
@@ -153,14 +195,31 @@ def _is_suppressed_by_cooldown(alert: dict) -> bool:
     """True nếu alert nên bỏ qua để chống spam.
 
     3 layer check (lớp đầu True → skip ngay, không check lớp sau):
+    0. Cross-hệ (HMIP_NOTIFY_SKU_COOLDOWN_MIN): hệ nào gửi trước (PI collect
+       HOẶC scheduler scan) → ghi mốc → hệ kia thấy trong cửa sổ → skip. Chống
+       DOUBLE NOTIFY (cùng 1 SP, 2 hệ chạy song song gửi 2 messages).
     1. Per-sku (HMIP_NOTIFY_SKU_COOLDOWN_MIN, mặc định 30'): 1 SP đổi giá trên
        nhiều kênh (Tiki+Shopee+Lazada) cùng lúc → chỉ kênh đầu notify. Bỏ qua
        nếu SP đã notify gần đây BẤT KỂ kênh nào.
     2. Per-channel (HMIP_NOTIFY_COOLDOWN_MIN, mặc định 6h): cùng (sku,channel,
        region) đã notify gần đây → skip.
     """
-    # Layer 1: per-sku (chống spam multi-channel).
     sku_window = _sku_cooldown_seconds()
+    # Layer 0: cross-hệ (PI collect ↔ scheduler scan). Dùng chung cửa sổ per-sku.
+    # Ngoại lệ: giá đổi đáng kể (≥5%) → event mới → cho phép (không skip).
+    if sku_window > 0:
+        prod_key = _product_notify_key(alert)
+        if prod_key:
+            prod_last = _load_sku_last_sent(prod_key)
+            if prod_last is not None and (time.time() - prod_last) < sku_window:
+                # Trong cửa sổ — check giá đổi đáng kể so với mốc cross.
+                prod_price = _load_sku_last_price(prod_key)
+                new_p = alert.get("new_price")
+                if not _cross_price_changed_significantly(prod_price, new_p):
+                    log.info("Notify skip (cross-hệ cooldown %.0fs): %s",
+                             sku_window, prod_key)
+                    return True
+    # Layer 1: per-sku (chống spam multi-channel).
     if sku_window > 0:
         sku_key = _sku_notify_key(alert)
         if sku_key.strip("sku:").strip("|"):
@@ -183,7 +242,7 @@ def _is_suppressed_by_cooldown(alert: dict) -> bool:
 
 
 def _record_notify_sent(alert: dict) -> None:
-    """Ghi mốc notify cho cả 2 layer: per-(sku,channel,region) + per-sku."""
+    """Ghi mốc notify cho cả 3 layer: cross-hệ + per-(sku,channel,region) + per-sku."""
     key = _notify_key(alert)
     if not key.strip("|"):
         return
@@ -205,18 +264,23 @@ def _record_notify_sent(alert: dict) -> None:
         )
     except Exception as exc:
         log.debug("Notify state persist fail (non-fatal): %s", exc)
+        price_f = None
 
-    # Per-sku state (cho anti-spam multi-channel).
+    # Per-sku state (cho anti-spam multi-channel) + cross-hệ (cho đồng bộ với
+    # scheduler scan). Cùng cửa sổ HMIP_NOTIFY_SKU_COOLDOWN_MIN.
+    # prod:<name> ghi last_price để cross-scope check giá đổi đáng kể (≥5%).
     sku_window = _sku_cooldown_seconds()
     if sku_window > 0:
-        sku_key = _sku_notify_key(alert)
-        if sku_key.strip("sku:").strip("|"):
-            _sku_notify_state[sku_key] = now
+        for skey in (_sku_notify_key(alert), _product_notify_key(alert)):
+            if not skey or (skey.startswith("sku:") and not skey.strip("sku:").strip("|")):
+                continue
+            _sku_notify_state[skey] = now
+            is_prod = skey.startswith("prod:")
             try:
                 from . import pi_store
                 pi_store.set_notify_state(
-                    sku_key, "pi-sku",
-                    last_price=None,
+                    skey, "pi-sku",
+                    last_price=price_f if is_prod else None,
                     last_decision=alert.get("event_type"),
                     path=_state_path(),
                 )
