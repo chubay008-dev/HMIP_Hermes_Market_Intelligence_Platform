@@ -68,6 +68,17 @@ python -m extensions.scheduler
 
 Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Crawl4AI tier 5 nếu `CRAWL4AI_ENABLED`).
 
+### Mismatch đơn vị thùng/lon (đã fix PR #6) — LƯU Ý QUAN TRỌNG
+
+**Vấn đề:** `base_price` (`ref_price` trong `DEFAULT_PRODUCTS`) là giá **1 LON** (~18k-40k). Collector cào Tiki thật, item match đầu tiên cho "Peroni 330ml" thường là **THÙNG 24 lon** (~240k-635k) chứ không lon lẻ → so giá thùng vs base lon → variance 479-1818% → ESCALATE sai liên tục (nguồn spam).
+**Fix (apples-to-apples với base lon):**
+- `collectors._match_best`: score `(brand_match, -pack)` → **ưu tiên lon lẻ** (pack=1); thùng (pack 6/12/24) chỉ lấy khi không có lon lẻ.
+- `TikiCollector.collect` + `ScraperAPICollector.collect`: parse `pack_quantity` từ **tên ITEM thật** (`best.name`), fallback tên config.
+- `_TikiRealAdapter.fetch` (run_prc_001 path): trả `unit_price = eff / pack_quantity` (giá/lon) → `price_text` hiển thị + compare với base lon cùng đơn vị.
+**Giới hạn:** ZenRows/Jina dùng `extract_product_price` trên HTML (không có item name) → vẫn parse pack từ config (lon=1). Fallback cuối khi ScraperAPI OK; nếu extract lấy giá thùng thì unit_price = giá thùng (sai). Khi gặp, cần mở rộng `extract_product_price` trả (price, pack_hint) đoán pack từ giá.
+
+### Tier chain & circuit breaker
+
 - **Circuit breaker Firecrawl:** khi API trả 402 (hết credit), `FirecrawlCollector._credit_exhausted=True` → các SP còn lại trong run skip Firecrawl ngay (0s thay vì 60s timeout mỗi SP), xuống ScraperAPI/ZenRows/Jina. Flag reset khi nhận 200 lại (credit refresh) hoặc process restart.
 - **Firecrawl credit schedule:** key `fc-abc42...` refresh credit định kỳ (kỳ tới ~14/09). Trong khi chờ, auto-scan incremental (`HMIP_PI_COLLECT_MIN=360` = 6h) dùng ScraperAPI/ZenRows/Jina. Chỉ ghi observation + notify khi giá **thay đổi** (noise threshold 1%); giá không đổi → skip (không re-seed toàn bộ).
 - **Hai hệ thống notify (tách biệt, cả hai đều có anti-spam):**
