@@ -170,6 +170,7 @@
         <span class="toggle" data-s="brand_avg" data-i18n="brandAvg">Brand</span>
         <span class="toggle" data-s="regular_price" data-i18n="regular">Regular</span>
         <span class="toggle" data-s="promotion_price" data-i18n="promotion">Promotion</span>
+        <span class="toggle" data-s="channel_breakdown" data-i18n="byChannel">Theo kênh</span>
       </div>
       <div id="trendChart"></div>
       <div class="legend" id="trendLegend"></div>
@@ -189,7 +190,8 @@
     </div>
     <div class="card">
       <h3 data-i18n="channelCmp">🛒 Channel Comparison</h3>
-      <div class="tbl-wrap"><table id="chTable"><thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th><th data-i18n="colN">n</th></tr></thead><tbody></tbody></table></div>
+      <div id="channelChart" style="height:280px"></div>
+      <div class="tbl-wrap" style="margin-top:8px"><table id="chTable"><thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th data-i18n="colIndex">Index</th><th data-i18n="colN">n</th></tr></thead><tbody></tbody></table></div>
       <div id="chLowHigh" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
     </div>
   </div>
@@ -212,7 +214,11 @@
     <div class="card">
       <h3 data-i18n="promo">🏷️ Promotion Intelligence</h3>
       <div id="promoSummary" class="row-actions" style="flex-wrap:wrap;gap:8px"></div>
-      <div class="tbl-wrap"><table id="promoTable" style="margin-top:8px"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colType">Loại</th><th data-i18n="colDisc">Giảm</th><th data-i18n="colPromoPrice">Giá KM</th></tr></thead><tbody></tbody></table></div>
+      <div class="grid two-col" style="margin-top:8px">
+        <div><div id="promoTypeChart" style="height:200px"></div></div>
+        <div><div id="promoChannelChart" style="height:200px"></div></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:8px"><table id="promoTable"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colType">Loại</th><th data-i18n="colDisc">Giảm</th><th data-i18n="colPromoPrice">Giá KM</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card">
       <h3 data-i18n="events">⚡ Price Events</h3>
@@ -271,6 +277,8 @@ const I18N = {
     regional:"🌏 Regional Pricing", positioning:"🎯 Price Positioning Matrix",
     posLegend:"X = Price Index · Y = Market Presence (số kênh)",
     promo:"🏷️ Promotion Intelligence", events:"⚡ Price Events",
+    byChannel:"Theo kênh", promoTypeTitle:"Theo loại KM",
+    promoChannelTitle:"Giảm giá TB theo kênh",
     alerts:"🔔 Price Alert Center", skuAi:"🔬 SKU Explorer + AI Analyst",
     viewSku:"Xem SKU", askAi:"Hỏi AI", aiPlaceholder:"Hỏi AI Analyst, ví dụ: Tại sao giá Tiger tăng?",
     colProduct:"Sản phẩm", colBrand:"Brand", colAvg:"Giá TB", colIndex:"Index",
@@ -298,6 +306,8 @@ const I18N = {
     regional:"🌏 Regional Pricing", positioning:"🎯 Price Positioning Matrix",
     posLegend:"X = Price Index · Y = Market Presence (channel count)",
     promo:"🏷️ Promotion Intelligence", events:"⚡ Price Events",
+    byChannel:"By channel", promoTypeTitle:"By promo type",
+    promoChannelTitle:"Avg discount by channel",
     alerts:"🔔 Price Alert Center", skuAi:"🔬 SKU Explorer + AI Analyst",
     viewSku:"View SKU", askAi:"Ask AI", aiPlaceholder:"Ask AI Analyst, e.g.: Why did Tiger price rise?",
     colProduct:"Product", colBrand:"Brand", colAvg:"Avg Price", colIndex:"Index",
@@ -325,6 +335,8 @@ const I18N = {
     regional:"🌏 地区定价", positioning:"🎯 价格定位矩阵",
     posLegend:"X = 价格指数 · Y = 市场存在度（渠道数）",
     promo:"🏷️ 促销情报", events:"⚡ 价格事件",
+    byChannel:"按渠道", promoTypeTitle:"按促销类型",
+    promoChannelTitle:"各渠道平均折扣",
     alerts:"🔔 价格警报中心", skuAi:"🔬 SKU 浏览器 + AI 分析师",
     viewSku:"查看 SKU", askAi:"问 AI", aiPlaceholder:"问 AI 分析师，例如：为什么 Tiger 涨价了？",
     colProduct:"产品", colBrand:"品牌", colAvg:"平均价", colIndex:"指数",
@@ -532,14 +544,56 @@ function lineChart(container, series, opts){
 }
 
 function renderTrend(t){
-  const series={};
   const colors={'sku_price':'#4f9cff','market_avg':'#7c5cff','brand_avg':'#2ea043','regular_price':'#db8b1a','promotion_price':'#f85149'};
   const onSeries = state.trendSeries;
-  Object.keys(t.series||{}).forEach(k=>{ if(onSeries.includes(k)) series[k]=t.series[k]; });
+  // channel_breakdown is a nested dict {channel_name: [{t,v}]} → multi-line per kênh.
+  const cb = t.series && t.series.channel_breakdown;
+  if(onSeries.includes('channel_breakdown') && cb && Object.keys(cb).length){
+    renderTrendByChannel(cb);
+    return;
+  }
+  const series={};
+  Object.keys(t.series||{}).forEach(k=>{ if(onSeries.includes(k) && k!=='channel_breakdown') series[k]=t.series[k]; });
   if(Object.keys(series).length===0){ $('#trendChart').innerHTML='<div class="loading">'+t('chooseSeries')+'</div>'; $('#trendLegend').innerHTML=''; return; }
-  // flatten brand_avg (has brand key) into single? keep as market_avg if present
   lineChart('#trendChart', series, {colors:Object.values(colors).filter((c,i)=>onSeries.includes(Object.keys(colors)[i]))});
-  $('#trendLegend').innerHTML = onSeries.map(k=>`<span><i class="dot" style="background:${colors[k]}"></i>${labelOf(k)}</span>`).join('');
+  $('#trendLegend').innerHTML = onSeries.filter(k=>k!=='channel_breakdown').map(k=>`<span><i class="dot" style="background:${colors[k]||'#888'}"></i>${labelOf(k)}</span>`).join('');
+}
+// Multi-line chart: 1 line per kênh (Shopee/Lazada/Tiki/...) — giá TB theo ngày.
+const CHANNEL_COLORS = ['#4f9cff','#f85149','#2ea043','#db8b1a','#7c5cff','#e056fd',
+  '#00d2d3','#ff9f43','#54a0ff','#ee5a6f','#10ac84','#feca57','#5f27cd','#01a3a4','#ff6b6b','#48dbfb','#1dd1a1','#f368e0'];
+function renderTrendByChannel(cb){
+  const names = Object.keys(cb);
+  if(!names.length){ $('#trendChart').innerHTML='<div class="loading">—</div>'; $('#trendLegend').innerHTML=''; return; }
+  // union of all days across channels for x-axis
+  const daySet = new Set();
+  names.forEach(n => cb[n].forEach(p => daySet.add(p.t)));
+  const days = [...daySet].sort();
+  const apexSeries = names.map((n,i) => ({
+    name: n,
+    data: days.map(d => {
+      const pt = cb[n].find(p => p.t === d);
+      return pt ? pt.v : null;
+    })
+  }));
+  const el = $('#trendChart');
+  el.innerHTML = '<div id="trendChart-apex"></div>';
+  const isLight = document.documentElement.getAttribute('data-theme')==='light';
+  const chart = new ApexCharts(document.querySelector('#trendChart-apex'), {
+    chart:{ type:'line', height:320, background:'transparent', toolbar:{show:true}, zoom:{enabled:true} },
+    theme:{ mode: isLight?'light':'dark' },
+    series: apexSeries,
+    colors: names.map((_,i) => CHANNEL_COLORS[i % CHANNEL_COLORS.length]),
+    stroke:{ width:2, curve:'smooth' },
+    xaxis:{ type:'datetime', categories: days, labels:{ style:{ colors:'#8b98a5' } } },
+    yaxis:{ labels:{ style:{ colors:'#8b98a5' }, formatter:v=> fmt(v) } },
+    grid:{ borderColor:'#2c3744' },
+    tooltip:{ theme: isLight?'light':'dark', y:{ formatter:v=> v==null?'—':fmt(v) } },
+    legend:{ position:'bottom', labels:{ colors:'#8b98a5' } },
+    dataLabels:{ enabled:false },
+    noData:{ text: t('chooseSeries') },
+  });
+  chart.render();
+  $('#trendLegend').innerHTML = names.map((n,i)=>`<span><i class="dot" style="background:${CHANNEL_COLORS[i%CHANNEL_COLORS.length]}"></i>${esc(n)}</span>`).join('');
 }
 function labelOf(k){ return {sku_price:'SKU',market_avg:t('market'),brand_avg:t('brandAvg'),regular_price:t('regular'),promotion_price:t('promotion')}[k]||k; }
 
@@ -590,6 +644,33 @@ function renderChannel(ch){
   if(ch.lowest_channel&&ch.highest_channel){
     $('#chLowHigh').innerHTML=`${t('cheapest')}<b>${esc(ch.lowest_channel.channel)}</b> (${fmt(ch.lowest_channel.avg_price)}) ${t('priciest')}<b>${esc(ch.highest_channel.channel)}</b> (${fmt(ch.highest_channel.avg_price)})`;
   }
+  renderChannelChart(ch.channels||[]);
+}
+function renderChannelChart(channels){
+  const el=$('#channelChart');
+  if(!channels.length){ el.innerHTML='<div class="loading">—</div>'; return; }
+  el.innerHTML='<div id="channelChart-apex"></div>';
+  const isLight=document.documentElement.getAttribute('data-theme')==='light';
+  // Bar chart: avg_price per kênh, màu theo index (xanh=re index≤95, đỏ=re ≥105, xanh dương=mid).
+  const sorted=[...channels].sort((a,b)=>a.avg_price-b.avg_price);
+  const chart=new ApexCharts(document.querySelector('#channelChart-apex'),{
+    chart:{ type:'bar', height:280, background:'transparent', toolbar:{show:false} },
+    theme:{ mode: isLight?'light':'dark' },
+    series:[{ name:t('colAvg'), data: sorted.map(c=>Math.round(c.avg_price)) }],
+    xaxis:{ categories: sorted.map(c=>c.channel), labels:{ style:{ colors:'#8b98a5', fontSize:'11px' }, rotate:-45 } },
+    yaxis:{ labels:{ style:{ colors:'#8b98a5' }, formatter:v=>fmt(v) } },
+    plotOptions:{ bar:{ borderRadius:4, distributed:true, columnWidth:'60%' } },
+    colors: sorted.map(c=> c.price_index>=105?'#f85149':(c.price_index<=95?'#2ea043':'#4f9cff')),
+    legend:{ show:false },
+    dataLabels:{ enabled:false },
+    grid:{ borderColor:'#2c3744' },
+    tooltip:{ theme: isLight?'light':'dark', y:{ formatter:v=>fmt(v) },
+      x:{ formatter:(_v, opts) => {
+        const c=sorted[opts.dataPointIndex];
+        return `${c.channel} · Index ${c.price_index} · n=${c.n}`;
+      }}},
+  });
+  chart.render();
 }
 function renderRegion(rg){
   const tb=$('#regTable tbody'); tb.innerHTML='';
@@ -604,10 +685,55 @@ function renderPromo(p){
     chip('TB giảm: '+(p.avg_discount_pct||0)+'%'),
     chip('Sâu nhất: '+(p.max_discount_pct||0)+'%'),
   ].join('');
+  renderPromoTypeChart(p.promotion_by_type||{});
+  renderPromoChannelChart(p.promotion_by_channel||[]);
   const tb=$('#promoTable tbody'); tb.innerHTML='';
   (p.promotions||[]).slice(0,12).forEach(r=>{
     tb.innerHTML+=`<tr><td>${esc(r.product)}</td><td><span class="chip">${esc(r.type)}</span></td><td class="mono">-${r.discount_pct}%</td><td class="mono">${fmt(r.promotion_price)}</td></tr>`;
   });
+}
+// Donut chart: phân bổ KM theo loại (Flash Sale / Campaign...).
+function renderPromoTypeChart(byType){
+  const el=$('#promoTypeChart');
+  const entries=Object.entries(byType);
+  if(!entries.length){ el.innerHTML='<div class="loading" style="font-size:11px;color:var(--muted);text-align:center;padding:40px 0">'+t('promoTypeTitle')+'</div>'; return; }
+  el.innerHTML='<div id="promoTypeChart-apex"></div>';
+  const isLight=document.documentElement.getAttribute('data-theme')==='light';
+  const chart=new ApexCharts(document.querySelector('#promoTypeChart-apex'),{
+    chart:{ type:'donut', height:200, background:'transparent' },
+    theme:{ mode: isLight?'light':'dark' },
+    series: entries.map(([_,n])=>n),
+    labels: entries.map(([k])=>k),
+    colors: ['#f85149','#4f9cff','#2ea043','#db8b1a','#7c5cff','#00d2d3'],
+    legend:{ position:'bottom', labels:{ colors:'#8b98a5' } },
+    dataLabels:{ enabled:true, style:{ colors:['#fff'] } },
+    plotOptions:{ pie:{ donut:{ size:'55%' } } },
+    tooltip:{ theme: isLight?'light':'dark', y:{ formatter:v=> v+' KM' } },
+    title:{ text:t('promoTypeTitle'), align:'center', style:{ color:'#8b98a5', fontSize:'11px', fontWeight:500 } },
+  });
+  chart.render();
+}
+// Bar chart: giảm giá TB (%) theo kênh — so sánh độ sâu khuyến mãi cross-channel.
+function renderPromoChannelChart(byChannel){
+  const el=$('#promoChannelChart');
+  if(!byChannel.length){ el.innerHTML='<div class="loading" style="font-size:11px;color:var(--muted);text-align:center;padding:40px 0">'+t('promoChannelTitle')+'</div>'; return; }
+  el.innerHTML='<div id="promoChannelChart-apex"></div>';
+  const isLight=document.documentElement.getAttribute('data-theme')==='light';
+  const chart=new ApexCharts(document.querySelector('#promoChannelChart-apex'),{
+    chart:{ type:'bar', height:200, background:'transparent', toolbar:{show:false} },
+    theme:{ mode: isLight?'light':'dark' },
+    series:[{ name:t('colDisc'), data: byChannel.map(c=>c.avg_discount_pct) }],
+    xaxis:{ categories: byChannel.map(c=>c.channel), labels:{ style:{ colors:'#8b98a5', fontSize:'10px' }, rotate:-45 } },
+    yaxis:{ labels:{ style:{ colors:'#8b98a5' }, formatter:v=>v+'%' } },
+    plotOptions:{ bar:{ borderRadius:3, columnWidth:'60%' } },
+    colors:['#7c5cff'],
+    legend:{ show:false },
+    dataLabels:{ enabled:false },
+    grid:{ borderColor:'#2c3744' },
+    tooltip:{ theme: isLight?'light':'dark', y:{ formatter:v=> v+'%' } },
+    title:{ text:t('promoChannelTitle'), align:'center', style:{ color:'#8b98a5', fontSize:'11px', fontWeight:500 } },
+  });
+  chart.render();
 }
 function chip(t){ return `<span class="chip">${t}</span>`; }
 

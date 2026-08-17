@@ -144,6 +144,7 @@ def price_trend(filters: dict[str, Any] | None = None,
     by_day_brand: dict[str, dict[str, list[float]]] = {}
     by_day_regular: dict[str, list[float]] = {}
     by_day_promo: dict[str, list[float]] = {}
+    by_day_channel: dict[str, dict[str, list[float]]] = {}
     for r in rows:
         day = r["observed_at"][:10]
         by_day.setdefault(day, []).append(float(r["effective_price"]))
@@ -152,6 +153,9 @@ def price_trend(filters: dict[str, Any] | None = None,
             by_day_promo.setdefault(day, []).append(float(r["promotion_price"]))
         if "brand_avg" in series:
             by_day_brand.setdefault(r["brand_id"], {}).setdefault(day, []).append(
+                float(r["effective_price"]))
+        if "channel_breakdown" in series and r["channel_id"]:
+            by_day_channel.setdefault(r["channel_id"], {}).setdefault(day, []).append(
                 float(r["effective_price"]))
 
     days = sorted(by_day.keys())
@@ -175,6 +179,21 @@ def price_trend(filters: dict[str, Any] | None = None,
         if "promotion_price" in series and day in by_day_promo:
             result["promotion_price"].append(
                 {"t": day, "v": round(statistics.mean(by_day_promo[day]), 2)})
+
+    # Channel breakdown: series per channel_id → [{t,v}] (giá TB ngày per kênh).
+    # Resolve tên hiển thị kênh để frontend vẽ legend trực tiếp.
+    if "channel_breakdown" in series and by_day_channel:
+        cid_rows = pi_store.fetch_all(
+            "SELECT channel_id, channel_name FROM pi_channels", [], path=path)
+        cid_name = {r["channel_id"]: r["channel_name"] for r in cid_rows}
+        chan_series: dict[str, list[dict[str, Any]]] = {}
+        for cid, dd in by_day_channel.items():
+            name = cid_name.get(cid, cid)
+            chan_series[name] = [
+                {"t": day, "v": round(statistics.mean(vals), 2)}
+                for day, vals in sorted(dd.items())
+            ]
+        result["channel_breakdown"] = chan_series  # type: ignore[assignment]
 
     return {"series": result, "points": len(days)}
 
@@ -475,6 +494,7 @@ def promotion_intelligence(filters: dict[str, Any] | None = None,
     discs = [float(r["discount_percent"]) for r in rows if r["discount_percent"] is not None]
     by_type: dict[str, int] = {}
     by_day: dict[str, list[float]] = {}
+    by_channel: dict[str, dict[str, float]] = {}
     for r in rows:
         if r["promotion_type"]:
             by_type[r["promotion_type"]] = by_type.get(r["promotion_type"], 0) + 1
@@ -482,14 +502,36 @@ def promotion_intelligence(filters: dict[str, Any] | None = None,
         if day and r["discount_percent"] is not None:
             # điểm = discount trung bình theo ngày
             by_day.setdefault(day, []).append(float(r["discount_percent"]))
+        if r["channel_id"] and r["discount_percent"] is not None:
+            agg = by_channel.setdefault(r["channel_id"], {"count": 0.0, "discounts": []})
+            agg["count"] += 1
+            agg["discounts"].append(float(r["discount_percent"]))
     best_day = None
     if by_day:
         best_day = max(by_day.items(), key=lambda kv: statistics.mean(kv[1]))[0]
+    # Resolve channel names + compute avg discount per channel for cross-channel chart.
+    cid_rows = pi_store.fetch_all(
+        "SELECT channel_id, channel_name FROM pi_channels", [], path=path)
+    cid_name = {r["channel_id"]: r["channel_name"] for r in cid_rows}
+    by_channel_out = [
+        {
+            "channel_id": cid,
+            "channel": cid_name.get(cid, cid),
+            "n": int(agg["count"]),
+            "avg_discount_pct": round(statistics.mean(agg["discounts"]), 2)
+                if agg["discounts"] else 0.0,
+            "max_discount_pct": round(max(agg["discounts"]), 2)
+                if agg["discounts"] else 0.0,
+        }
+        for cid, agg in by_channel.items()
+    ]
+    by_channel_out.sort(key=lambda x: x["avg_discount_pct"], reverse=True)
     return {
         "total_promotions": len(rows),
         "avg_discount_pct": round(statistics.mean(discs), 2) if discs else 0.0,
         "max_discount_pct": round(max(discs), 2) if discs else 0.0,
         "promotion_by_type": by_type,
+        "promotion_by_channel": by_channel_out,
         "best_day": best_day,
         "promotions": [
             {
