@@ -181,10 +181,16 @@ def test_extract_product_price_prefers_lon_over_thung():
 
 
 def test_extract_product_price_falls_back_to_thung_when_no_lon():
-    """Trang chỉ có thùng → extract lấy thùng (adapter sẽ chia 24)."""
+    """Trang chỉ có thùng + có pack token → extract chuẩn hoá về giá/lon
+    (PR #9). Chỉ fallback median thùng khi KHÔNG parse được pack."""
     from extensions.pi.price_extract import extract_product_price
 
+    # 432000 có "Thùng 24 lon" → /24 = 18000; 598800 chỉ "Thùng" (không số)
+    # → không parse được pack → fallback. Ưu tiên giá/lon từ 432000.
     html = "432.000₫ HEINEKEN ### Thùng 24 lon; 598.800₫ HEINEKEN ### Thùng"
     val = extract_product_price(html, brand="Heineken")
-    # Cả 2 đều > LON_MAX → median của [432000, 598800] = 598800
-    assert val == 598800.0
+    assert val == 18000.0  # 432000 / 24 — giá/LON apples-to-apples
+    # Khi KHÔNG có pack token nào → fallback median thùng (caller chia heuristic).
+    html2 = "432.000₫ HEINEKEN ### Thùng; 598.800₫ HEINEKEN ### Thùng"
+    val2 = extract_product_price(html2, brand="Heineken")
+    assert val2 == 598800.0  # median thùng (không parse được pack)

@@ -170,10 +170,34 @@ def test_extract_price_filters_hotline_garbage():
     from extensions.pi.price_extract import extract_product_price
     # Chỉ hotline → không có giá sản phẩm → None
     assert extract_product_price("Hotline: 1000 đ/phút (8-21h)") is None
-    # Hotline lẫn giá thật → trả giá thật, không trả 1000
+    # Hotline lẫn giá thật → lọc hotline, trả giá/lon (thùng 24 → /24)
     html = "598.800₫ HEINEKEN ### Thùng 24 lon; Hotline 1000 đ/phút"
     val = extract_product_price(html, brand="Heineken")
-    assert val == 598800.0
+    assert val == 24950.0  # 598800 / 24 lon — giá/LON apples-to-apples
+
+
+def test_extract_price_pack_aware_normalizes_box_to_lon():
+    """Trang search chỉ có item THÙNG (lon lẻ hết hàng) → trả giá/LON
+    bằng pack phát hiện từ context, không trả giá thùng (PR #9).
+    Sửa mismatch cho SP như Sư Tử Trắng, Huda.
+    """
+    from extensions.pi.price_extract import extract_product_price
+    # Chỉ 1 item thùng 24 lon, không có lon lẻ → 736000/24 ≈ 30667
+    html = "736.000₫ BIA SƯ TỬ TRẮNG ### Thùng 24 lon 330ml"
+    assert extract_product_price(html, brand="Sư") == 30666.67
+    # Thùng 12 lon → /12
+    html12 = "360.000₫ HUDA ### Thùng 12 lon 330ml"
+    assert extract_product_price(html12, brand="Huda") == 30000.0
+    # "x24" notation
+    htmlx = "598.800₫ HEINEKEN ### Bia lon x24"
+    assert extract_product_price(htmlx, brand="Heineken") == 24950.0
+
+
+def test_extract_price_prefers_lon_when_both_present():
+    """Trang có cả lon lẻ + thùng → vẫn ưu tiên lon (không chia)."""
+    from extensions.pi.price_extract import extract_product_price
+    html = "18.500₫ HEINEKEN ### Lon 330ml; 598.800₫ HEINEKEN ### Thùng 24 lon"
+    assert extract_product_price(html, brand="Heineken") == 18500.0
 
 
 def test_extract_price_brand_match_avoids_other_products():

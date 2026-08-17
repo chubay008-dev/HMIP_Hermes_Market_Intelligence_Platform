@@ -123,3 +123,24 @@ def test_notify_alert_respects_custom_cooldown_env(monkeypatch):
     assert r1 == {"discord": True, "telegram": True}
     assert r2 == {"discord": True, "telegram": True}
     assert len(sent) == 4
+
+
+def test_notify_alert_cooldown_persists_across_cache_clear(tmp_path, monkeypatch):
+    """State BỀN VỮNG (PR #9): sau khi notify, xoá cache in-memory (giả lập
+    restart Render) → cooldown vẫn sống (đọc từ DB) → alert cùng key bị skip.
+    """
+    notifier._set_state_db_path(str(tmp_path / "pi_state.db"))
+    notifier.reset_notify_state()
+    monkeypatch.setattr(notifier, "_maybe_load_env", lambda: None)
+    monkeypatch.setattr(notifier, "send_discord", lambda m: True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: True)
+
+    first = notifier.notify_alert(_alert(change_pct=10.0))
+    # Giả lập restart: xoá cache in-memory.
+    notifier._notify_state.clear()
+    # Cùng (sku,channel,region) trong cooldown → skip (đọc từ DB).
+    second = notifier.notify_alert(_alert(change_pct=12.0))
+
+    assert first == {"discord": True, "telegram": True}
+    assert second == {"discord": False, "telegram": False}
+    notifier._set_state_db_path(None)

@@ -29,9 +29,26 @@ _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 # sku/kênh/vùng, bỏ qua mọi alert khác cho chính cặp đó trong cooldown
 # này. Mặc định 6h (360') — đủ để bắt giá đổi thật sự, không phải noise
 # dao động qua lại trong ngày. Override qua env.
-# _notify_state[key] = epoch (s) của lần gửi thành công cuối. In-memory:
-# reset khi process restart (chấp nhận — scheduler chạy 1 process dài).
+#
+# State BỀN VỮNG (PR #9): ngoài cache in-memory (_notify_state), mốc
+# lần gửi cuối còn ghi vào bảng pi_notify_state (PI DB). Render free tier
+# ngủ/restart → cache in-memory mất → đọc lại từ DB → cooldown vẫn sống
+# (tránh re-notify toàn bộ alert mỗi lần restart). Cache in-memory chỉ
+# dùng để tránh round-trip DB cho mỗi alert trong cùng process dài.
 _notify_state: dict[str, float] = {}
+# path PI DB để ghi state bền vững. Khởi tạo lazy khi cần (tránh import
+# cycle + cho phép test override path qua _set_state_db_path).
+_state_db_path: str | None = None
+
+
+def _set_state_db_path(path: str | None) -> None:
+    """Override PI DB path cho state notify (test)."""
+    global _state_db_path
+    _state_db_path = path
+
+
+def _state_path() -> str | None:
+    return _state_db_path or os.getenv("HMIP_PI_DB_PATH") or None
 
 
 def _cooldown_seconds() -> float:
@@ -57,13 +74,39 @@ def _notify_key(alert: dict) -> str:
     )
 
 
+def _load_last_sent(key: str) -> float | None:
+    """Đọc mốc lần gửi cuối cho key: cache in-memory first, rồi DB.
+
+    Khi process restart (cache rỗng), đọc lại từ DB để cooldown sống qua
+    restart (Render free tier ngủ 15' rồi spin-up lại).
+    """
+    last = _notify_state.get(key)
+    if last is not None:
+        return last
+    # Cache miss → đọc DB (bền vững qua restart).
+    try:
+        from . import pi_store
+        rec = pi_store.get_notify_state(key, path=_state_path())
+        if rec and rec.get("last_sent_at"):
+            import datetime as _dt
+            try:
+                ts = _dt.datetime.fromisoformat(rec["last_sent_at"]).timestamp()
+                _notify_state[key] = ts  # populate cache
+                return ts
+            except (ValueError, TypeError):
+                return None
+    except Exception:
+        pass
+    return None
+
+
 def _is_suppressed_by_cooldown(alert: dict) -> bool:
     """True nếu alert này cho (sku,channel,region) đã được notify gần đây
     (trong cooldown window) → nên bỏ qua để chống spam."""
     key = _notify_key(alert)
     if not key.strip("|"):
         return False
-    last = _notify_state.get(key)
+    last = _load_last_sent(key)
     if last is None:
         return False
     return (time.time() - last) < _cooldown_seconds()
@@ -71,8 +114,26 @@ def _is_suppressed_by_cooldown(alert: dict) -> bool:
 
 def _record_notify_sent(alert: dict) -> None:
     key = _notify_key(alert)
-    if key.strip("|"):
-        _notify_state[key] = time.time()
+    if not key.strip("|"):
+        return
+    now = time.time()
+    _notify_state[key] = now
+    # Ghi DB (bền vững qua restart). best-effort — không block notify.
+    try:
+        from . import pi_store
+        price = alert.get("new_price")
+        try:
+            price_f = float(price) if price is not None else None
+        except (TypeError, ValueError):
+            price_f = None
+        pi_store.set_notify_state(
+            key, pi_store.NOTIFY_SCOPE_PI,
+            last_price=price_f,
+            last_decision=alert.get("event_type"),
+            path=_state_path(),
+        )
+    except Exception as exc:
+        log.debug("Notify state persist fail (non-fatal): %s", exc)
 
 
 def _alert_change_pct(alert: dict) -> float | None:
@@ -84,8 +145,20 @@ def _alert_change_pct(alert: dict) -> float | None:
 
 
 def reset_notify_state() -> None:
-    """Xoá state cooldown (cho test / chạy lại sạch)."""
+    """Xoá state cooldown (cho test / chạy lại sạch).
+
+    Xoá cache in-memory luôn. Chỉ xoá bảng DB khi đã set state path
+    (tránh tạo file hmip_pi.db rác trong cwd khi test chưa cấu hình path).
+    """
     _notify_state.clear()
+    p = _state_path()
+    if not p:
+        return
+    try:
+        from . import pi_store
+        pi_store.clear_notify_state(path=p)
+    except Exception:
+        pass
 
 # Load .hermes/.env nếu env thiếu (chỉ cho local dev; Render set sẵn env).
 def _maybe_load_env():

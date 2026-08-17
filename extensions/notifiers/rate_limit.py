@@ -16,9 +16,10 @@ gọi trước khi đẩy message đi:
 3. No-repeat: nếu cùng decision + giá không đổi (within 1%) → skip ngay cả
    khi hết cooldown (tránh lặp cùng trạng thái).
 
-State in-memory (`_state`), reset khi process restart. Chỉ ghi nhận khi
-notify thực sự diễn ra (gọi `mark_sent` sau khi ≥1 kênh gửi thành công)
-→ nếu fail thì alert sau vẫn thử lại.
+State BỀN VỮNG (PR #9): ngoài cache in-memory (_state), mốc lần gửi cuối
+còn ghi vào bảng pi_notify_state (PI DB, scope="scan"). Render free tier
+ngủ/restart → cache mất → đọc lại từ DB → cooldown vẫn sống (tránh re-notify
+toàn bộ alert mỗi lần restart). Cache in-memory chỉ tránh round-trip DB.
 
 Env:
     HMIP_SCAN_NOTIFY_COOLDOWN_MIN — phút cooldown (mặc định 360 = 6h; 0 = tắt).
@@ -35,6 +36,17 @@ log = logging.getLogger("hmip.notify.rate_limit")
 
 # (product_name) -> {"ts": float, "price": float|None, "decision": str}
 _state: dict[str, dict] = {}
+_state_db_path: str | None = None
+
+
+def _set_state_db_path(path: str | None) -> None:
+    """Override PI DB path cho state (test)."""
+    global _state_db_path
+    _state_db_path = path
+
+
+def _state_path() -> str | None:
+    return _state_db_path or os.getenv("HMIP_PI_DB_PATH") or None
 
 
 def _cooldown_secs() -> float:
@@ -52,8 +64,43 @@ def _min_pct() -> float:
 
 
 def reset() -> None:
-    """Xoá state (dùng trong test)."""
+    """Xoá state (dùng trong test). Xoá cache in-memory luôn; chỉ xoá bảng
+    DB khi đã set state path (tránh tạo file hmip_pi.db rác trong cwd)."""
     _state.clear()
+    p = _state_path()
+    if not p:
+        return
+    try:
+        from extensions.pi import pi_store
+        pi_store.clear_notify_state(path=p)
+    except Exception:
+        pass
+
+
+def _load_prev(product_name: str) -> dict | None:
+    """Đọc mốc notify cuối cho product_name: cache first, rồi DB (restart)."""
+    prev = _state.get(product_name)
+    if prev is not None:
+        return prev
+    try:
+        from extensions.pi import pi_store
+        rec = pi_store.get_notify_state(product_name, path=_state_path())
+        if rec and rec.get("last_sent_at"):
+            import datetime as _dt
+            try:
+                ts = _dt.datetime.fromisoformat(rec["last_sent_at"]).timestamp()
+            except (ValueError, TypeError):
+                return None
+            prev = {
+                "ts": ts,
+                "price": rec.get("last_price"),
+                "decision": rec.get("last_decision"),
+            }
+            _state[product_name] = prev  # populate cache
+            return prev
+    except Exception:
+        pass
+    return None
 
 
 def _price_changed_significantly(last: float | None, current) -> bool:
@@ -86,7 +133,7 @@ def allow(product_name: str, decision: str, price=None, delta_percent=None) -> b
 
     now = time.time()
     cooldown = _cooldown_secs()
-    prev = _state.get(product_name)
+    prev = _load_prev(product_name)
 
     # Chưa từng notify → cho phép (lần đầu phát hiện).
     if prev is None:
@@ -107,7 +154,10 @@ def allow(product_name: str, decision: str, price=None, delta_percent=None) -> b
 
 
 def mark_sent(product_name: str, decision: str, price=None) -> None:
-    """Ghi nhận đã gửi thành công (gọi sau khi ≥1 kênh gửi OK)."""
+    """Ghi nhận đã gửi thành công (gọi sau khi ≥1 kênh gửi OK).
+
+    Ghi cả cache in-memory VÀ DB (bền vững qua restart).
+    """
     try:
         p = float(price) if price is not None else None
     except (TypeError, ValueError):
@@ -117,3 +167,11 @@ def mark_sent(product_name: str, decision: str, price=None) -> None:
         "price": p,
         "decision": decision,
     }
+    try:
+        from extensions.pi import pi_store
+        pi_store.set_notify_state(
+            product_name, pi_store.NOTIFY_SCOPE_SCAN,
+            last_price=p, last_decision=decision, path=_state_path(),
+        )
+    except Exception as exc:
+        log.debug("scan notify state persist fail (non-fatal): %s", exc)

@@ -113,3 +113,28 @@ def test_no_mark_sent_when_both_fail(monkeypatch):
     monkeypatch.setattr(notify_pkg._discord, "notify", lambda *a, **k: False)
     notify_pkg.notify_all("ESCALATE", "Bia A", 400000.0, 2000.0, 18000.0)
     assert "Bia A" not in rate_limit._state
+
+
+def test_cooldown_persists_across_cache_clear(tmp_path):
+    """State BỀN VỮNG (PR #9): sau mark_sent, xoá cache in-memory (giả lập
+    restart Render) → cooldown vẫn sống (đọc từ DB) → alert cùng giá bị skip.
+    """
+    rate_limit.reset()
+    rate_limit._set_state_db_path(str(tmp_path / "scan_state.db"))
+    rate_limit.mark_sent("Bia A", "ESCALATE", 400000.0)
+    # Giả lập restart: xoá cache in-memory.
+    rate_limit._state.clear()
+    # Cùng giá, cùng decision ngay sau → skip (cooldown đọc từ DB).
+    assert rate_limit.allow("Bia A", "ESCALATE", 400000.0, 2000.0) is False
+    rate_limit._set_state_db_path(None)
+
+
+def test_cooldown_after_restart_allows_significant_change(tmp_path):
+    """Sau 'restart' (cache clear), giá đổi đáng kể → vẫn cho phép notify."""
+    rate_limit.reset()
+    rate_limit._set_state_db_path(str(tmp_path / "scan_state2.db"))
+    rate_limit.mark_sent("Bia A", "ESCALATE", 400000.0)
+    rate_limit._state.clear()
+    # Giá đổi 50% → đáng báo dù cooldown.
+    assert rate_limit.allow("Bia A", "ESCALATE", 600000.0, 3000.0) is True
+    rate_limit._set_state_db_path(None)
