@@ -162,7 +162,13 @@ def price_trend(filters: dict[str, Any] | None = None,
     out: dict[str, Any] = {"sku_price" if f.get("product_id") else "market_avg": []}
     # Build series
     result: dict[str, list[dict[str, Any]]] = {s: [] for s in series}
+    # Khi chưa chọn product_id, sku_price không có nghĩa (không có SKU cụ thể).
+    # Backfill sku_price = market_avg để chart "SKU" vẫn hiện đường giá thị trường
+    # TB thay vì trống — tránh user thấy chart "không có dữ liệu" khi vào trang lần đầu.
+    sku_backfill = "sku_price" in series and not f.get("product_id")
     for day in days:
+        if sku_backfill:
+            result["sku_price"].append({"t": day, "v": round(statistics.mean(by_day[day]), 2)})
         if "sku_price" in series and f.get("product_id"):
             result["sku_price"].append({"t": day, "v": round(statistics.mean(by_day[day]), 2)})
         if "market_avg" in series:

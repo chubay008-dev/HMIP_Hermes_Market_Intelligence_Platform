@@ -167,11 +167,11 @@
     <div class="card">
       <h3 data-i18n="priceTrend">📈 Price Trend</h3>
       <div class="toggle-row" id="trendToggles">
-        <span class="toggle on" data-s="sku_price">SKU</span>
+        <span class="toggle" data-s="sku_price">SKU</span>
         <span class="toggle on" data-s="market_avg" data-i18n="market">Thị trường</span>
         <span class="toggle" data-s="brand_avg" data-i18n="brandAvg">Brand</span>
-        <span class="toggle" data-s="regular_price" data-i18n="regular">Regular</span>
-        <span class="toggle" data-s="promotion_price" data-i18n="promotion">Promotion</span>
+        <span class="toggle on" data-s="regular_price" data-i18n="regular">Regular</span>
+        <span class="toggle on" data-s="promotion_price" data-i18n="promotion">Promotion</span>
         <span class="toggle" data-s="channel_breakdown" data-i18n="byChannel">Theo kênh</span>
       </div>
       <div id="trendChart"></div>
@@ -257,7 +257,7 @@
 
 <script>
 const API = "";
-let state = { filters:{}, trendSeries:["sku_price","market_avg"] };
+let state = { filters:{}, trendSeries:["market_avg","regular_price","promotion_price"] };
 const $ = s => document.querySelector(s);
 const fmt = n => n==null ? "—" : new Intl.NumberFormat('vi-VN').format(Math.round(n)) + " ₫";
 const pct = n => n==null ? "—" : (n>=0?"+":"") + n.toFixed(1) + "%";
@@ -506,16 +506,19 @@ async function loadAll(){
   let ws;
   try { ws = await api('/api/price-intelligence/workspace?'+qs(f)); }
   catch(e){ $('#kpis').innerHTML='<div class="err">'+t('errLoad')+esc(e.message)+'<br>'+t('seedFirst')+'</div>'; return; }
-  renderKPIs(ws.kpi);
-  renderTrend(ws.trend);
-  renderIndex(ws.index);
-  renderCompetitor(ws.competitor);
-  renderChannel(ws.channel);
-  renderRegion(ws.region);
-  renderPositioning(ws.positioning);
-  renderPromo(ws.promotions);
-  renderEvents(ws.events);
-  renderAlerts(ws.alerts);
+  // Mỗi render bọc try/catch: 1 chart fail không làm hỏng phần còn lại
+  // (vd ApexCharts chưa load xong → lineChart throw → không halts loadAll).
+  const safe=(fn)=>{ try{ fn(); }catch(e){ console.warn('render err',e); } };
+  safe(()=>renderKPIs(ws.kpi));
+  safe(()=>renderTrend(ws.trend));
+  safe(()=>renderIndex(ws.index));
+  safe(()=>renderCompetitor(ws.competitor));
+  safe(()=>renderChannel(ws.channel));
+  safe(()=>renderRegion(ws.region));
+  safe(()=>renderPositioning(ws.positioning));
+  safe(()=>renderPromo(ws.promotions));
+  safe(()=>renderEvents(ws.events));
+  safe(()=>renderAlerts(ws.alerts));
 }
 function qs(f){ return new URLSearchParams(f).toString(); }
 
@@ -539,8 +542,14 @@ function kpi(lbl,val,cls){
 function lineChart(container, series, opts){
   // series: {name:[{t,v}], ...}; opts:{colors}
   const colors = opts.colors || ['#4f9cff','#7c5cff','#2ea043','#db8b1a','#f85149'];
-  const labels = Object.values(series)[0] ? Object.values(series)[0].map(p=>p.t) : [];
-  const apexSeries = Object.entries(series).map(([name,arr])=>({
+  // Lọc series trống (vd sku_price khi chưa chọn SKU) để không vẽ đường rỗng.
+  const populated = Object.fromEntries(Object.entries(series).filter(([_,arr])=>arr && arr.length));
+  if(!Object.keys(populated).length){
+    $(container).innerHTML='<div class="loading">'+(t('chooseSeries')||'Chọn chuỗi dữ liệu để hiển thị.')+'</div>';
+    return null;
+  }
+  const labels = Object.values(populated)[0].map(p=>p.t);
+  const apexSeries = Object.entries(populated).map(([name,arr])=>({
     name, data: arr.map(p=>p.v)
   }));
   const el = $(container);
@@ -561,6 +570,7 @@ function lineChart(container, series, opts){
   chart.render();
   // re-render on theme toggle
   $(container)._apex = chart;
+  return chart;
 }
 
 function renderTrend(t){
