@@ -25,7 +25,7 @@ from typing import Any
 import requests
 
 from .collectors import PricePoint, _parse_pack_volume, _REQ_GAP_S, store_price_point
-from .price_extract import extract_product_price
+from .price_extract import extract_product_price, _resolve_base_price
 
 log = logging.getLogger("hmip.jina")
 
@@ -53,7 +53,8 @@ class JinaCollector:
             log.warning("Tiki API err: %s", exc)
             return None, None
 
-    def scrape_price(self, product_url: str, brand: str | None = None) -> float | None:
+    def scrape_price(self, product_url: str, brand: str | None = None,
+                     product_id: str | None = None) -> float | None:
         """Scrape Tiki qua Jina Reader, trả giá sản phẩm hợp lệ (hoặc None).
 
         Jina Reader KHÔNG render JS → trang search/product Tiki (SPA) không
@@ -64,12 +65,15 @@ class JinaCollector:
 
         brand: tên sản phẩm mục tiêu → ưu tiên giá có brand keyword gần
         (tránh lấy median của toàn bộ sản phẩm trên trang search).
+        product_id: truyền để resolve base_price từ catalog → suy pack từ
+        tỷ số giá thùng/base khi context HTML không nêu rõ pack (PR #11).
         """
         try:
             r = requests.get(JINA + product_url, headers={"Accept": "text/plain"}, timeout=45)
             if r.status_code != 200:
                 return None
-            return extract_product_price(r.text, brand=brand)
+            base = _resolve_base_price(product_id, brand or "") if product_id else None
+            return extract_product_price(r.text, brand=brand, base_price=base)
         except Exception as exc:
             log.warning("Jina err: %s", exc)
             return None
@@ -80,7 +84,7 @@ class JinaCollector:
         from .channels import get_channel
         chan = channel or get_channel("TIKI")
         search_url = chan.search_url(product_name)
-        price = self.scrape_price(search_url, brand=product_name)
+        price = self.scrape_price(search_url, brand=product_name, product_id=product_id)
         if not price:
             return None
         pack, v = _parse_pack_volume(product_name)

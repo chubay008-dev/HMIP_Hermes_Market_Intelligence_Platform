@@ -113,10 +113,11 @@ def test_notify_alert_respects_custom_min_pct_env(monkeypatch):
 
 
 def test_notify_alert_respects_custom_cooldown_env(monkeypatch):
-    """HMIP_NOTIFY_COOLDOWN_MIN=0 + HMIP_NOTIFY_SKU_COOLDOWN_MIN=0 → không cooldown,
-    alert lặp vẫn gửi."""
+    """HMIP_NOTIFY_COOLDOWN_MIN=0 + HMIP_NOTIFY_SKU_COOLDOWN_MIN=0 +
+    HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN=0 → không cooldown, alert lặp vẫn gửi."""
     monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
     monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN", "0")
     sent = []
     monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
     monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
@@ -221,8 +222,10 @@ def test_per_sku_cooldown_independent_per_sku(monkeypatch):
 
 
 def test_per_sku_cooldown_disabled(monkeypatch):
-    """HMIP_NOTIFY_SKU_COOLDOWN_MIN=0 → tắt per-sku, multi-channel gửi hết."""
+    """HMIP_NOTIFY_SKU_COOLDOWN_MIN=0 + HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN=0
+    → tắt per-sku + per-product, multi-channel gửi hết."""
     monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN", "0")
     monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
     sent = []
     monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
@@ -327,3 +330,96 @@ def test_shopee_collector_no_key_falls_back_to_jina(monkeypatch):
     result = sc.collect("P1", "Heineken 330ml")
     # Jina trả None (không raise) → result None.
     assert result is None
+
+
+# ---- Tests: per-product cooldown (PR #11) ----
+
+def test_per_product_cooldown_suppresses_multi_channel_region(monkeypatch):
+    """Per-product cooldown (PR #11): 1 SP đổi giá trên nhiều kênh+vùng khác
+    cùng lúc → chỉ alert đầu gửi, các alert sau (cùng product_name, khác
+    channel/region) bị skip trong cửa sổ per-product.
+
+    Trước fix: 18 kênh × 5 vùng = 90 alerts possible (per-channel 6h chỉ
+    gộp từng cặp). Sau fix: per-product gộp tất cả thành 1.
+    """
+    monkeypatch.setenv("HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN", "240")
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
+    sent = []
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    a1 = _alert(sku="SKU-1", channel="TIKI", region="HCMC", change_pct=15.0)
+    a1["product_name"] = "Bia Huda 330ml"
+    a2 = _alert(sku="SKU-1", channel="SHOPEE", region="HANOI", change_pct=15.0)
+    a2["product_name"] = "Bia Huda 330ml"
+    a3 = _alert(sku="SKU-1", channel="LAZADA", region="DANANG", change_pct=15.0)
+    a3["product_name"] = "Bia Huda 330ml"
+
+    r1 = notifier.notify_alert(a1)
+    r2 = notifier.notify_alert(a2)
+    r3 = notifier.notify_alert(a3)
+
+    assert r1 == {"discord": True, "telegram": True}
+    assert r2 == {"discord": False, "telegram": False}
+    assert r3 == {"discord": False, "telegram": False}
+    assert len(sent) == 2
+
+
+def test_per_product_cooldown_allows_different_products(monkeypatch):
+    """Per-product cooldown chỉ skip cùng product_name — SP khác vẫn gửi."""
+    monkeypatch.setenv("HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN", "240")
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
+    sent = []
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    a1 = _alert(sku="SKU-1", channel="TIKI", change_pct=15.0)
+    a1["product_name"] = "Bia Huda 330ml"
+    a2 = _alert(sku="SKU-2", channel="TIKI", change_pct=15.0)
+    a2["product_name"] = "Bia Larue 330ml"
+
+    r1 = notifier.notify_alert(a1)
+    r2 = notifier.notify_alert(a2)
+
+    assert r1 == {"discord": True, "telegram": True}
+    assert r2 == {"discord": True, "telegram": True}
+    assert len(sent) == 4
+
+
+def test_per_product_cooldown_disabled(monkeypatch):
+    """HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN=0 → tắt per-product, multi-channel gửi hết."""
+    monkeypatch.setenv("HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
+    sent = []
+    monkeypatch.setattr(notifier, "send_discord", lambda m: sent.append(m) or True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: sent.append(m) or True)
+
+    a1 = _alert(sku="SKU-1", channel="TIKI", change_pct=15.0)
+    a1["product_name"] = "Bia Huda 330ml"
+    a2 = _alert(sku="SKU-1", channel="SHOPEE", change_pct=15.0)
+    a2["product_name"] = "Bia Huda 330ml"
+
+    r1 = notifier.notify_alert(a1)
+    r2 = notifier.notify_alert(a2)
+
+    assert r1 == {"discord": True, "telegram": True}
+    assert r2 == {"discord": True, "telegram": True}
+    assert len(sent) == 4
+
+
+def test_min_change_default_is_8_pct(monkeypatch):
+    """PR #11: min-change default tăng từ 5→8% (giảm noise 5-8%)."""
+    monkeypatch.delenv("HMIP_NOTIFY_MIN_PCT", raising=False)
+    monkeypatch.setenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN", "0")
+    monkeypatch.setenv("HMIP_NOTIFY_COOLDOWN_MIN", "0")
+    monkeypatch.setattr(notifier, "send_discord", lambda m: True)
+    monkeypatch.setattr(notifier, "send_telegram", lambda m: True)
+
+    r1 = notifier.notify_alert(_alert(change_pct=7.0))
+    r2 = notifier.notify_alert(_alert(change_pct=8.0))
+    assert r1 == {"discord": False, "telegram": False}
+    assert r2 == {"discord": True, "telegram": True}

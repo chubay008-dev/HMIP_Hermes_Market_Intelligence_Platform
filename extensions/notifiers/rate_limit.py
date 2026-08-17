@@ -66,11 +66,15 @@ def _min_pct() -> float:
 def _cross_cooldown_secs() -> float:
     """Cửa sổ cooldown cross-hệ (giây). Đọc HMIP_NOTIFY_SKU_COOLDOWN_MIN
     (cùng env với hệ 1 PI collect) để 2 hệ dùng chung cửa sổ → hệ nào gửi
-    trước, hệ kia skip. 0 = tắt cross-hệ."""
+    trước, hệ kia skip. 0 = tắt cross-hệ.
+
+    PR #11: đồng bộ default với notifier.py (120' thay vì 30') — 30' quá
+    ngắn, sau 30' 2 hệ gửi lại cho cùng SP → vẫn spam.
+    """
     try:
-        return float(os.getenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "30")) * 60.0
+        return float(os.getenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "120")) * 60.0
     except ValueError:
-        return 30.0 * 60.0
+        return 120.0 * 60.0
 
 
 def reset() -> None:

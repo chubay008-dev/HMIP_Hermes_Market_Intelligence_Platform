@@ -217,12 +217,12 @@ def test_cross_scope_allows_when_window_expired(tmp_path, monkeypatch):
 
     from extensions.pi import pi_store
 
-    old = (_dt.datetime.now(_dt.UTC) - _dt.timedelta(hours=1)).isoformat()
+    old = (_dt.datetime.now(_dt.UTC) - _dt.timedelta(hours=3)).isoformat()
     pi_store.set_notify_state(
         "prod:Bia Larue", "pi-sku", last_decision="PRICE_INCREASE",
         path=dbp,
     )
-    # Ghi đè last_sent_at cũ (1h trước) bằng UPDATE trực tiếp.
+    # Ghi đè last_sent_at cũ (3h trước) bằng UPDATE trực tiếp.
     with _sqlite3.connect(dbp) as c:
         c.execute(
             "UPDATE pi_notify_state SET last_sent_at=? WHERE state_key=?",
@@ -230,7 +230,7 @@ def test_cross_scope_allows_when_window_expired(tmp_path, monkeypatch):
         )
     notifier._sku_notify_state.clear()
 
-    # Cửa sổ 30' đã hết (mốc 1h trước) → Hệ 2 cho phép.
+    # Cửa sổ cross-hệ (mặc định 120'=2h) đã hết (mốc 3h trước) → Hệ 2 cho phép.
     r2 = rate_limit.allow("Bia Larue", "ESCALATE", price=19800, delta_percent=10.0)
     assert r2 is True
     notifier._set_state_db_path(None)
