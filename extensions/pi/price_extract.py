@@ -14,6 +14,28 @@ _NOISE_TOKENS = ("phút", "phí", "ship", "đánh giá", "lượt", "review", "�
 
 MIN_PRICE = 5000.0
 MAX_PRICE = 2_000_000.0
+# Giá 1 lon bia VN tối đa ~50.000đ (bia cao cấp). Giá > LON_MAX gần như chắc
+# chắn là thùng/pack — khi trang search có cả lon lẻ + thùng, ưu tiên lon để
+# so sánh apples-to-apples với base_price (ref_price là giá 1 lon).
+LON_MAX = 50000.0
+
+
+def _median(values: list[float]) -> float:
+    values.sort()
+    return values[len(values) // 2]
+
+
+def _pick_price(values: list[float]) -> float:
+    """Ưu tiên nhóm giá LON (≤ LON_MAX) nếu có — tránh lấy thùng khi có lon lẻ.
+
+    Trang search Tiki thường có cả lon lẻ (~18-40k) và thùng (~400-700k).
+    base_price là giá lon nên phải lấy lon. Nếu không có lon → fallback
+    median toàn bộ (thùng) — adapter sẽ chia pack 24 (heuristic).
+    """
+    lon = [v for v in values if v <= LON_MAX]
+    if lon:
+        return _median(lon)
+    return _median(values)
 
 
 def extract_product_price(html_or_md: str,
@@ -59,9 +81,7 @@ def extract_product_price(html_or_md: str,
             if primary_kw in ctx_after_wide:
                 brand_matches.append(val)
     if brand_matches:
-        brand_matches.sort()
-        return brand_matches[len(brand_matches) // 2]
+        return _pick_price(brand_matches)
     if not candidates:
         return None
-    candidates.sort()
-    return candidates[len(candidates) // 2]
+    return _pick_price(candidates)
