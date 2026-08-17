@@ -362,7 +362,7 @@ HMIP/
 
 ## 15. Chiến lược kiểm thử (testing)
 
-**Pytest**, 37 file test, **58 pass / 1 skip** (extensions/tests), **257 pass / 11 fail** (toàn bộ khi chạy `python -m pytest` với coverage gate). `[VERIFIED]` — chạy trực tiếp (Python 3.13). 5 test mới cho `price_extract` (filter hotline + brand matching) và `persistent_collector` (marker + incremental + notify) đã thêm vào `extensions/tests/test_pi.py`.
+**Pytest**, **415 pass / 1 skip**, coverage **94.28%** (gate ≥80%). `[VERIFIED]` — chạy trực tiếp (Python 3.13, 2026-08-17). Test PI mở rộng qua các PR: `price_extract` (filter hotline + brand matching + pack-aware), `persistent_collector` (marker + incremental + notify + **so sánh per-lon PR #13**), `test_pack_normalize` (clamp pack PR #13), `test_notify_rate_limit_sys2` (guard "tham chiếu" absent), `test_pi` (+5 test PR #12: brand Unknown/promo/channels/migrate_brand_ids).
 
 **Phân loại:** `[VERIFIED]` — `tests/`, `extensions/tests/`, `domains/beer/pricing/tests/`
 - `tests/unit/` — core (bootstrap, config, registry, planner, executor, workflow, event_bus, lineage, models, ontology, health, readiness, platform_bootstrap, context)
@@ -375,7 +375,7 @@ HMIP/
 
 **Cổng coverage:** ≥80% (unit), ≥90% (workflow critical, review thủ công). `[VERIFIED]` — `pyproject.toml`.
 
-**Trạng thái test hiện tại (cần lưu ý):** 11 test **đang fail**. Nguyên nhân được xác nhận: master data `knowledge/master/*.json` đã được cập nhật sang tên tiếng Việt (vd "Bia Sài Gòn") nhưng test vẫn assert tên tiếng Anh cũ ("Saigon Beer") — đây là **mismatch data/test**, không phải lỗi runtime của app. Các test PRC-001 end-to-end cũng fail theo dây chuyền vì enrich task dựa vào ontology master data mới. `[VERIFIED]` — traceback trực tiếp. Đây là nợ kỹ thuật (xem mục 19).
+**Trạng thái test hiện tại:** **415 pass / 1 skip**, coverage 94.28% (gate ≥80%). `[VERIFIED]` — chạy `python -m pytest` trực tiếp (2026-08-17, sau PR #12 + #13). Lịch sử: 11 test từng fail do master data `knowledge/master/*.json` đổi sang tên tiếng Việt ("Bia Sài Gòn") nhưng test assert tiếng Anh cũ — **đã sửa (2026-08-16)** bằng đồng bộ mock adapter + assertion + golden dataset. Không còn test fail.
 
 ---
 
@@ -438,7 +438,7 @@ HMIP/
 
 ## 19. Nợ kỹ thuật (technical debt)
 
-1. **11 test đang fail** (mismatch master data tiếng Việt vs assert tiếng Anh cũ). `[VERIFIED]` — chạy test trực tiếp. Cần cập nhật assertion hoặc giữ master data tiếng Anh.
+1. **~~11 test đang fail~~ (ĐÃ SỬA 2026-08-16):** mismatch master data tiếng Việt vs assert tiếng Anh cũ. Đã đồng bộ mock collect adapter + assertion + golden dataset. Suite hiện **415 pass / 1 skip** (sau PR #12 + #13). `[VERIFIED]`.
 2. **API không tuân contract:** `04_API_Contract.md` (base `/api/v1`, response envelope) vs thực tế (`/api`, dict thẳng). `[VERIFIED]`.
 3. **Orphaned `platform/` folder:** ADR-010 ghi rõ folder `platform/` cũ vẫn còn trên disk (tools không xoá được), phải xoá thủ công trước khi chạy test. `[VERIFIED]` — `SPRINT_6_STATUS.md`, `ADR_010`. *(Lưu ý: trong clone này, thư mục `platform/` không còn — chỉ còn `platform_/`.)*
 4. **Secret resolution stub:** `_resolve_secrets()` là pass-through. `[VERIFIED]` — `core/config.py`.

@@ -75,5 +75,6 @@ Chạy full suite: `uv run ruff check . && uv run mypy . && uv run pytest -v`
 - Build Docker thật chưa được xác nhận chạy (`docker build -t hmip:dev .`).
 - Chưa có LLM thật cho extraction (đang deterministic — xem `SPRINT_3_PRC001_STATUS.md`).
 - Chưa có adapter HTTP thật cho collect (đang mock — xem `domains/beer/pricing/skills/collect_price.py`).
-- ~~Chưa có CI pipeline file.~~ **Đã thêm (2026-08-16):** `.github/workflows/ci.yml` — ruff (kernel+tests) + mypy strict (kernel) + pytest (coverage gate 80%).
-- Chưa có secret provider thật (`HMIP_SECRET_PROVIDER` mới chỉ là placeholder).
+- ~~Chưa có CI pipeline file.~~ **Đã thêm (2026-08-16):** `.github/workflows/ci.yml` — ruff (kernel+tests) + mypy strict (kernel) + pytest (coverage gate 80%). **Đã xanh qua PR #12 (#53845ab) + PR #13 (#02fa68c, 415 pass / 1 skip, coverage 94.28%)** (2026-08-17).
+- ~~Chưa có secret provider thật~~ (`HMIP_SECRET_PROVIDER` mới chỉ là placeholder) — vẫn mở.
+- ~~Lỗi hiển thị giá sai trong tin nhắn cảnh báo~~ (pack-mismatch `-98.67%` giả, "Giá thùng (450 lon)") — **ĐÃ SỬA (PR #13, 2026-08-17):** so sánh + alert trên giá/LON, clamp pack `{6,12,24}`, "Giá thùng (24 lon)" cố định. Xem `AGENTS.md` mục "Thu thập giá thật (PI)" + "Hai hệ thống notify".
