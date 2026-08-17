@@ -148,11 +148,20 @@ def test_collector_tiki_real(db, monkeypatch):
     assert obs[0]["normalized_price"] > 0
     k = an.kpi_overview(path=tdb)
     assert k["observation_count"] >= 1
+    # Shopee collector delegate sang tier chain (ScraperAPI/ZenRows/Jina) —
+    # không còn raise NotImplementedError. Không có key → trả None (không raise).
+    for _k in ("SCRAPERAPI_KEY", "ZENROWS_KEY", "FIRECRAWL_API_KEY"):
+        os.environ.pop(_k, None)
+    # Monkeypatch JinaCollector.collect để không gọi mạng thật.
+    from extensions.pi.jina_collector import JinaCollector
+    orig = JinaCollector.collect
+    JinaCollector.collect = lambda self, pid, name, ref_vol=330, channel=None: None
     try:
-        col.collect_product("SHOPEE", "P456", "Heineken Lager 330ml")
-        assert False, "Shopee phải raise NotImplementedError"
-    except NotImplementedError:
-        pass
+        pp_shopee = col.collect_product("SHOPEE", "P456", "Heineken Lager 330ml")
+    finally:
+        JinaCollector.collect = orig
+    # Trả None (không có key, Jina trả None) — không raise.
+    assert pp_shopee is None
     os.remove(tdb)
 
 

@@ -33,6 +33,8 @@ services:
         value: "360"                    # quét gia tăng mỗi 6h (chỉ ghi khi giá đổi + notify; tiết kiệm credit)
       - key: HMIP_CHANNELS
         value: "tiki,shopee,lazada"     # kênh thu thập: tiki (API JSON), shopee/lazada (HTML search). Mỗi kênh = observation riêng → so sánh cross-channel.
+      - key: HMIP_NOTIFY_SKU_COOLDOWN_MIN
+        value: "30"                    # anti-spam multi-channel: 1 SP đổi giá trên nhiều kênh → chỉ kênh đầu notify (30'). 0 = tắt.
       - key: TELEGRAM_HMIP_MARKET_BOT
         sync: false                     # 🔒 SECRET — token bot HMIP Market (Discord/Telegram alert). Điền tại Render Dashboard.
       - key: TELEGRAM_CHAT_ID

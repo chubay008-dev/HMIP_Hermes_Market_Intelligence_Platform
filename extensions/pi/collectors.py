@@ -178,34 +178,75 @@ class TikiCollector:
 
 
 class ShopeeCollector:
-    """Stub — Shopee chặn scrape công khai (cần cookie/csrf động + proxy).
+    """Collector Shopee — delegate sang tier chain (ScraperAPI render JS).
 
-    Hoàn thiện sau: dùng Shopee Partner/Affiliate API (cần đăng ký seller
-    app -> app-key/secret) hoặc headless browser xoay cookie. Không scrape
-    liều từ server đơn vì sẽ bị block IP.
+    Shopee chặn scrape công khai + có bot protection mạnh. Thay vì raise
+    NotImplementedError, delegate sang ScraperAPICollector.collect_html(channel=SHOPEE)
+    (render JS qua proxy residential) → extract_product_price parse giá.
+    Nếu ScraperAPI không cấu hình → fallback ZenRows → Jina (qua tier chain).
     """
 
     source = "shopee"
 
     def collect(self, product_id: str, product_name: str, ref_vol: int = 330):
-        raise NotImplementedError(
-            "Shopee cần Partner API key hoặc cookie động + proxy. "
-            "Xem Hướng dẫn: đăng ký Shopee Open Platform, đặt env "
-            "SHOPEE_API_KEY, rồi implement collect() qua /api/v4/search."
-        )
+        from .channels import get_channel
+        from .scraperapi_collector import ScraperAPICollector
+        col = ScraperAPICollector()
+        if col.api_key:
+            chan = get_channel("SHOPEE")
+            pp = col.collect_html(product_id, product_name, chan, ref_vol)
+            if pp:
+                return pp
+        # Fallback: ZenRows (render JS).
+        try:
+            from .zenrows_collector import ZenRowsCollector
+            zr = ZenRowsCollector()
+            if zr.api_key:
+                return zr.collect(product_id, product_name, ref_vol,
+                                  channel=get_channel("SHOPEE"))
+        except Exception:
+            pass
+        # Fallback cuối: Jina (không render JS — thường None cho SPA Shopee).
+        try:
+            from .jina_collector import JinaCollector
+            return JinaCollector().collect(product_id, product_name, ref_vol,
+                                           channel=get_channel("SHOPEE"))
+        except Exception:
+            return None
 
 
 class LazadaCollector:
-    """Stub — Lazada có bot protection (Akamai), cần Open Platform key."""
+    """Collector Lazada — delegate sang tier chain (ScraperAPI render JS).
+
+    Lazada có Akamai bot protection. Delegate sang ScraperAPICollector.collect_html
+    (channel=LAZADA) → extract_product_price. Fallback ZenRows → Jina.
+    """
 
     source = "lazada"
 
     def collect(self, product_id: str, product_name: str, ref_vol: int = 330):
-        raise NotImplementedError(
-            "Lazada cần Lazada Open Platform app key/secret. "
-            "Đăng ký developer app, đặt env LAZADA_API_KEY, implement qua "
-            "Lazada API /products/search."
-        )
+        from .channels import get_channel
+        from .scraperapi_collector import ScraperAPICollector
+        col = ScraperAPICollector()
+        if col.api_key:
+            chan = get_channel("LAZADA")
+            pp = col.collect_html(product_id, product_name, chan, ref_vol)
+            if pp:
+                return pp
+        try:
+            from .zenrows_collector import ZenRowsCollector
+            zr = ZenRowsCollector()
+            if zr.api_key:
+                return zr.collect(product_id, product_name, ref_vol,
+                                  channel=get_channel("LAZADA"))
+        except Exception:
+            pass
+        try:
+            from .jina_collector import JinaCollector
+            return JinaCollector().collect(product_id, product_name, ref_vol,
+                                           channel=get_channel("LAZADA"))
+        except Exception:
+            return None
 
 
 COLLECTORS = {
@@ -221,8 +262,6 @@ def collect_product(channel: str, product_id: str, product_name: str, ref_vol: i
         return None
     try:
         return cls().collect(product_id, product_name, ref_vol)
-    except NotImplementedError:
-        raise
     except Exception as exc:
         log.warning("%s collect failed for %s: %s", channel, product_id, exc)
         return None
@@ -374,8 +413,8 @@ def store_price_point(pp: PricePoint, today: str | None = None, path: str | None
 def collect_realtime(channel: str = "TIKI", limit: int | None = None, path: str | None = None) -> dict[str, Any]:
     """Quét giá thật cho catalog, lưu vào PI DB.
 
-    Trả summary: {collected, failed, total}. Chỉ Tiki hoạt động; Shopee/Lazada
-    sẽ raise NotImplementedError (bắt ở caller).
+    Trả summary: {collected, failed, total}. Tiki dùng API JSON; Shopee/Lazada
+    delegate sang tier chain (ScraperAPI/ZenRows/Jina render JS).
     """
     from extensions.default_products import DEFAULT_PRODUCTS
 
@@ -390,8 +429,9 @@ def collect_realtime(channel: str = "TIKI", limit: int | None = None, path: str 
         name = str(meta["product_name"])
         try:
             pp = collect_product(channel, pid, name)
-        except NotImplementedError as exc:
-            raise
+        except Exception as exc:
+            log.warning("%s collect %s err: %s", channel, pid, exc)
+            pp = None
         if pp:
             store_price_point(pp)
             collected += 1
