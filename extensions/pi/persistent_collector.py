@@ -169,15 +169,27 @@ def store_price_point_if_changed(
     if notify and result["changed"] and result["old_price"]:
         try:
             from . import notifier
+            from .models import DEFAULT_THRESHOLDS, Severity
             old = result["old_price"]
             new = result["new_price"]
             change = (new - old) / old * 100.0 if old else 0.0
+            change_abs = abs(change)
+            # Severity theo magnitude thực (không cứng CRITICAL) để message
+            # phản ánh đúng mức độ; filter min-change/cooldown ở notify_alert.
+            if change_abs >= DEFAULT_THRESHOLDS["high"]:
+                sev = Severity.CRITICAL
+            elif change_abs >= DEFAULT_THRESHOLDS["medium"]:
+                sev = Severity.HIGH
+            elif change_abs >= DEFAULT_THRESHOLDS["low"]:
+                sev = Severity.MEDIUM
+            else:
+                sev = Severity.LOW
             alert = {
                 "event_type": "PRICE_INCREASE" if change > 0 else "PRICE_DECREASE",
                 "sku_id": pp.sku_id, "product_name": pp.product_id,
                 "channel_id": pp.channel_id, "region_id": pp.region_id,
                 "old_price": round(old, 2), "new_price": round(new, 2),
-                "change_pct": round(change, 2), "severity": "CRITICAL",
+                "change_pct": round(change, 2), "severity": sev.value,
                 "timestamp": _now_iso(),
                 "source": pp.source,
             }

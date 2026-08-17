@@ -35,7 +35,7 @@ def test_collect_price_adapter_health_is_true() -> None:
 def test_collect_price_adapter_fetch_returns_known_product() -> None:
     payload = CollectPriceAdapter().fetch({"product_id": "P123", "source": "shopee"})
 
-    assert payload["brand"] == "Saigon Beer"
+    assert payload["brand"] == "Bia Sài Gòn"
     assert payload["product_id"] == "P123"
     assert "fetched_at" in payload
 

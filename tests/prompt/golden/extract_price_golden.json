@@ -7,7 +7,7 @@
       "name": "saigon_beer_standard",
       "input": {
         "product_id": "P123",
-        "brand": "Saigon Beer",
+        "brand": "Bia Sài Gòn",
         "product_name": "Saigon Special 330ml",
         "price_text": "18,500",
         "currency": "VND",
@@ -20,7 +20,7 @@
       "expected": {
         "product_id": "P123",
         "sku": null,
-        "brand": "Saigon Beer",
+        "brand": "Bia Sài Gòn",
         "product_name": "Saigon Special 330ml",
         "price": 18500.0,
         "currency": "VND",

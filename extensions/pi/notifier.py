@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 
 import requests
 
@@ -22,6 +23,69 @@ _DISCORD_API = "https://discord.com/api/v10"
 _DISCORD_MSG = _DISCORD_API + "/channels/{channel_id}/messages"
 _DISCORD_DM = _DISCORD_API + "/users/@me/channels"
 _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
+
+# --- Rate limiting (chống spam) -------------------------------------------
+# Cooldown per (sku|channel|region): sau khi notify 1 alert cho 1 cặp
+# sku/kênh/vùng, bỏ qua mọi alert khác cho chính cặp đó trong cooldown
+# này. Mặc định 6h (360') — đủ để bắt giá đổi thật sự, không phải noise
+# dao động qua lại trong ngày. Override qua env.
+# _notify_state[key] = epoch (s) của lần gửi thành công cuối. In-memory:
+# reset khi process restart (chấp nhận — scheduler chạy 1 process dài).
+_notify_state: dict[str, float] = {}
+
+
+def _cooldown_seconds() -> float:
+    """Số giây giữa 2 lần notify cho cùng (sku,channel,region)."""
+    try:
+        return float(int(os.getenv("HMIP_NOTIFY_COOLDOWN_MIN", "360"))) * 60.0
+    except (TypeError, ValueError):
+        return 360.0 * 60.0
+
+
+def _min_change_pct() -> float:
+    """% thay đổi tối thiểu để notify (mặc định 5 — bỏ noise 1-5%)."""
+    try:
+        return float(os.getenv("HMIP_NOTIFY_MIN_PCT", "5"))
+    except (TypeError, ValueError):
+        return 5.0
+
+
+def _notify_key(alert: dict) -> str:
+    return "|".join(
+        str(alert.get(k, ""))
+        for k in ("sku_id", "channel_id", "region_id")
+    )
+
+
+def _is_suppressed_by_cooldown(alert: dict) -> bool:
+    """True nếu alert này cho (sku,channel,region) đã được notify gần đây
+    (trong cooldown window) → nên bỏ qua để chống spam."""
+    key = _notify_key(alert)
+    if not key.strip("|"):
+        return False
+    last = _notify_state.get(key)
+    if last is None:
+        return False
+    return (time.time() - last) < _cooldown_seconds()
+
+
+def _record_notify_sent(alert: dict) -> None:
+    key = _notify_key(alert)
+    if key.strip("|"):
+        _notify_state[key] = time.time()
+
+
+def _alert_change_pct(alert: dict) -> float | None:
+    pct = alert.get("change_pct", alert.get("price_change_pct"))
+    try:
+        return abs(float(pct)) if pct is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def reset_notify_state() -> None:
+    """Xoá state cooldown (cho test / chạy lại sạch)."""
+    _notify_state.clear()
 
 # Load .hermes/.env nếu env thiếu (chỉ cho local dev; Render set sẵn env).
 def _maybe_load_env():
@@ -158,9 +222,36 @@ def send_telegram(message: str) -> bool:
 
 
 def notify_alert(alert: dict) -> dict[str, bool]:
-    """Gửi 1 alert tới các kênh đã cấu hình. Trả {discord, telegram}."""
+    """Gửi 1 alert tới các kênh đã cấu hình. Trả {discord, telegram}.
+
+    Chống spam (2 lớp, áp dụng tại đây — điểm funnel duy nhất mọi caller
+    đi qua, gồm collector + detect_events):
+    1. Min-change: bỏ qua alert có |change_pct| < HMIP_NOTIFY_MIN_PCT
+       (mặc định 5%) — không notify noise dao động nhỏ 1-5%.
+    2. Cooldown: bỏ qua alert cho (sku,channel,region) đã notify trong
+       HMIP_NOTIFY_COOLDOWN_MIN (mặc định 6h) gần đây — tránh gửi liên
+       tục cùng 1 SP khi giá dao động qua lại.
+    Alert bị bỏ qua vẫn trả {discord:False, telegram:False} (không gửi).
+    """
+    # Lớp 1: min-change filter.
+    pct = _alert_change_pct(alert)
+    if pct is not None and pct < _min_change_pct():
+        log.info("Notify skip (change %.2f%% < min %.2f%%): %s",
+                 pct, _min_change_pct(), _notify_key(alert))
+        return {"discord": False, "telegram": False}
+
+    # Lớp 2: cooldown filter.
+    if _is_suppressed_by_cooldown(alert):
+        log.info("Notify skip (cooldown): %s", _notify_key(alert))
+        return {"discord": False, "telegram": False}
+
     msg = _format(alert)
-    return {"discord": send_discord(msg), "telegram": send_telegram(msg)}
+    result = {"discord": send_discord(msg), "telegram": send_telegram(msg)}
+    # Chỉ ghi nhận cooldown khi ít nhất 1 kênh gửi thành công — nếu gửi
+    # fail (mạng/token), alert sau vẫn được thử lại.
+    if result["discord"] or result["telegram"]:
+        _record_notify_sent(alert)
+    return result
 
 
 def notify_alerts(alerts: list[dict]) -> dict[str, int]:

@@ -136,7 +136,7 @@ def test_load_dataset_from_files_accepts_real_master_data() -> None:
         skus_path=MASTER_DIR / "skus.json",
     )
 
-    assert dataset.get_brand_for_product("P123").name == "Saigon Beer"
+    assert dataset.get_brand_for_product("P123").name == "Bia Sài Gòn"
     assert dataset.get_product_for_sku("SKU-P123-330").id == "P123"
 
 

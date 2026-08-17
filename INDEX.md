@@ -75,5 +75,5 @@ Chạy full suite: `uv run ruff check . && uv run mypy . && uv run pytest -v`
 - Build Docker thật chưa được xác nhận chạy (`docker build -t hmip:dev .`).
 - Chưa có LLM thật cho extraction (đang deterministic — xem `SPRINT_3_PRC001_STATUS.md`).
 - Chưa có adapter HTTP thật cho collect (đang mock — xem `domains/beer/pricing/skills/collect_price.py`).
-- Chưa có CI pipeline file.
+- ~~Chưa có CI pipeline file.~~ **Đã thêm (2026-08-16):** `.github/workflows/ci.yml` — ruff (kernel+tests) + mypy strict (kernel) + pytest (coverage gate 80%).
 - Chưa có secret provider thật (`HMIP_SECRET_PROVIDER` mới chỉ là placeholder).

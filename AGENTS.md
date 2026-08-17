@@ -22,7 +22,7 @@ HMIP là platform giám sát giá bia Việt Nam + workflow engine (AI OS). Hai 
 pip install -e ".[dev]"
 pip install fastapi "uvicorn[standard]" apscheduler httpx requests
 
-# Chạy test (37 file; hiện 257 pass / 11 fail — fail do mismatch data, xem phần Technical Debt)
+# Chạy test (37 file; hiện 268 pass / 0 fail)
 python -m pytest                        # toàn bộ + coverage gate 80%
 python -m pytest extensions/tests       # test lớp web (58 pass / 1 skip)
 python -m pytest extensions/tests/test_pi.py --no-cov  # test PI nhanh
@@ -70,7 +70,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 
 - **Circuit breaker Firecrawl:** khi API trả 402 (hết credit), `FirecrawlCollector._credit_exhausted=True` → các SP còn lại trong run skip Firecrawl ngay (0s thay vì 60s timeout mỗi SP), xuống ScraperAPI/ZenRows/Jina. Flag reset khi nhận 200 lại (credit refresh) hoặc process restart.
 - **Firecrawl credit schedule:** key `fc-abc42...` refresh credit định kỳ (kỳ tới ~14/09). Trong khi chờ, auto-scan incremental (`HMIP_PI_COLLECT_MIN=360` = 6h) dùng ScraperAPI/ZenRows/Jina. Chỉ ghi observation + notify khi giá **thay đổi** (noise threshold 1%); giá không đổi → skip (không re-seed toàn bộ).
-- **Notify:** `notifier.py` gửi alert Telegram (`TELEGRAM_HMIP_MARKET_BOT` + `TELEGRAM_CHAT_ID`) + Discord (`DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL` hoặc `DISCORD_DM_USER_ID` để DM trực tiếp tới user). Chỉ trigger khi `store_price_point_if_changed` phát hiện giá đổi.
+- **Notify:** `notifier.py` gửi alert Telegram (`TELEGRAM_HMIP_MARKET_BOT` + `TELEGRAM_CHAT_ID`) + Discord (`DISCORD_BOT_TOKEN` + `DISCORD_HOME_CHANNEL` hoặc `DISCORD_DM_USER_ID` để DM trực tiếp tới user). Chỉ trigger khi `store_price_point_if_changed` phát hiện giá đổi. **Chống spam (2 lớp, áp trong `notify_alert` — điểm funnel duy nhất mọi caller đi qua):** (1) min-change filter — bỏ qua alert có `|change_pct| < HMIP_NOTIFY_MIN_PCT` (mặc định 5, bỏ noise 1-5%); (2) cooldown per `(sku,channel,region)` — sau khi notify 1 alert, bỏ qua alert khác cho cùng cặp trong `HMIP_NOTIFY_COOLDOWN_MIN` (mặc định 360' = 6h; `0` = tắt). Cooldown in-memory (`_notify_state`), reset khi process restart; chỉ ghi nhận khi ≥1 kênh gửi thành công (fail → alert sau vẫn thử lại). Severity trong collector tính theo magnitude thực (CRITICAL≥10% / HIGH≥5% / MEDIUM≥3% / LOW), không cứng CRITICAL.
 
 - `collect_smart(limit, path)` trong `persistent_collector.py` thử từng tier cho toàn bộ sản phẩm.
 - Tier thành công khi: thu được ≥1 observation mới (`collected>0`) HOẶC có giá không đổi (`skipped>0`, tức tier lấy được giá nhưng không cần ghi lại). Chỉ xuống tier sau khi cả hai đều 0.
@@ -92,7 +92,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 ## Kiểm thử
 
 - `tests/conftest.py` thêm repo root vào `sys.path` (không cần editable install để import).
-- Test fail hiện tại (11): do `knowledge/master/*.json` đổi tên "Saigon Beer"→"Bia Sài Gòn" nhưng test vẫn assert tên cũ. **Đây là nợ kỹ thuật, không phải regression của app.** Khi sửa, cập nhật assertion trong `tests/unit/test_ontology.py`, `domains/beer/pricing/tests/test_enrich_price.py`, `tests/workflow/test_prc_001_*.py`.
+- ~~Test fail hiện tại (11): do `knowledge/master/*.json` đổi tên "Saigon Beer"→"Bia Sài Gòn" nhưng test vẫn assert tên cũ.~~ **ĐÃ SỬA (2026-08-16):** đồng bộ mock collect adapter (`collect_price.py`) + assertion trong `tests/unit/test_ontology.py`, `domains/beer/pricing/tests/test_enrich_price.py`, `domains/beer/pricing/tests/test_skills.py`, và golden dataset (`tests/prompt/golden/extract_price_golden.json`) sang "Bia Sài Gòn" khớp master data. Full suite 268 pass / 0 fail.
 - Test PI (`extensions/tests/test_pi.py`) cần có thể seed DB — chạy trong tmp.
 
 ## Cấu hình & env
@@ -117,8 +117,8 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - 🔴 ~~`render.yaml` hardcode `FIRECRAWL_API_KEY` thật~~ — **ĐÃ SỬA** (đổi sang `sync: false`). Nhưng key cũ (`fc-906d...`) đã nằm trong git history (commit `32335cb`) → **vẫn cần thu hồi key đó trên Firecrawl Dashboard và sinh key mới**, vì xoá khỏi working tree không xoá khỏi history. Xem `docs/CODEBASE_OVERVIEW.md` mục 20.
 - `docker-compose.yml` token mặc định `changeme-in-production` — phải đổi khi deploy.
 - Dashboard `/`, `/pi`, `/workspace` + `/docs` exempt khỏi auth → lộ khi public.
-- `logging.yaml` khai báo `redact_fields` nhưng không có logic redact (giả).
-- Lineage ghi nguyên payload không lọc.
+- ~~`logging.yaml` khai báo `redact_fields` nhưng không có logic redact (giả).~~ **ĐÃ SỬA (2026-08-16):** `core/observability.py` thêm `make_redact_processor` + `_redact_value` (đệ quy dict/list/tuple) → structlog processor redact giá trị các key nhạy cảm (`password`/`token`/`secret`/`api_key`). `core/bootstrap.py::_initialize_logging` wire `config.logging.redact_fields` vào processor. Override qua env `HMIP_LOG_REDACT_FIELDS` (comma-separated). Test: `tests/unit/test_observability_redact.py` (7 test). Lưu ý: chỉ redact qua structlog (core runtime); extensions/ dùng stdlib `logging` riêng, chưa qua processor này.
+- ~~Lineage ghi nguyên payload không lọc.~~ **ĐÃ SỬA (2026-08-16):** `core/lineage.py` thêm `_scrub_payload` (dùng `_redact_value` từ observability) → cả `InMemoryLineageTracer` và `PersistentLineageTracer` redact sensitive keys (`password`/`token`/`secret`/`api_key`, đệ quy nested) trước khi ghi, tuân thủ `05_Interface_Contract.md §4.8` "Không ghi secret plaintext". Mặc định BẬT; truyền `redact_fields=None` để disable (test exact payload). Test: `tests/unit/test_lineage.py` (4 test redact mới).
 - Khi sửa auth: route exempt nằm trong `_EXEMPT_EXACT`/`_EXEMPT_PREFIX` trong `extensions/auth.py`.
 
 ## Kiến trúc — lưu ý dễ nhầm

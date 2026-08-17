@@ -155,7 +155,18 @@ class BootstrapKernel:
         self._config = loader.freeze(raw)
 
     def _initialize_logging(self) -> None:
-        configure_logging()
+        # Wire config/logging.yaml's `redact_fields` into structlog so the
+        # declaration is actually enforced (it was previously inert — see
+        # AGENTS.md security note). Falls back to the env/default set in
+        # observability._parse_redact_fields when the config omits it.
+        redact_fields = None
+        if self._config is not None:
+            logging_cfg = self._config.get("logging")
+            if isinstance(logging_cfg, dict):
+                fields = logging_cfg.get("redact_fields")
+                if isinstance(fields, list):
+                    redact_fields = fields
+        configure_logging(redact_fields=redact_fields)
 
     def _initialize_registry(self) -> None:
         # Registry instance is created via constructor injection in

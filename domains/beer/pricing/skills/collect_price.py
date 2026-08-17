@@ -23,7 +23,7 @@ from core.exceptions import WorkflowExecutionException
 # swapping this out is the whole point of the BaseAdapter boundary.
 _MOCK_SOURCE_DATA: dict[tuple[str, str], dict[str, Any]] = {
     ("P123", "shopee"): {
-        "brand": "Saigon Beer",
+        "brand": "Bia Sài Gòn",
         "product_name": "Saigon Special 330ml",
         "price_text": "18,500",
         "currency": "VND",

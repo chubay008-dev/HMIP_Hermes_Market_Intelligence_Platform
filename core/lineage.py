@@ -23,8 +23,11 @@ import dataclasses
 import hashlib
 import json
 import time
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any, Protocol
+
+from core.observability import _DEFAULT_REDACT_FIELDS, _redact_value
 
 
 @dataclasses.dataclass(frozen=True)
@@ -71,14 +74,27 @@ def _compute_integrity_hash(output_val: Any) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _scrub_payload(value: Any, fields: Iterable[str] | None) -> Any:
+    """Redact sensitive keys from a lineage payload before it is stored,
+    per 05_Interface_Contract.md section 4.8's rule "Không ghi secret
+    plaintext". Returns the value unchanged when `fields` is None
+    (redaction disabled — e.g. tests asserting exact payloads)."""
+    if fields is None:
+        return value
+    return _redact_value(value, frozenset(fields))
+
+
 class InMemoryLineageTracer:
     """Append-only, in-memory LineageTracer conforming to
     05_Interface_Contract.md section 4.8's protocol. Lost on process
     exit — use `PersistentLineageTracer` when durability across
     process restarts matters."""
 
-    def __init__(self) -> None:
+    def __init__(self, redact_fields: Iterable[str] | None = _DEFAULT_REDACT_FIELDS) -> None:
         self._records: list[LineageRecord] = []
+        # `None` disables redaction (for tests asserting exact payloads);
+        # the default scrubs the contract-mandated sensitive fields.
+        self._redact_fields: Iterable[str] | None = redact_fields
 
     def record_trace(
         self,
@@ -87,14 +103,16 @@ class InMemoryLineageTracer:
         output_val: Any,
         model_info: str,
     ) -> None:
+        scrubbed_input = _scrub_payload(input_val, self._redact_fields)
+        scrubbed_output = _scrub_payload(output_val, self._redact_fields)
         self._records.append(
             LineageRecord(
                 step=step_id,
-                input_value=input_val,
-                output_value=output_val,
+                input_value=scrubbed_input,
+                output_value=scrubbed_output,
                 model_info=model_info,
                 timestamp=time.time(),
-                integrity_hash=_compute_integrity_hash(output_val),
+                integrity_hash=_compute_integrity_hash(scrubbed_output),
             )
         )
 
@@ -129,9 +147,14 @@ class PersistentLineageTracer:
 
     DEFAULT_PATH = Path("knowledge/dynamic/lineage/lineage.jsonl")
 
-    def __init__(self, path: Path | None = None) -> None:
+    def __init__(
+        self,
+        path: Path | None = None,
+        redact_fields: Iterable[str] | None = _DEFAULT_REDACT_FIELDS,
+    ) -> None:
         self._path = path if path is not None else self.DEFAULT_PATH
         self._path.parent.mkdir(parents=True, exist_ok=True)
+        self._redact_fields: Iterable[str] | None = redact_fields
 
     def record_trace(
         self,
@@ -140,13 +163,15 @@ class PersistentLineageTracer:
         output_val: Any,
         model_info: str,
     ) -> None:
+        scrubbed_input = _scrub_payload(input_val, self._redact_fields)
+        scrubbed_output = _scrub_payload(output_val, self._redact_fields)
         record = LineageRecord(
             step=step_id,
-            input_value=input_val,
-            output_value=output_val,
+            input_value=scrubbed_input,
+            output_value=scrubbed_output,
             model_info=model_info,
             timestamp=time.time(),
-            integrity_hash=_compute_integrity_hash(output_val),
+            integrity_hash=_compute_integrity_hash(scrubbed_output),
         )
         line = json.dumps(dataclasses.asdict(record), sort_keys=True, default=str)
         with self._path.open("a", encoding="utf-8") as handle:
