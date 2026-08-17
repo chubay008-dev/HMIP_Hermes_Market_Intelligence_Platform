@@ -64,6 +64,16 @@ def test_autoscan_lifecycle(temp_db, monkeypatch):
     from fastapi.testclient import TestClient
     monkeypatch.delenv("HMIP_API_TOKEN", raising=False)
     monkeypatch.setattr("extensions.db.DEFAULT_DB_PATH", temp_db)
+    # Catalog nhỏ (2 SP) để scan_once chạy nhanh (<0.5s), tránh thread leak
+    # cross-test: nếu scan_once 68 SP chưa xong khi test teardown, thread sót
+    # chèn SP lạ vào temp_db của test sau (race → test_db_upsert fail).
+    _small = {
+        "P123": {"product_name": "Bia Sài Gòn Special 330ml", "brand": "Bia Sài Gòn",
+                 "ref_price": 18000.0},
+        "P456": {"product_name": "Bia Larue 330ml", "brand": "Bia Larue",
+                 "ref_price": 22000.0},
+    }
+    monkeypatch.setattr("extensions.scheduler._DEMO_CATALOG", _small)
     client = TestClient(app)
 
     assert client.get("/api/autoscan/status").json()["running"] is False
