@@ -210,7 +210,8 @@ def price_index_by_brand(filters: dict[str, Any] | None = None,
         f"""SELECT o.brand_id, b.name AS brand_name, o.normalized_price,
                    o.effective_price
             FROM pi_observations o
-            JOIN pi_brands b ON b.brand_id = o.brand_id
+            JOIN pi_products p ON p.product_id = o.product_id
+            JOIN pi_brands b ON b.brand_id = p.brand_id
             {where}""",
         params, path=path,
     )
@@ -233,8 +234,12 @@ def price_index_by_brand(filters: dict[str, Any] | None = None,
     for r in rows:
         if r["normalized_price"] is None:
             continue
-        by_brand.setdefault(r["brand_id"], []).append(float(r["normalized_price"]))
-        names[r["brand_id"]] = r["brand_name"]
+        bid = r["brand_id"] or ""
+        # Bỏ brand rỗng (observation cũ chưa resolve brand_id).
+        if not bid:
+            continue
+        by_brand.setdefault(bid, []).append(float(r["normalized_price"]))
+        names[bid] = r["brand_name"]
 
     brands = []
     for bid, vals in by_brand.items():
@@ -262,14 +267,16 @@ def competitor_comparison(filters: dict[str, Any] | None = None,
                           path: str | None = None) -> dict[str, Any]:
     f = filters or {}
     where, params = _where_clause(f)
-    # Join product để lấy volume (comparable universe)
+    # Join product để lấy volume (comparable universe). JOIN pi_brands qua
+    # p.brand_id (product) thay vì o.brand_id (observation) — observation có
+    # thể ghi brand_id rỗng → match ('','Unknown') → hiện "Unknown" trong UI.
     rows = pi_store.fetch_all(
         f"""SELECT o.product_id, p.product_name, p.brand_id, b.name AS brand,
                    o.channel_id, o.region_id, o.effective_price,
                    o.normalized_price, p.volume_ml
             FROM pi_observations o
             JOIN pi_products p ON p.product_id = o.product_id
-            JOIN pi_brands b ON b.brand_id = o.brand_id
+            JOIN pi_brands b ON b.brand_id = p.brand_id
             {where}""",
         params, path=path,
     )
@@ -280,14 +287,19 @@ def competitor_comparison(filters: dict[str, Any] | None = None,
     target_vol = rows[0]["volume_ml"]
     comp = [r for r in rows if r["volume_ml"] == target_vol]
 
+    # Chọn brand theo product_id deterministic: ưu tiên brand_id không rỗng,
+    # fallback brand_id đầu tiên gặp (tránh ghi đè Unknown từ row cũ).
     by_product: dict[str, list[float]] = {}
     meta: dict[str, dict[str, Any]] = {}
     for r in comp:
         by_product.setdefault(r["product_id"], []).append(float(r["effective_price"]))
-        meta[r["product_id"]] = {
-            "product_id": r["product_id"], "name": r["product_name"],
-            "brand": r["brand"], "volume_ml": r["volume_ml"],
-        }
+        brand_id = r.get("brand_id") or ""
+        if r["product_id"] not in meta or (brand_id and not meta[r["product_id"]].get("brand_id")):
+            meta[r["product_id"]] = {
+                "product_id": r["product_id"], "name": r["product_name"],
+                "brand": r["brand"] or "Unknown", "brand_id": brand_id,
+                "volume_ml": r["volume_ml"],
+            }
     market_avg = statistics.mean([v for vs in by_product.values() for v in vs]) if by_product else 0.0
     out_rows = []
     for pid, vals in by_product.items():
@@ -526,12 +538,45 @@ def promotion_intelligence(filters: dict[str, Any] | None = None,
         for cid, agg in by_channel.items()
     ]
     by_channel_out.sort(key=lambda x: x["avg_discount_pct"], reverse=True)
+
+    # Promotion by brand —KM sâu nhất theo thương hiệu (chart phong phú hơn).
+    by_brand: dict[str, dict[str, Any]] = {}
+    for r in rows:
+        if not r["brand"] or r["discount_percent"] is None:
+            continue
+        agg = by_brand.setdefault(r["brand"], {"count": 0.0, "discounts": []})
+        agg["count"] += 1
+        agg["discounts"].append(float(r["discount_percent"]))
+    by_brand_out = [
+        {
+            "brand": brand,
+            "n": int(agg["count"]),
+            "avg_discount_pct": round(statistics.mean(agg["discounts"]), 2)
+                if agg["discounts"] else 0.0,
+            "max_discount_pct": round(max(agg["discounts"]), 2)
+                if agg["discounts"] else 0.0,
+        }
+        for brand, agg in by_brand.items()
+    ]
+    by_brand_out.sort(key=lambda x: x["avg_discount_pct"], reverse=True)
+
+    # Promotion timeline — số KM + giảm giá TB theo ngày (line chart 30 ngày
+    # gần nhất). Giúp chart Promotion Intelligence có chiều thời gian thay vì
+    # chỉ 2 slice donut (Flash Sale / Campaign).
+    timeline_out = [
+        {"day": day, "count": len(ds), "avg_discount_pct": round(statistics.mean(ds), 2)}
+        for day, ds in sorted(by_day.items())
+    ]
+    timeline_out = timeline_out[-30:]
+
     return {
         "total_promotions": len(rows),
         "avg_discount_pct": round(statistics.mean(discs), 2) if discs else 0.0,
         "max_discount_pct": round(max(discs), 2) if discs else 0.0,
         "promotion_by_type": by_type,
         "promotion_by_channel": by_channel_out,
+        "promotion_by_brand": by_brand_out,
+        "promotion_timeline": timeline_out,
         "best_day": best_day,
         "promotions": [
             {
@@ -563,7 +608,7 @@ def positioning_matrix(filters: dict[str, Any] | None = None,
                    o.effective_price, o.normalized_price, o.channel_id
             FROM pi_observations o
             JOIN pi_products p ON p.product_id = o.product_id
-            JOIN pi_brands b ON b.brand_id = o.brand_id
+            JOIN pi_brands b ON b.brand_id = p.brand_id
             {where}""",
         params, path=path,
     )
@@ -598,17 +643,32 @@ def positioning_matrix(filters: dict[str, Any] | None = None,
 # ---------------------------------------------------------------------------
 
 def catalog(path: str | None = None) -> dict[str, Any]:
-    brands = pi_store.fetch_all(
+    raw_brands = pi_store.fetch_all(
         "SELECT brand_id, name FROM pi_brands ORDER BY name", path=path)
+    # Dedup brand theo tên (pi_brands có thể có 2 brand_id cho cùng tên do
+    # seed.py vs collector generate ID khác nhau — VD "BR-Heineken" và
+    # "BR-HEINEKEN"). Giữ brand_id match pi_products.brand_id; loại brand rỗng.
     products = pi_store.fetch_all(
         "SELECT product_id, product_name, brand_id, pack_size, volume_ml FROM pi_products ORDER BY product_name",
         path=path)
+    used_brand_ids = {p["brand_id"] for p in products if p["brand_id"]}
+    seen_names: set[str] = set()
+    brands: list[dict[str, Any]] = []
+    # Ưu tiên brand_id đang được product dùng, rồi theo tên.
+    for b in sorted(raw_brands, key=lambda x: (x["name"], x["brand_id"] not in used_brand_ids)):
+        if not b["brand_id"] or not b["name"] or b["name"] == "Unknown":
+            continue
+        key = b["name"].strip().lower()
+        if key in seen_names:
+            continue
+        seen_names.add(key)
+        brands.append({"id": b["brand_id"], "name": b["name"]})
     channels = pi_store.fetch_all(
         "SELECT channel_id, channel_name FROM pi_channels ORDER BY channel_name", path=path)
     regions = pi_store.fetch_all(
         "SELECT region_id, province, region FROM pi_regions ORDER BY province", path=path)
     return {
-        "brands": [{"id": b["brand_id"], "name": b["name"]} for b in brands],
+        "brands": brands,
         "products": [{"id": p["product_id"], "name": p["product_name"],
                       "brand_id": p["brand_id"], "pack_size": p["pack_size"],
                       "volume_ml": p["volume_ml"]} for p in products],

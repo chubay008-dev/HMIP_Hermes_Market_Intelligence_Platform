@@ -87,6 +87,17 @@ def _start_pi_collect(interval_min: int = 30) -> None:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     db.init_db()
+    # Backfill brand_id rỗng trong observation cũ (pre-PR#12) từ
+    # pi_products.brand_id → tránh "Unknown" brand trong Competitor Comparison
+    # / Price Index. Idempotent: chỉ update row có brand_id rỗng.
+    try:
+        from extensions.pi import pi_store as _ps
+        _migrated = _ps.migrate_brand_ids(
+            path=os.getenv("HMIP_PI_DB_PATH") or None)
+        if _migrated:
+            print(f"[PI] migrated brand_id cho {_migrated} observation(s)")
+    except Exception as _exc:
+        print(f"[PI] brand_id migrate skip/error: {_exc}")
     # Tự seed Price Intelligence DB nếu rỗng + env HMIP_PI_AUTOSEED != off.
     # MẶC ĐỊNH BẬT (on): Render ephemeral FS mất data mỗi restart -> tự seed
     # lại để user vào web luôn có data, không cần bấm Seed thủ công.

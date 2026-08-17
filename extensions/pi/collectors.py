@@ -298,10 +298,6 @@ def ensure_catalog(path: str | None = None) -> None:
             "ON CONFLICT(seller_id) DO UPDATE SET seller_name=excluded.seller_name, "
             "seller_type=excluded.seller_type",
             ("UNKNOWN", "Unknown", "unknown"))
-        c.execute(
-            "INSERT INTO pi_brands (brand_id, name) VALUES (?, ?) "
-            "ON CONFLICT(brand_id) DO UPDATE SET name=excluded.name",
-            ("", "Unknown"))
         for cid, cname, ctype in [
             ("SHOPEE", "Shopee", "ecommerce"),
             ("LAZADA", "Lazada", "ecommerce"),
@@ -384,11 +380,17 @@ def store_price_point(pp: PricePoint, today: str | None = None, path: str | None
     )
     eff = pp.promotion_price if pp.promotion_price else pp.regular_price
     ts = today or time.strftime("%Y-%m-%d")
+    # Resolve brand_id từ product (PR #12) — tránh ghi brand_id rỗng →
+    # FK fail (brand Unknown đã xoá) + "Unknown" trong analytics.
+    bid_row = pi_store.fetch_one(
+        "SELECT brand_id FROM pi_products WHERE product_id = ?",
+        (pp.product_id,), path=path)
+    brand_id = bid_row["brand_id"] if bid_row and bid_row["brand_id"] else ""
     pi_store.insert_observation(
         observation_id=f"OBS-{pp.source}-{pp.sku_id}-{ts}",
         sku_id=pp.sku_id,
         product_id=pp.product_id,
-        brand_id="",
+        brand_id=brand_id,
         channel_id=pp.channel_id,
         seller_id="UNKNOWN",
         region_id=pp.region_id,

@@ -218,6 +218,10 @@
         <div><div id="promoTypeChart" style="height:200px"></div></div>
         <div><div id="promoChannelChart" style="height:200px"></div></div>
       </div>
+      <div class="grid two-col" style="margin-top:8px">
+        <div><div id="promoBrandChart" style="height:220px"></div></div>
+        <div><div id="promoTimelineChart" style="height:220px"></div></div>
+      </div>
       <div class="tbl-wrap" style="margin-top:8px"><table id="promoTable"><thead><tr><th data-i18n="colProduct">Sản phẩm</th><th data-i18n="colType">Loại</th><th data-i18n="colDisc">Giảm</th><th data-i18n="colPromoPrice">Giá KM</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card">
@@ -279,6 +283,8 @@ const I18N = {
     promo:"🏷️ Promotion Intelligence", events:"⚡ Price Events",
     byChannel:"Theo kênh", promoTypeTitle:"Theo loại KM",
     promoChannelTitle:"Giảm giá TB theo kênh",
+    promoBrandTitle:"Giảm giá TB theo thương hiệu",
+    promoTimelineTitle:"Timeline khuyến mãi (30 ngày)",
     alerts:"🔔 Price Alert Center", skuAi:"🔬 SKU Explorer + AI Analyst",
     viewSku:"Xem SKU", askAi:"Hỏi AI", aiPlaceholder:"Hỏi AI Analyst, ví dụ: Tại sao giá Tiger tăng?",
     colProduct:"Sản phẩm", colBrand:"Brand", colAvg:"Giá TB", colIndex:"Index",
@@ -308,6 +314,8 @@ const I18N = {
     promo:"🏷️ Promotion Intelligence", events:"⚡ Price Events",
     byChannel:"By channel", promoTypeTitle:"By promo type",
     promoChannelTitle:"Avg discount by channel",
+    promoBrandTitle:"Avg discount by brand",
+    promoTimelineTitle:"Promotion timeline (30 days)",
     alerts:"🔔 Price Alert Center", skuAi:"🔬 SKU Explorer + AI Analyst",
     viewSku:"View SKU", askAi:"Ask AI", aiPlaceholder:"Ask AI Analyst, e.g.: Why did Tiger price rise?",
     colProduct:"Product", colBrand:"Brand", colAvg:"Avg Price", colIndex:"Index",
@@ -337,6 +345,8 @@ const I18N = {
     promo:"🏷️ 促销情报", events:"⚡ 价格事件",
     byChannel:"按渠道", promoTypeTitle:"按促销类型",
     promoChannelTitle:"各渠道平均折扣",
+    promoBrandTitle:"各品牌平均折扣",
+    promoTimelineTitle:"促销时间线（30天）",
     alerts:"🔔 价格警报中心", skuAi:"🔬 SKU 浏览器 + AI 分析师",
     viewSku:"查看 SKU", askAi:"问 AI", aiPlaceholder:"问 AI 分析师，例如：为什么 Tiger 涨价了？",
     colProduct:"产品", colBrand:"品牌", colAvg:"平均价", colIndex:"指数",
@@ -687,6 +697,8 @@ function renderPromo(p){
   ].join('');
   renderPromoTypeChart(p.promotion_by_type||{});
   renderPromoChannelChart(p.promotion_by_channel||[]);
+  renderPromoBrandChart(p.promotion_by_brand||[]);
+  renderPromoTimelineChart(p.promotion_timeline||[]);
   const tb=$('#promoTable tbody'); tb.innerHTML='';
   (p.promotions||[]).slice(0,12).forEach(r=>{
     tb.innerHTML+=`<tr><td>${esc(r.product)}</td><td><span class="chip">${esc(r.type)}</span></td><td class="mono">-${r.discount_pct}%</td><td class="mono">${fmt(r.promotion_price)}</td></tr>`;
@@ -732,6 +744,57 @@ function renderPromoChannelChart(byChannel){
     grid:{ borderColor:'#2c3744' },
     tooltip:{ theme: isLight?'light':'dark', y:{ formatter:v=> v+'%' } },
     title:{ text:t('promoChannelTitle'), align:'center', style:{ color:'#8b98a5', fontSize:'11px', fontWeight:500 } },
+  });
+  chart.render();
+}
+// Bar chart: giảm giá TB (%) theo thương hiệu — KM sâu nhất theo brand.
+function renderPromoBrandChart(byBrand){
+  const el=$('#promoBrandChart');
+  if(!byBrand||!byBrand.length){ el.innerHTML='<div class="loading" style="font-size:11px;color:var(--muted);text-align:center;padding:50px 0">'+t('promoBrandTitle')+'</div>'; return; }
+  const top=byBrand.slice(0,12);
+  el.innerHTML='<div id="promoBrandChart-apex"></div>';
+  const isLight=document.documentElement.getAttribute('data-theme')==='light';
+  const chart=new ApexCharts(document.querySelector('#promoBrandChart-apex'),{
+    chart:{ type:'bar', height:220, background:'transparent', toolbar:{show:false} },
+    theme:{ mode: isLight?'light':'dark' },
+    series:[{ name:t('colDisc'), data: top.map(c=>c.avg_discount_pct) }],
+    xaxis:{ categories: top.map(c=>c.brand), labels:{ style:{ colors:'#8b98a5', fontSize:'10px' }, rotate:-45 } },
+    yaxis:{ labels:{ style:{ colors:'#8b98a5' }, formatter:v=>v+'%' } },
+    plotOptions:{ bar:{ borderRadius:3, columnWidth:'60%' } },
+    colors:['#00d2d3'],
+    legend:{ show:false },
+    dataLabels:{ enabled:false },
+    grid:{ borderColor:'#2c3744' },
+    tooltip:{ theme: isLight?'light':'dark', y:{ formatter:v=> v+'%' } },
+    title:{ text:t('promoBrandTitle'), align:'center', style:{ color:'#8b98a5', fontSize:'11px', fontWeight:500 } },
+  });
+  chart.render();
+}
+// Line chart: số KM + giảm giá TB theo ngày (30 ngày gần nhất).
+function renderPromoTimelineChart(timeline){
+  const el=$('#promoTimelineChart');
+  if(!timeline||!timeline.length){ el.innerHTML='<div class="loading" style="font-size:11px;color:var(--muted);text-align:center;padding:50px 0">'+t('promoTimelineTitle')+'</div>'; return; }
+  el.innerHTML='<div id="promoTimelineChart-apex"></div>';
+  const isLight=document.documentElement.getAttribute('data-theme')==='light';
+  const chart=new ApexCharts(document.querySelector('#promoTimelineChart-apex'),{
+    chart:{ type:'line', height:220, background:'transparent', toolbar:{show:false} },
+    theme:{ mode: isLight?'light':'dark' },
+    series:[
+      { name:t('colDisc'), type:'line', data: timeline.map(p=>p.avg_discount_pct) },
+      { name:t('colN'), type:'column', data: timeline.map(p=>p.count) },
+    ],
+    xaxis:{ categories: timeline.map(p=>p.day), labels:{ style:{ colors:'#8b98a5', fontSize:'9px' }, rotate:-45 } },
+    yaxis:[
+      { labels:{ style:{ colors:'#8b98a5' }, formatter:v=>v+'%' }, title:{ text:t('colDisc'), style:{ color:'#8b98a5', fontSize:'10px' } } },
+      { opposite:true, labels:{ style:{ colors:'#8b98a5' } }, title:{ text:t('colN'), style:{ color:'#8b98a5', fontSize:'10px' } } },
+    ],
+    stroke:{ width:[3,0], curve:'smooth' },
+    colors:['#f85149','#4f9cff'],
+    legend:{ position:'top', labels:{ colors:'#8b98a5' } },
+    dataLabels:{ enabled:false },
+    grid:{ borderColor:'#2c3744' },
+    tooltip:{ theme: isLight?'light':'dark' },
+    title:{ text:t('promoTimelineTitle'), align:'center', style:{ color:'#8b98a5', fontSize:'11px', fontWeight:500 } },
   });
   chart.render();
 }

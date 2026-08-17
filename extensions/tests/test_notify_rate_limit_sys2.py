@@ -142,7 +142,7 @@ def test_cooldown_after_restart_allows_significant_change(tmp_path):
 
 def test_sys2_message_includes_unit_box_bottle():
     """Message Hệ 2 (scheduler) phải ghi rõ đơn vị lon + giá thùng + giá chai."""
-    from extensions.notifiers import telegram, discord
+    from extensions.notifiers import discord, telegram
 
     msg = telegram._format("ESCALATE", "Bia Sài Gòn Special 330ml", 18000.0, 20.0, 15000.0, 24, 330)
     assert "VND/lon" in msg
@@ -151,10 +151,13 @@ def test_sys2_message_includes_unit_box_bottle():
     assert "VND/thùng" in msg
     assert "330ml" in msg
     assert "VND/chai" in msg
+    # Giá tham chiếu (lon) đã bị xoá khỏi message theo yêu cầu.
+    assert "tham chiếu" not in msg
     # Discord cũng cùng format.
     dmsg = discord._format("ESCALATE", "Bia Sài Gòn Special 330ml", 18000.0, 20.0, 15000.0, 24, 330)
     assert "VND/lon" in dmsg
     assert "432,000" in dmsg
+    assert "tham chiếu" not in dmsg
 
 
 # ---- Cross-hệ (PI collect ↔ scheduler scan) — chống double-notify ----------
