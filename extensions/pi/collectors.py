@@ -81,12 +81,13 @@ def _parse_pack_volume(name: str) -> tuple[int, int]:
     if m:
         vol = int(m.group(1))
     pack = 1
-    m = re.search(r"(\d+)\s*lon|thùng\s*(\d+)|chai\s*(\d+)", name, re.I)
+    m = re.search(r"thùng\s*(\d+)|(\d+)\s*lon|chai\s*(\d+)", name, re.I)
     if m:
         pack = int(next(g for g in m.groups() if g))
-    # Heuristic: 'Thùng' thường 6/12/24
-    if "thùng" in name.lower() and pack == 1:
-        pack = 24
+    # Pack bia VN chỉ có {6, 12, 24} (lon lẻ = 1). Số khác (vd "Combo 450 lon",
+    # "lon 330") là token bị bắt nhầm → bỏ, không tin. Heuristic "thùng" → 24.
+    if pack not in (6, 12, 24):
+        pack = 24 if "thùng" in name.lower() else 1
     return pack, vol
 
 

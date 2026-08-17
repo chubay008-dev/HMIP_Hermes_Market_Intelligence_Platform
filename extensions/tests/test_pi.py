@@ -429,3 +429,63 @@ def test_persistent_changed_price_notifies(db, monkeypatch):
     assert r["old_price"] == 598800.0 and r["new_price"] == 550000.0
     assert "alert" in called
     assert called["alert"]["event_type"] == "PRICE_DECREASE"
+
+
+def test_per_lon_comparison_avoids_pack_mismatch_false_alert(db, monkeypatch):
+    """So sánh giá/LON (không raw) → không sinh -98.67% giả khi pack đổi.
+
+    Reproduce user report: observation cũ là THÙNG 24 (eff 1,150,000₫),
+    observation mới là LON LẺ (15,333₫). Trước đây so raw → -98.67% (sai).
+    Giờ so per-lon: 47,917₫ → 15,333₫ = -68% (đúng).
+    """
+    from extensions.pi import persistent_collector as pc
+    from extensions.pi.collectors import PricePoint
+
+    # Dùng kênh riêng (LAZADA) để cô lập khỏi observation sót từ test khác.
+    CHAN, REG = "LAZADA", "ONLINE"
+
+    # Old: thùng 24 lon @ 1,150,000₫ → per-lon = 47,916.67
+    pp_box = PricePoint(product_id="P456", sku_id="SKU-P456", channel_id=CHAN,
+                        region_id=REG, regular_price=1150000.0, promotion_price=None,
+                        pack_quantity=24, unit_volume_ml=330, source="tiki", raw={})
+    pc.store_price_point_if_changed(pp_box, path=db, notify=False)
+
+    captured = {}
+
+    def fake_notify(alert, **kw):
+        captured["alert"] = alert
+        return {"discord": True, "telegram": True}
+    monkeypatch.setattr("extensions.pi.notifier.notify_alert", fake_notify)
+
+    # New: lon lẻ @ 15,333₫ → per-lon = 15,333
+    pp_lon = PricePoint(product_id="P456", sku_id="SKU-P456", channel_id=CHAN,
+                        region_id=REG, regular_price=15333.0, promotion_price=None,
+                        pack_quantity=1, unit_volume_ml=330, source="tiki", raw={})
+    r = pc.store_price_point_if_changed(pp_lon, path=db, notify=True)
+
+    # old_price = per-lon của thùng (≈47,917), KHÔNG phải raw 1,150,000.
+    assert r["old_price"] == pytest.approx(1150000.0 / 24, rel=1e-3)
+    assert r["new_price"] == pytest.approx(15333.0, rel=1e-3)
+    # change_pct ≈ -68%, KHÔNG phải -98.67%.
+    pct = captured["alert"]["change_pct"]
+    assert -70 < pct < -60, f"expected ~-68%, got {pct}"
+    assert captured["alert"]["event_type"] == "PRICE_DECREASE"
+
+
+def test_alert_message_shows_per_lon_and_standard_box():
+    """Message PI phải ghi giá/LON + Giá thùng (24 lon) — không raw, không pack lạ."""
+    from extensions.pi import notifier
+
+    alert = {"event_type": "PRICE_DECREASE", "product_name": "Bia Huda",
+             "channel_id": "TIKI", "region_id": "ONLINE",
+             "old_price": 47917.0, "new_price": 15333.0, "change_pct": -68.0,
+             "timestamp": "2026-08-17", "pack_size": 1, "unit_ml": 330}
+    msg = notifier._format(alert, pack_size=1, unit_ml=330)
+    # Giá/LON phải hiện đúng per-lon, không phải raw.
+    assert "47,917₫" in msg and "15,333₫/lon" in msg
+    assert "-68.0%" in msg
+    # Giá thùng = per-lon × 24 (luôn 24 lon tiêu chuẩn), không dùng pack_size=1.
+    assert "Giá thùng (24 lon)" in msg
+    assert "367,992₫/thùng" in msg  # 15,333 × 24
+    # Không hiện "Giá thùng (1 lon)" (pack_size cũ gây nhầm).
+    assert "(1 lon)" not in msg

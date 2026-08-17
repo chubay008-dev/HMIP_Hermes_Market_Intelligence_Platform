@@ -33,6 +33,27 @@ def test_parse_pack_volume_thung_keyword_default24():
     assert pack == 24
 
 
+def test_parse_pack_volume_clamps_absurd_pack():
+    """Số vô lý (vd 'Combo 450 lon', 'Lon 330') không được tin là pack.
+
+    Pack bia VN chỉ có {6,12,24}; lon lẻ = 1. Token '450' trong 'Combo 450
+    lon' là số lon trong combo khổng lồ, '330' trong 'Lon 330' là volume —
+    đều phải bị bỏ (→ 1), không sinh 'Giá thùng (450 lon)' vô lý.
+    """
+    # 'Thùng 450 lon' → pack 24 (thùng keyword, số 450 bị reject)
+    pack, _ = _parse_pack_volume("Thùng 450 lon bia")
+    assert pack == 24
+    # 'Combo 450 lon' → pack 1 (không có 'thùng' → lon lẻ)
+    pack, _ = _parse_pack_volume("Combo 450 lon bia")
+    assert pack == 1
+    # 'Lon 330' → pack 1 (330 là volume, bị reject)
+    pack, _ = _parse_pack_volume("Lon 330")
+    assert pack == 1
+    # Pack hợp lệ vẫn nhận đúng
+    assert _parse_pack_volume("Thùng 6 lon")[0] == 6
+    assert _parse_pack_volume("Thùng 12 chai")[0] == 12
+
+
 def test_match_best_prefers_lon_le_over_thung():
     """Khi có cả lon lẻ + thùng, _match_best chọn lon lẻ (pack=1)."""
     items = [
