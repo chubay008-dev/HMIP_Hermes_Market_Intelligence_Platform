@@ -75,7 +75,10 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - `collectors._match_best`: score `(brand_match, -pack)` → **ưu tiên lon lẻ** (pack=1); thùng (pack 6/12/24) chỉ lấy khi không có lon lẻ.
 - `TikiCollector.collect` + `ScraperAPICollector.collect`: parse `pack_quantity` từ **tên ITEM thật** (`best.name`), fallback tên config.
 - `_TikiRealAdapter.fetch` (run_prc_001 path): trả `unit_price = eff / pack_quantity` (giá/lon) → `price_text` hiển thị + compare với base lon cùng đơn vị.
-**Giới hạn:** ZenRows/Jina dùng `extract_product_price` trên HTML (không có item name) → vẫn parse pack từ config (lon=1). Fallback cuối khi ScraperAPI OK; nếu extract lấy giá thùng thì unit_price = giá thùng (sai). Khi gặp, cần mở rộng `extract_product_price` trả (price, pack_hint) đoán pack từ giá.
+**Giới hạn:** ZenRows/Jina dùng `extract_product_price` trên HTML (không có item name) → từng parse pack từ config (lon=1). Đã fix 2 lớp (PR #7 + #8):
+- **PR #7:** adapter heuristic — nếu pack==1 (config) nhưng eff>100000 (ngưỡng thùng) → chia 24 (thùng bia VN thường 24 lon). 736000/24=30667/lon.
+- **PR #8:** `extract_product_price._pick_price` ưu tiên nhóm giá LON (≤50000đ) khi trang search có cả lon lẻ + thùng; nếu chỉ thùng → fallback median thùng (adapter PR #7 chia 24).
+- **Còn sót (giới hạn dữ liệu):** một số SP (Bia Sư Tử Trắng, Huda) trên Tiki chỉ có item THÙNG (lon lẻ hết hàng/không match brand) → extract lấy thùng → heuristic /24. Thùng/24 thường đắt hơn lon lẻ thật → variance +74-104% còn lại. Fix triệt để cần parse pack từ context HTML ("24 lon" gần giá) hoặc nguồn giá lon lẻ khác (API Tiki chính thức).
 
 ### Tier chain & circuit breaker
 
