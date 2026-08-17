@@ -221,6 +221,7 @@ def _collect_via_chain(limit: int | None, path: str | None,
     incremental=False: dùng store_price_point (ghi tất cả, cho lần seed đầu).
     """
     from extensions.default_products import DEFAULT_PRODUCTS
+    from .channels import configured_channels
     ensure_catalog(path=path)
 
     tiers: list[tuple[str, Any]] = []
@@ -263,36 +264,43 @@ def _collect_via_chain(limit: int | None, path: str | None,
         _all = [(pid, m) for pid, m in _all if pid in _pids]
     items = _all[:limit] if limit else _all
     total = len(items)
+    # Multi-channel: quét từng kênh configured (env HMIP_CHANNELS, default TIKI).
+    # Mỗi kênh = observation riêng (channel_id khác) → so sánh cross-channel.
+    chan_list = configured_channels()
 
     for tier_name, collector in tiers:
         collected = changed = skipped = failed = 0
-        for pid, meta in items:
-            name = str(meta["product_name"])
-            try:
-                pp = collector.collect(pid, name)
-            except Exception as exc:
-                log.warning("%s collect %s err: %s", tier_name, pid, exc)
-                pp = None
-            if pp:
-                if incremental:
-                    res = store_price_point_if_changed(pp, path=path, notify=True)
-                    if res["inserted"]:
-                        collected += 1
-                        if res["changed"]:
-                            changed += 1
+        for chan in chan_list:
+            for pid, meta in items:
+                name = str(meta["product_name"])
+                try:
+                    pp = collector.collect(pid, name, channel=chan)
+                except Exception as exc:
+                    log.warning("%s[%s] collect %s err: %s", tier_name,
+                                chan.channel_id, pid, exc)
+                    pp = None
+                if pp:
+                    if incremental:
+                        res = store_price_point_if_changed(pp, path=path, notify=True)
+                        if res["inserted"]:
+                            collected += 1
+                            if res["changed"]:
+                                changed += 1
+                        else:
+                            # Giá không đổi (trong noise threshold) → skip, KHÔNG phải fail.
+                            skipped += 1
                     else:
-                        # Giá không đổi (trong noise threshold) → skip, KHÔNG phải fail.
-                        skipped += 1
+                        store_price_point(pp, path=path)
+                        collected += 1
+                        _mark_real_seeded(pp.sku_id, path=path)
                 else:
-                    store_price_point(pp, path=path)
-                    collected += 1
-                    _mark_real_seeded(pp.sku_id, path=path)
-            else:
-                failed += 1
-            time.sleep(0.6)
+                    failed += 1
+                time.sleep(0.6)
         # Tier thành công nếu: có observation mới (collected>0) HOẶC có giá
         # không đổi (skipped>0, tức tier lấy được giá nhưng không cần ghi lại).
         # Chỉ xuống tier sau khi cả collected và skipped đều 0 (không lấy được giá).
+        # Multi-channel: thành công nếu TỔNG qua các kênh > 0 (không yêu cầu
+        # tất cả kênh đều có giá — Shopee/Lazada có thể fail do bot protection).
         if collected > 0 or skipped > 0:
             return {"source_used": tier_name, "collected": collected,
                     "changed": changed, "skipped": skipped, "failed": failed,

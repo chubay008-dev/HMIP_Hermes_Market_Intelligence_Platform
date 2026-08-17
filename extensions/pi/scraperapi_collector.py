@@ -25,6 +25,7 @@ from urllib.parse import quote as _urlquote
 import requests
 
 from .collectors import PricePoint, _parse_pack_volume, _REQ_GAP_S, store_price_point
+from .price_extract import extract_product_price
 
 log = logging.getLogger("hmip.scraperapi")
 
@@ -118,7 +119,14 @@ class ScraperAPICollector:
             log.warning("ScraperAPI API error: %s", exc)
             return None
 
-    def collect(self, product_id: str, product_name: str, ref_vol: int = 330) -> PricePoint | None:
+    def collect(self, product_id: str, product_name: str, ref_vol: int = 330,
+                channel=None) -> PricePoint | None:
+        # channel: ChannelConfig (mặc định TIKI). Tiki → API JSON; Shopee/Lazada
+        # → HTML search (delegate collect_html).
+        from .channels import get_channel
+        chan = channel or get_channel("TIKI")
+        if chan.strategy != "api" or not chan.api_url(product_name):
+            return self.collect_html(product_id, product_name, chan, ref_vol)
         items = self._api_search(product_name, limit=10)
         if not items:
             return None
@@ -148,29 +156,73 @@ class ScraperAPICollector:
             raw={"url": f"tiki://product/{it.get('id')}", "name": it.get("name", "")},
         )
 
+    def collect_html(self, product_id: str, product_name: str, channel,
+                     ref_vol: int = 330) -> PricePoint | None:
+        """Scrape trang search kênh (Shopee/Lazada) qua ScraperAPI render JS.
+
+        Channel: ChannelConfig từ channels.REGISTRY. Dùng search_url(query)
+        cào HTML đã render JS → extract_product_price (pack-aware) parse giá.
+        """
+        if not self.api_key:
+            return None
+        url = channel.search_url(product_name)
+        html = self.scrape_html(url)
+        if not html:
+            return None
+        price = extract_product_price(html, brand=product_name)
+        if not price:
+            log.warning("ScraperAPI[%s]: không tìm giá hợp lệ cho %s",
+                        channel.channel_id, product_name)
+            return None
+        pack, v = _parse_pack_volume(product_name)
+        return PricePoint(
+            product_id=product_id, sku_id=f"SKU-{product_id}",
+            channel_id=channel.channel_id, region_id="ONLINE",
+            regular_price=float(price), promotion_price=None,
+            pack_quantity=pack, unit_volume_ml=v or ref_vol,
+            source=f"{channel.channel_id.lower()}-scraperapi",
+            raw={"url": url},
+        )
+
 
 def collect_realtime_scraperapi(channel: str = "TIKI", limit: int | None = None,
-                                path: str | None = None) -> dict[str, Any]:
-    """Quét giá thật qua ScraperAPI cho toàn bộ catalog."""
+                                path: str | None = None,
+                                channels: list | None = None) -> dict[str, Any]:
+    """Quét giá thật qua ScraperAPI cho toàn bộ catalog.
+
+    channels: list ChannelConfig (từ channels.configured_channels()). Mặc định
+    [TIKI]. Với Tiki dùng API JSON (collect); Shopee/Lazada dùng HTML search
+    (collect_html). Mỗi kênh lưu observation riêng (channel_id khác).
+    """
     from extensions.default_products import DEFAULT_PRODUCTS
+    from .channels import get_channel
 
     col = ScraperAPICollector()
     if not col.api_key:
         return {"channel": "scraperapi", "collected": 0, "failed": 0,
                 "total": 0, "error": "no SCRAPERAPI_KEY"}
 
+    chan_list = channels or [get_channel(channel)]
     collected = failed = total = 0
-    for pid, meta in list(DEFAULT_PRODUCTS.items())[:limit]:
-        total += 1
-        name = str(meta["product_name"])
-        pp = col.collect(pid, name)
-        if not pp:
-            time.sleep(_REQ_GAP_S)
-            pp = col.collect(pid, name)
-        if pp:
-            store_price_point(pp, path=path)
-            collected += 1
-        else:
-            failed += 1
-        time.sleep(_REQ_GAP_S * 2)
+    for chan in chan_list:
+        for pid, meta in list(DEFAULT_PRODUCTS.items())[:limit]:
+            total += 1
+            name = str(meta["product_name"])
+            # Tiki: API JSON; Shopee/Lazada: HTML search.
+            if chan.strategy == "api" and chan.api_url(name):
+                pp = col.collect(pid, name)
+            else:
+                pp = col.collect_html(pid, name, chan)
+            if not pp:
+                time.sleep(_REQ_GAP_S)
+                if chan.strategy == "api" and chan.api_url(name):
+                    pp = col.collect(pid, name)
+                else:
+                    pp = col.collect_html(pid, name, chan)
+            if pp:
+                store_price_point(pp, path=path)
+                collected += 1
+            else:
+                failed += 1
+            time.sleep(_REQ_GAP_S * 2)
     return {"channel": "scraperapi", "collected": collected, "failed": failed, "total": total}

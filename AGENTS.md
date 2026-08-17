@@ -53,7 +53,8 @@ python -m extensions.scheduler
   - `db.py` — SQLite lịch sử giá (path: `HMIP_DB_PATH`)
   - `pi/` — Price Intelligence (DB riêng `HMIP_PI_DB_PATH`, schema đầy đủ)
     - `collectors.py` — `collect_realtime_smart` (delegate sang `collect_smart` 4-tier chain)
-    - `persistent_collector.py` — `has_real_prices` (marker), `store_price_point_if_changed` (incremental), `collect_smart` (4-tier chain)
+    - `channels.py` — **channel registry** (TIKI/SHOPEE/LAZADA): search_url + api_url + strategy; `configured_channels()` đọc `HMIP_CHANNELS`
+    - `persistent_collector.py` — `has_real_prices` (marker), `store_price_point_if_changed` (incremental), `collect_smart` (4-tier chain, multi-channel)
     - `price_extract.py` — `extract_product_price(brand=)` dùng chung: filter hotline garbage + brand matching
     - `firecrawl_collector.py` (tier 1), `scraperapi_collector.py` (tier 2), `zenrows_collector.py` (tier 3), `jina_collector.py` (tier 4)
     - `service.py` — orchestration; `mark_ready` đã sửa `global _seed_state`
@@ -67,6 +68,14 @@ python -m extensions.scheduler
 ## Thu thập giá thật (PI) — chain 4 tầng
 
 Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Crawl4AI tier 5 nếu `CRAWL4AI_ENABLED`).
+
+### Multi-channel (Tiki + Shopee + Lazada)
+
+- **Channel registry:** `extensions/pi/channels.py` định nghĩa TIKI/SHOPEE/LAZADA — mỗi kênh có `search_url(query)` (URL trang search) + `api_url(query)` (API JSON nếu có). Tiki = strategy "api" (gọi `/api/v2/products` parse JSON chính xác); Shopee/Lazada = strategy "html" (scrape trang search + `extract_product_price` pack-aware, vì không có public API dễ gọi).
+- **Bật kênh qua env:** `HMIP_CHANNELS=tiki,shopee,lazada` (mặc định chỉ `tiki`). Mỗi kênh lưu observation riêng (`channel_id` khác) → so sánh giá cross-channel trong UI/analytics.
+- **Tier collectors đa kênh:** `FirecrawlCollector/ZenRowsCollector/JinaCollector.collect(channel=...)` nhận ChannelConfig, dùng `channel.search_url(query)` thay vì hardcode Tiki. `ScraperAPICollector.collect(channel=...)` dispatch: Tiki → API JSON (`_api_search`), Shopee/Lazada → HTML search (`collect_html`).
+- **`_collect_via_chain` quét multi-channel:** vòng ngoài = kênh, vòng trong = sản phẩm. Tier thành công nếu TỔNG collected/skipped qua các kênh > 0 (không yêu cầu tất cả kênh đều có giá — Shopee/Lazada có thể fail do bot protection mạnh).
+- **Giới hạn thực tế:** Shopee có bot protection mạnh (chống scrape) → ScraperAPI/ZenRows (render JS + proxy residential) có khả năng cao nhất cào được; Jina (không render JS) thường trả None cho SPA Shopee. Lazada (Akamai) khó hơn. Nếu một kênh fail, kênh khác vẫn ghi observation → không mất dữ liệu.
 
 ### Mismatch đơn vị thùng/lon (đã fix PR #6) — LƯU Ý QUAN TRỌNG
 
@@ -94,7 +103,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - **One-time seed:** `has_real_prices()` kiểm marker `real_price_seeded=true` trong `pi_skus.metadata`. Seed 1 lần → marker đặt → không re-seed synthetic nữa.
 - **Incremental:** `store_price_point_if_changed` chỉ ghi observation khi giá mới (ngoài noise threshold). Giá không đổi → skip (không ghi đè).
 - **Lọc rác:** `extract_product_price(html, brand)` — loại token hotline ("1000 đ/phút"), chỉ nhận 5k-2tr; brand matching ưu tiên giá gần tên thương hiệu (tránh median sản phẩm khác).
-- Env: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render: `sync: false`). Code đọc `SCRAPERAPI_KEY`/`ZENROWS_KEY` (không phải `_API_KEY`).
+- Env: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render: `sync: false`). Code đọc `SCRAPERAPI_KEY`/`ZENROWS_KEY` (không phải `_API_KEY`). Multi-channel: `HMIP_CHANNELS=tiki,shopee,lazada` (mặc định `tiki`).
 
 ## Quy ước mã nguồn
 

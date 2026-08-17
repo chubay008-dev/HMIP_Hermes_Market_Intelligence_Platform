@@ -31,6 +31,8 @@ services:
         value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → marker giữ giá thật cố định)
       - key: HMIP_PI_COLLECT_MIN
         value: "360"                    # quét gia tăng mỗi 6h (chỉ ghi khi giá đổi + notify; tiết kiệm credit)
+      - key: HMIP_CHANNELS
+        value: "tiki,shopee,lazada"     # kênh thu thập: tiki (API JSON), shopee/lazada (HTML search). Mỗi kênh = observation riêng → so sánh cross-channel.
       - key: TELEGRAM_HMIP_MARKET_BOT
         sync: false                     # 🔒 SECRET — token bot HMIP Market (Discord/Telegram alert). Điền tại Render Dashboard.
       - key: TELEGRAM_CHAT_ID
