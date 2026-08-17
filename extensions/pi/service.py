@@ -227,6 +227,12 @@ def full_workspace(filters: dict[str, Any] | None = None, path: str | None = Non
         "events": price_events(filters, limit=30, path=path),
         "alerts": alerts(limit=30, path=path),
     }
+    # KHÔNG cache payload rỗng/lệch: request đầu có thể đua nhau với startup
+    # (seed/collect-if-stale chưa xong) → channel=[] được cache 60s → user vào
+    # trang thấy "không có kênh" dù DB đã có data. Bỏ qua cache khi kênh trống,
+    # request kế tiếp sẽ re-query và lấy đủ data rồi mới cache.
+    if not payload.get("channel", {}).get("channels"):
+        return payload
     return _cache_set(key, payload)
 
 
