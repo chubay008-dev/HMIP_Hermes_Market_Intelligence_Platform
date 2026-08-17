@@ -91,16 +91,23 @@ def _parse_pack_volume(name: str) -> tuple[int, int]:
 
 
 def _match_best(items: list[dict[str, Any]], want_name: str, vol: int) -> dict[str, Any] | None:
-    """Chọn item khớp nhất: chứa volume + gần tên nhất."""
+    """Chọn item khớp nhất: chứa volume + gần tên + ưu tiên lon lẻ (pack nhỏ).
+
+    base_price (ref_price) là giá 1 LON, nên phải chọn item LON LẺ để so sánh
+    apples-to-apples. Thùng (pack 6/12/24) bị penalty — chỉ lấy khi không có
+    lon lẻ. Score: (brand_match, -pack) → brand khớp trước, rồi pack nhỏ hơn.
+    """
     want = want_name.lower()
     vol_s = f"{vol}ml"
+    brand = want.split()[0] if want.split() else ""
     scored = []
     for it in items:
         n = (it.get("name") or "").lower()
         if vol_s not in n:
             continue
-        score = 1 if want.split()[0] in n else 0
-        scored.append((score, it))
+        brand_score = 1 if brand and brand in n else 0
+        pack, _ = _parse_pack_volume(it.get("name") or "")
+        scored.append(((brand_score, -pack), it))
     if scored:
         scored.sort(key=lambda x: x[0], reverse=True)
         return scored[0][1]
@@ -144,11 +151,13 @@ class TikiCollector:
         return []
 
     def collect(self, product_id: str, product_name: str, ref_vol: int = 330) -> PricePoint | None:
-        pack, vol = _parse_pack_volume(product_name)
+        _cfg_pack, cfg_vol = _parse_pack_volume(product_name)
         items = self.search(product_name, limit=10)
-        best = _match_best(items, product_name, vol or ref_vol)
+        best = _match_best(items, product_name, cfg_vol or ref_vol)
         if not best:
             return None
+        # Parse pack/vol từ tên ITEM thật (thùng 24 vs lon lẻ), fallback tên config.
+        pack, vol = _parse_pack_volume(best.get("name") or product_name)
         price = best.get("price") or best.get("list_price")
         if not price:
             return None
