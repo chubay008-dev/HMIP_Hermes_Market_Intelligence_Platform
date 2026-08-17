@@ -88,26 +88,82 @@ def _pick_price(values: list[float]) -> float:
     return _median(values)
 
 
+def _infer_pack_from_price(box_price: float, base_price: float) -> int | None:
+    """Suy pack_quantity từ tỷ số giá thùng / giá lon (base).
+
+    base_price là giá 1 LON đã biết (ref_price từ catalog). Nếu collector
+    cào được giá THÙNG nhưng context HTML không nêu rõ pack (không có
+    "thùng 24 lon"), dùng tỷ số box/base để suy pack. Snap về 6/12/24
+    (pack bia VN phổ biến) gần nhất — chính xác hơn /24 cứng (PR #9 chỉ
+    chia 24, sai khi SP là thùng 6 hoặc 12 lon).
+
+    VD: box=736000, base=30667 → ratio≈24 → pack 24.
+        box=360000, base=30000 → ratio≈12 → pack 12.
+        box=108000, base=18000 → ratio≈6  → pack 6.
+    """
+    if not base_price or base_price <= 0:
+        return None
+    ratio = box_price / base_price
+    if ratio < _PACK_MIN:
+        return None  # gần base → chắc là lon lẻ, không phải thùng
+    # Snap về pack phổ biến gần nhất (6/12/24). Cho phép sai số ±30%.
+    best = None
+    best_diff = float("inf")
+    for cand in (6, 12, 24):
+        diff = abs(ratio - cand) / cand
+        if diff < 0.30 and diff < best_diff:
+            best, best_diff = cand, diff
+    return best
+
+
+def _resolve_base_price(product_id: str, product_name: str) -> float | None:
+    """Lấy giá 1 LON (ref_price) từ catalog DEFAULT_PRODUCTS.
+
+    Dùng để suy pack từ tỷ số giá thùng/base khi context HTML không nêu pack.
+    Trả None nếu không có catalog hoặc SP không trong catalog.
+    """
+    try:
+        from extensions.default_products import DEFAULT_PRODUCTS
+        meta = DEFAULT_PRODUCTS.get(product_id)
+        if meta:
+            rp = meta.get("ref_price")
+            if rp and float(rp) > 0:
+                return float(rp)
+    except Exception:
+        pass
+    return None
+
+
 def extract_product_price(html_or_md: str,
                           min_price: float = MIN_PRICE,
                           max_price: float = MAX_PRICE,
-                          brand: str | None = None) -> float | None:
+                          brand: str | None = None,
+                          base_price: float | None = None) -> float | None:
     """Trích giá sản phẩm hợp lệ từ HTML/markdown Tiki.
 
     Bỏ qua các số kèm token nhiễu (vd "1000 đ/phút" hotline).
 
-    Pack-aware: khi giá trùng brand/toàn trang đều là THÙNG (> LON_MAX), parse
-    pack_quantity từ context gần giá ("thùng 24 lon"...) và trả giá/LON thay vì
-    giá thùng. Điều này sửa dứt điểm mismatch thùng/lon cho sản phẩm chỉ có item
-    thùng trên Tiki (Sư Tử Trắng, Huda) — trước đây trả giá thùng → adapter
-    heuristic /24 hay lệch → ESCALATE sai liên tục (spam notify).
+    Pack-aware (PR #9 + PR #11): khi giá trùng brand/toàn trang đều là THÙNG
+    (> LON_MAX), parse pack_quantity từ context gần giá ("thùng 24 lon"...)
+    và trả giá/LON thay vì giá thùng. Khi context KHÔNG nêu pack, nếu
+    ``base_price`` (giá 1 lon đã biết) được truyền → suy pack từ tỷ số
+    box/base (snap về 6/12/24) — chính xác hơn /24 cứng. Điều này sửa dứt
+    điểm mismatch thùng/lon cho SP chỉ có item thùng trên Tiki (Sư Tử Trắng,
+    Huda) — trước đây trả giá thùng → adapter heuristic /24 hay lệch khi
+    SP là thùng 6 hoặc 12 lon → ESCALATE sai liên tục (spam notify).
+
+    Args:
+        html_or_md: HTML/markdown trang search Tiki.
+        min_price/max_price: khoảng giá hợp lệ (5k-2tr).
+        brand: tên thương hiệu/sản phẩm mục tiêu — ưu tiên giá có brand keyword
+            gần, tránh lấy median toàn trang.
+        base_price: giá 1 LON đã biết (ref_price từ catalog). Dùng để suy pack
+            khi context HTML không nêu rõ pack. None = bỏ qua fallback này.
 
     Trả về:
-    - Nếu có ``brand`` (tên thương hiệu/sản phẩm mục tiêu): ưu tiên giá có
-      brand keyword xuất hiện gần (trong 30 ký tự sau). Tránh lấy
-      median của toàn bộ sản phẩm trên trang search (bia ngũ hành, Habeco,
-      Rooster...). Nếu không khớp brand → fallback median.
-    - Nếu không có brand: trả median của các ứng viên hợp lệ.
+    - Giá/LON nếu có giá lon lẻ HOẶC pack phát hiện được (context hoặc
+      price-based inference).
+    - Fallback: median thùng (caller/adapter sẽ heuristic /DEFAULT_BOX_PACK).
     """
     candidates: list[float] = []
     brand_matches: list[float] = []
@@ -155,5 +211,14 @@ def extract_product_price(html_or_md: str,
         per_lon = [v / p for v, p in box_pool if p > 0]
         if per_lon and all(LON_MAX * 0.1 <= x <= LON_MAX for x in per_lon):
             return round(_median(per_lon), 2)
-    # 3) Fallback: median thùng (caller/adapter sẽ heuristic /DEFAULT_BOX_PACK).
+    # 3) Context KHÔNG nêu pack → suy pack từ tỷ số giá thùng/base (nếu có
+    #    base_price). Chính xác hơn /24 cứng khi SP là thùng 6/12 lon.
+    box_prices = [v for v in pool if v > LON_MAX]
+    if box_prices and base_price and base_price > 0:
+        inferred = [_infer_pack_from_price(v, base_price) for v in box_prices]
+        per_lon = [v / p for v, p in zip(box_prices, inferred, strict=True)
+                   if p and p > 0]
+        if per_lon and all(LON_MAX * 0.1 <= x <= LON_MAX for x in per_lon):
+            return round(_median(per_lon), 2)
+    # 4) Fallback cuối: median thùng (caller/adapter sẽ heuristic /DEFAULT_BOX_PACK).
     return _median(pool)

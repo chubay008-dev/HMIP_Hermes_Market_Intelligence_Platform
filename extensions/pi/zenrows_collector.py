@@ -24,7 +24,7 @@ from urllib.parse import quote as _urlquote
 import requests
 
 from .collectors import PricePoint, _parse_pack_volume, _REQ_GAP_S, store_price_point
-from .price_extract import extract_product_price
+from .price_extract import extract_product_price, _resolve_base_price
 
 log = logging.getLogger("hmip.zenrows")
 
@@ -77,7 +77,10 @@ class ZenRowsCollector:
         html = self.scrape_html(search_url)
         if not html:
             return None
-        price = extract_product_price(html, brand=product_name)
+        price = extract_product_price(
+            html, brand=product_name,
+            base_price=_resolve_base_price(product_id, product_name),
+        )
         if not price:
             log.warning("ZenRows[%s]: không tìm thấy giá hợp lệ cho %s",
                         chan.channel_id, product_name)

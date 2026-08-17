@@ -170,6 +170,15 @@ def store_price_point_if_changed(
         try:
             from . import notifier
             from .models import DEFAULT_THRESHOLDS, Severity
+            # Resolve tên SP thật từ catalog để cross-hệ cooldown key khớp
+            # (trước đây ghi product_id "P123" → key khác scheduler scan truyền
+            # tên thật "Bia Huda" → cross-hệ skip không hoạt động → spam).
+            try:
+                from extensions.default_products import DEFAULT_PRODUCTS
+                pname = DEFAULT_PRODUCTS.get(pp.product_id, {}).get(
+                    "product_name", pp.product_id)
+            except Exception:
+                pname = pp.product_id
             old = result["old_price"]
             new = result["new_price"]
             change = (new - old) / old * 100.0 if old else 0.0
@@ -186,7 +195,7 @@ def store_price_point_if_changed(
                 sev = Severity.LOW
             alert = {
                 "event_type": "PRICE_INCREASE" if change > 0 else "PRICE_DECREASE",
-                "sku_id": pp.sku_id, "product_name": pp.product_id,
+                "sku_id": pp.sku_id, "product_name": pname,
                 "channel_id": pp.channel_id, "region_id": pp.region_id,
                 "old_price": round(old, 2), "new_price": round(new, 2),
                 "change_pct": round(change, 2), "severity": sev.value,

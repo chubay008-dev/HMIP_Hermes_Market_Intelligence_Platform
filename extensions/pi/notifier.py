@@ -65,11 +65,15 @@ def _cooldown_seconds() -> float:
 
 
 def _min_change_pct() -> float:
-    """% thay đổi tối thiểu để notify (mặc định 5 — bỏ noise 1-5%)."""
+    """% thay đổi tối thiểu để notify (mặc định 8 — bỏ noise 1-8%).
+
+    PR #11: tăng từ 5→8 vì giá bia VN dao động 5-10% là thường (khuyến mãi,
+    thuế) → 5% sinh quá nhiều alert. 8% chỉ bắt biến động đáng kể.
+    """
     try:
-        return float(os.getenv("HMIP_NOTIFY_MIN_PCT", "5"))
+        return float(os.getenv("HMIP_NOTIFY_MIN_PCT", "8"))
     except (TypeError, ValueError):
-        return 5.0
+        return 8.0
 
 
 def _notify_key(alert: dict) -> str:
@@ -106,14 +110,28 @@ def _product_notify_key(alert: dict) -> str | None:
 def _sku_cooldown_seconds() -> float:
     """Số giây giữa 2 lần notify cho cùng SP (bất kể kênh).
 
-    Ngắn hơn cooldown per-channel (mặc định 30' vs 6h) để 1 SP đổi giá trên
+    Ngắn hơn cooldown per-channel (mặc định 120' vs 6h) để 1 SP đổi giá trên
     nhiều kênh (Tiki+Shopee+Lazada) cùng lúc chỉ notify 1 lần (kênh đầu).
     Set 0 để tắt layer per-sku (chỉ dùng per-channel).
     """
     try:
-        return float(int(os.getenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "30"))) * 60.0
+        return float(int(os.getenv("HMIP_NOTIFY_SKU_COOLDOWN_MIN", "120"))) * 60.0
     except (TypeError, ValueError):
-        return 30.0 * 60.0
+        return 120.0 * 60.0
+
+
+def _product_cooldown_seconds() -> float:
+    """Số giây giữa 2 lần notify cho cùng PRODUCT (tên SP, bất kê sku/kênh/vùng).
+
+    PR #11: trước đây chỉ có per-(sku,channel,region)=6h + per-sku=30'. Nhưng
+    1 SP có 18 kênh × 5 vùng = 90 cặp (sku,channel,region) → vẫn 90 alerts
+    possible trong 6h. Per-product gộp 90 cặp thành 1 alert duy nhất per SP
+    trong cửa sổ dài (mặc định 4h). Set 0 để tắt.
+    """
+    try:
+        return float(int(os.getenv("HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN", "240"))) * 60.0
+    except (TypeError, ValueError):
+        return 240.0 * 60.0
 
 
 def _load_sku_last_sent(key: str) -> float | None:
@@ -194,14 +212,17 @@ def _load_last_sent(key: str) -> float | None:
 def _is_suppressed_by_cooldown(alert: dict) -> bool:
     """True nếu alert nên bỏ qua để chống spam.
 
-    3 layer check (lớp đầu True → skip ngay, không check lớp sau):
+    4 layer check (lớp đầu True → skip ngay, không check lớp sau):
     0. Cross-hệ (HMIP_NOTIFY_SKU_COOLDOWN_MIN): hệ nào gửi trước (PI collect
        HOẶC scheduler scan) → ghi mốc → hệ kia thấy trong cửa sổ → skip. Chống
        DOUBLE NOTIFY (cùng 1 SP, 2 hệ chạy song song gửi 2 messages).
-    1. Per-sku (HMIP_NOTIFY_SKU_COOLDOWN_MIN, mặc định 30'): 1 SP đổi giá trên
+    1. Per-product (HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN, mặc định 4h): cùng PRODUCT
+       (tên SP) đã notify gần đây BẤT KỂ sku/kênh/vùng → skip. Gộp 90 cặp
+       (sku,channel,region) thành 1 alert per SP (PR #11).
+    2. Per-sku (HMIP_NOTIFY_SKU_COOLDOWN_MIN, mặc định 120'): 1 SP đổi giá trên
        nhiều kênh (Tiki+Shopee+Lazada) cùng lúc → chỉ kênh đầu notify. Bỏ qua
        nếu SP đã notify gần đây BẤT KỂ kênh nào.
-    2. Per-channel (HMIP_NOTIFY_COOLDOWN_MIN, mặc định 6h): cùng (sku,channel,
+    3. Per-channel (HMIP_NOTIFY_COOLDOWN_MIN, mặc định 6h): cùng (sku,channel,
        region) đã notify gần đây → skip.
     """
     sku_window = _sku_cooldown_seconds()
@@ -219,7 +240,21 @@ def _is_suppressed_by_cooldown(alert: dict) -> bool:
                     log.info("Notify skip (cross-hệ cooldown %.0fs): %s",
                              sku_window, prod_key)
                     return True
-    # Layer 1: per-sku (chống spam multi-channel).
+    # Layer 1: per-product (gộp 90 cặp sku/channel/region thành 1 alert per SP).
+    prod_window = _product_cooldown_seconds()
+    if prod_window > 0:
+        prod_key = _product_notify_key(alert)
+        if prod_key:
+            prod_last = _load_sku_last_sent(prod_key)
+            if prod_last is not None and (time.time() - prod_last) < prod_window:
+                # Ngoại lệ: giá đổi đáng kể (≥5%) → event mới → cho phép.
+                prod_price = _load_sku_last_price(prod_key)
+                new_p = alert.get("new_price")
+                if not _cross_price_changed_significantly(prod_price, new_p):
+                    log.info("Notify skip (per-product cooldown %.0fs): %s",
+                             prod_window, prod_key)
+                    return True
+    # Layer 2: per-sku (chống spam multi-channel).
     if sku_window > 0:
         sku_key = _sku_notify_key(alert)
         if sku_key.strip("sku:").strip("|"):
@@ -269,11 +304,16 @@ def _record_notify_sent(alert: dict) -> None:
     # Per-sku state (cho anti-spam multi-channel) + cross-hệ (cho đồng bộ với
     # scheduler scan). Cùng cửa sổ HMIP_NOTIFY_SKU_COOLDOWN_MIN.
     # prod:<name> ghi last_price để cross-scope check giá đổi đáng kể (≥5%).
+    # PR #11: prod key còn dùng cho per-product cooldown (HMIP_NOTIFY_PRODUCT_COOLDOWN_MIN)
+    # — ghi ngay cả khi sku_window=0 (per-sku tắt) vì per-product có thể vẫn bật.
     sku_window = _sku_cooldown_seconds()
-    if sku_window > 0:
+    prod_window = _product_cooldown_seconds()
+    if sku_window > 0 or prod_window > 0:
         for skey in (_sku_notify_key(alert), _product_notify_key(alert)):
             if not skey or (skey.startswith("sku:") and not skey.strip("sku:").strip("|")):
                 continue
+            if skey.startswith("sku:") and sku_window <= 0:
+                continue  # per-sku tắt → không ghi sku key
             _sku_notify_state[skey] = now
             is_prod = skey.startswith("prod:")
             try:

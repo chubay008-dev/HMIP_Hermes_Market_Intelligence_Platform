@@ -273,6 +273,45 @@ def test_extract_price_range_and_format():
     assert extract_product_price("không có giá ở đây") is None
 
 
+def test_infer_pack_from_price_snaps_to_common_packs():
+    """_infer_pack_from_price suy pack từ tỷ số giá thùng/base (PR #11)."""
+    from extensions.pi.price_extract import _infer_pack_from_price
+    # box=736000, base=30667 → ratio≈24 → pack 24
+    assert _infer_pack_from_price(736000.0, 30667.0) == 24
+    # box=360000, base=30000 → ratio=12 → pack 12
+    assert _infer_pack_from_price(360000.0, 30000.0) == 12
+    # box=108000, base=18000 → ratio=6 → pack 6
+    assert _infer_pack_from_price(108000.0, 18000.0) == 6
+    # box gần base (ratio<2) → None (lon lẻ, không phải thùng)
+    assert _infer_pack_from_price(35000.0, 30000.0) is None
+    # base=0 → None
+    assert _infer_pack_from_price(736000.0, 0.0) is None
+
+
+def test_extract_price_base_price_inference_when_no_pack_context():
+    """Context HTML không nêu pack ("thùng 24") → suy pack từ base_price (PR #11).
+
+    Trước đây: chỉ có thùng 6 lon, không có "thùng 6" text → fallback median
+    thùng (108000) → adapter /24 cứng → giá/lon=4500 (sai, quá thấp).
+    Sau fix: base_price=18000 → ratio=6 → pack 6 → giá/lon=18000 (đúng).
+    """
+    from extensions.pi.price_extract import extract_product_price
+    # Thùng 6 lon, không có pack text, base_price=18000
+    html = "108.000₫ BIA HUDA ### Lon 330ml"
+    # Không base_price → fallback median thùng (108000)
+    assert extract_product_price(html, brand="Huda") == 108000.0
+    # Có base_price=18000 → suy pack 6 → 108000/6=18000
+    assert extract_product_price(html, brand="Huda", base_price=18000.0) == 18000.0
+
+
+def test_extract_price_base_price_inference_thung_12():
+    """Thùng 12 lon không có pack text → suy pack 12 từ base_price."""
+    from extensions.pi.price_extract import extract_product_price
+    html = "360.000₫ HUDA ### Bia lon 330ml"  # không có "thùng 12"
+    # base_price=30000 → ratio=12 → pack 12 → 360000/12=30000
+    assert extract_product_price(html, brand="Huda", base_price=30000.0) == 30000.0
+
+
 # ---- Tests: persistent_collector (marker + incremental + notify) ----
 
 def test_persistent_marker_and_incremental(db):

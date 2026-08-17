@@ -261,12 +261,21 @@ def build_collect_adapter() -> Any:
                 # chia pack_quantity (24 cho thùng, 1 cho lon lẻ) — tránh variance
                 # khổng lồ khi lấy giá thùng ~400k vs base lon ~38k (→ ESCALATE sai).
                 pack = pp.pack_quantity if pp.pack_quantity and pp.pack_quantity > 0 else 1
-                # Heuristic bảo vệ: collector HTML (Jina/ZenRows) parse pack từ tên
-                # config (lon=1) vì không có item name, nhưng extract_product_price có
-                # thể lấy giá THÙNG (~400k+). Nếu eff > 100000 mà pack==1 → gần như
-                # chắc chắn là thùng → chia 24 (thùng bia VN thường 24 lon).
+                # Heuristic bảo vệ: collector HTML (Jina/ZenRows/ScraperAPI) parse
+                # pack từ tên config (lon=1) vì không có item name, nhưng
+                # extract_product_price có thể lấy giá THÙNG (~400k+). Nếu eff >
+                # 100000 mà pack==1 → gần như chắc chắn là thùng → suy pack từ tỷ số
+                # giá thùng/base (snap về 6/12/24) thay vì /24 cứng (PR #11). /24 cứng
+                # sai khi SP là thùng 6 hoặc 12 lon → giá/lon lệch → ESCALATE sai.
                 if pack == 1 and eff > 100000:
-                    pack = 24
+                    base = float(DEFAULT_PRODUCTS.get(pid, {}).get("ref_price", 0) or 0)
+                    if base > 0:
+                        from extensions.pi.price_extract import _infer_pack_from_price
+                        inferred = _infer_pack_from_price(eff, base)
+                        if inferred:
+                            pack = inferred
+                    if pack == 1:
+                        pack = 24  # fallback cuối: thùng bia VN thường 24 lon
                 unit_price = eff / pack
                 return {
                     "brand": brand_name,
