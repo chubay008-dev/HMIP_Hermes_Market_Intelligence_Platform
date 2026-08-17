@@ -51,7 +51,7 @@ module = "jsonschema.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "domains"]
+testpaths = ["tests", "domains", "extensions/tests"]
 # 08_Testing_Standard.md section 4: unit coverage >= 80% (enforced
 # here via --cov-fail-under). Critical-workflow coverage (>= 90%) is
 # not separately automatable from this single config — the
