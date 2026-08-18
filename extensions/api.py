@@ -251,6 +251,13 @@ def prices_real() -> dict[str, Any]:
     }
 
 
+@app.get("/api/prices-real/channels")
+def prices_real_channels() -> dict[str, Any]:
+    """Channel Comparison: so sánh giá đa kênh (Tiki/Web/Lotte/BachHoaXanh/...)
+    từ bảng giá thật. Dùng tab Workspace."""
+    return real_prices_mod.get_channel_comparison()
+
+
 @app.get("/api/catalog-real")
 def catalog_real() -> list[dict[str, Any]]:
     """Catalog kết hợp: tên SP + giá thật (nếu có). Dùng tab Giám sát."""

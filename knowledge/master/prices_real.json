@@ -18,188 +18,449 @@
       "product_id": "P012",
       "name": "Bia Ha Noi 450ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 338000,
-      "price_single_vnd": 14000,
+      "price_case_vnd": 220000,
+      "price_single_vnd": 9000,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 368000,
+          "single_vnd": 15000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 230000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 220000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "P123",
       "name": "Saigon Special 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 270000,
-      "price_single_vnd": 102000,
+      "price_case_vnd": 300000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 340000,
+          "single_vnd": 14000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "P333",
       "name": "Bia Larue 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 368400,
-      "price_single_vnd": 15000,
+      "price_case_vnd": 275000,
+      "price_single_vnd": 11000,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 368400,
+          "single_vnd": 15000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 278400,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 275000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "P456",
       "name": "Heineken Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 468000,
-      "price_single_vnd": 20000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 19375,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 598800,
+          "single_vnd": 25000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 448000,
+          "single_vnd": 19375,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 360000,
+          "single_vnd": 19375,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "P555",
       "name": "Bia Saigon Export 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 988000,
-      "price_single_vnd": 12292,
+      "price_case_vnd": 299999,
+      "price_single_vnd": 12430,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 445500,
+          "single_vnd": 19000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 12292,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 299999,
+          "single_vnd": 12430,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "P777",
       "name": "Sapporo Premium 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 408000,
-      "price_single_vnd": 17000,
+      "price_case_vnd": 469000,
+      "price_single_vnd": 20000,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 510000,
+          "single_vnd": 21000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 477600,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 469000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "P789",
       "name": "Tiger Beer 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 468000,
-      "price_single_vnd": 20000,
+      "price_case_vnd": 292000,
+      "price_single_vnd": 87600,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 468000,
+          "single_vnd": 20000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 292000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 292000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "P888",
       "name": "Budweiser 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 448800,
-      "price_single_vnd": 22000,
+      "price_case_vnd": 219000,
+      "price_single_vnd": 9000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 436800,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 219000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PASP",
       "name": "Asahi Super Dry 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 531000,
-      "price_single_vnd": 18000,
+      "price_case_vnd": 512000,
+      "price_single_vnd": 21000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 512000,
+          "single_vnd": 21000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": null,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 603900,
+          "single_vnd": 25000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "tiki"
     },
     {
       "product_id": "PAT_ED",
       "name": "Edelweiss Wheat Beer 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 480000,
+      "price_case_vnd": 470000,
       "price_single_vnd": 20000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 1340000,
+          "single_vnd": 56000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 470000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 740000,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PBE_HG",
       "name": "Hoegaarden White 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 384000,
+      "price_case_vnd": 372000,
       "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 372000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 600000,
+          "single_vnd": 16500,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PBE_LF",
       "name": "Leffe Blonde 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 935000,
+      "price_case_vnd": 360000,
       "price_single_vnd": 55000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "tiki": {
+          "case_vnd": 1408000,
+          "single_vnd": 59000,
+          "confidence": "high"
+        },
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 55000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 935000,
+          "single_vnd": 55000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PCAR",
       "name": "Carlsberg 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 446200,
-      "price_single_vnd": 19000,
+      "price_case_vnd": 300000,
+      "price_single_vnd": 17600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 460800,
+          "single_vnd": 22550,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 17600,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PCN_19",
       "name": "Tsingtao 1903 Premium Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 600000,
-      "price_single_vnd": 25000,
+      "price_case_vnd": 412500,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 504000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 412500,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PCN_19B",
       "name": "Tsingtao 1903 Premium Lager 500ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 697368,
-      "price_single_vnd": 10000,
+      "price_case_vnd": 412500,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 900000,
+          "single_vnd": 38000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 412500,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PCN_LM",
       "name": "Tsingtao Lemon 0.0 330ml",
       "pack_case": "24x330ml",
       "price_case_vnd": 480000,
-      "price_single_vnd": 20000,
+      "price_single_vnd": 61900,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 480000,
+          "single_vnd": 61900,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PCN_OB",
       "name": "Tsingtao Oak Barrel Luxury Legend 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 5500000,
-      "price_single_vnd": 229000,
+      "price_case_vnd": 412500,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 499000,
+          "single_vnd": 61900,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 412500,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PCN_PD",
@@ -216,595 +477,1287 @@
       "product_id": "PCN_SE",
       "name": "Tsingtao 2026 Special Edition 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 1999000,
-      "price_single_vnd": 83000,
+      "price_case_vnd": 412500,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 504000,
+          "single_vnd": 61900,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 412500,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PCN_TL",
       "name": "Tsingtao Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 430000,
-      "price_single_vnd": 10000,
+      "price_case_vnd": 412500,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 465000,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 412500,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PCN_TP",
       "name": "Tsingtao Premium Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 550000,
-      "price_single_vnd": 30000,
+      "price_case_vnd": 412500,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 799000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 412500,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PCN_TP6",
       "name": "Tsingtao Premium Lager 640ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 490000,
-      "price_single_vnd": 10000,
+      "price_case_vnd": 412500,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 490000,
+          "single_vnd": 25000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 412500,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PDE_PA",
       "name": "Paulaner 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 1200000,
-      "price_single_vnd": 50000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PDE_WE",
       "name": "Weihenstephaner Hefeweissbier 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 1150000,
-      "price_single_vnd": 60000,
+      "price_case_vnd": 396000,
+      "price_single_vnd": 15000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 396000,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 750000,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PESP_ED",
       "name": "Estrella Damm 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 780000,
-      "price_single_vnd": 32000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 10000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 750000,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PESP_EG",
       "name": "Estrella Galicia 330ml",
       "pack_case": "24x330ml",
       "price_case_vnd": 297000,
-      "price_single_vnd": 13700,
+      "price_single_vnd": 12200,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 297000,
+          "single_vnd": 12200,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 750000,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PESP_MH",
       "name": "Mahou 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 250000,
-      "price_single_vnd": 102000,
+      "price_case_vnd": 259300,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 343740,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 259300,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PESP_SM",
       "name": "San Miguel 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 650000,
-      "price_single_vnd": 13700,
+      "price_case_vnd": 408000,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 408000,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 650000,
+          "single_vnd": 27500,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PHN_CH",
       "name": "Bia Hà Nội Chai 450ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 275000,
-      "price_single_vnd": 20000,
+      "price_case_vnd": 250000,
+      "price_single_vnd": 10000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 260000,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 250000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PHUDA",
       "name": "Bia Huda 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 290000,
-      "price_single_vnd": 80000,
+      "price_case_vnd": 289000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 289000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 289000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PIRE_G0",
       "name": "Guinness 0.0 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 1280000,
-      "price_single_vnd": 53000,
+      "price_case_vnd": 1900000,
+      "price_single_vnd": 79000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "websosanh": {
+          "case_vnd": 1900000,
+          "single_vnd": 79000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PIRE_GD",
       "name": "Guinness Draught 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 895000,
-      "price_single_vnd": 37000,
+      "price_case_vnd": 1900000,
+      "price_single_vnd": 79000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 2552000,
+          "single_vnd": 106000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 1900000,
+          "single_vnd": 79000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PIRE_GE",
       "name": "Guinness Extra Stout 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 895000,
-      "price_single_vnd": 37000,
+      "price_case_vnd": 1900000,
+      "price_single_vnd": 79000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 2400000,
+          "single_vnd": 100000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 1900000,
+          "single_vnd": 79000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PIRE_GF",
       "name": "Guinness Foreign Extra Stout 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 2160000,
-      "price_single_vnd": 90000,
+      "price_case_vnd": 1900000,
+      "price_single_vnd": 79000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 2600000,
+          "single_vnd": 108000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 1900000,
+          "single_vnd": 79000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PITA_BM",
       "name": "Birra Messina 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 270000,
-      "price_single_vnd": 102000,
+      "price_case_vnd": 300000,
+      "price_single_vnd": 22550,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 22550,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PITA_MN",
       "name": "Menabrea 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 270000,
-      "price_single_vnd": 11000,
+      "price_case_vnd": 300000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 300000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 22550,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PITA_MO",
       "name": "Moretti 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 343740,
-      "price_single_vnd": 80000,
+      "price_case_vnd": 259300,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 259300,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PITA_P",
       "name": "Peroni 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 525000,
-      "price_single_vnd": 22000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 850000,
+          "single_vnd": 29700,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PITA_PN",
       "name": "Peroni Nastro Azzurro 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 1175000,
+      "price_case_vnd": 360000,
       "price_single_vnd": 45000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 45000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 850000,
+          "single_vnd": 29700,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PKIR",
       "name": "Kirin Ichiban 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 1450000,
-      "price_single_vnd": 10000,
+      "price_case_vnd": 620000,
+      "price_single_vnd": 26000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 1200000,
+          "single_vnd": 72600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 620000,
+          "single_vnd": 26000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PLA_GD",
       "name": "Beerlao Gold 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 619000,
-      "price_single_vnd": 83000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 750000,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PLA_LG",
       "name": "Beerlao Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 619000,
-      "price_single_vnd": 83000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 650000,
+          "single_vnd": 27000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
       "product_id": "PMEX_CC",
       "name": "Corona Cero 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 550000,
-      "price_single_vnd": 23000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PMEX_CO",
-      "name": "Corona Extra 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 221000,
-      "price_single_vnd": 12300,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PMEX_DE",
-      "name": "Dos Equis 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 280800,
-      "price_single_vnd": 12000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PMEX_ME",
-      "name": "Modelo Especial 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 343740,
-      "price_single_vnd": 17000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PMEX_NM",
-      "name": "Negra Modelo 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 297000,
-      "price_single_vnd": 13700,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PMEX_PA",
-      "name": "Pacifico 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 343740,
-      "price_single_vnd": 58000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PMEX_SO",
-      "name": "Sol 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 200000,
-      "price_single_vnd": 8167,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PRUS_B0",
-      "name": "Baltika 0 (khong con) 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 750000,
-      "price_single_vnd": 31000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PRUS_BA",
-      "name": "Baltika 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 520000,
-      "price_single_vnd": 22000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PSG_BC",
-      "name": "Bia Sài Gòn Bạc 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 265000,
-      "price_single_vnd": 11042,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PSG_BK",
-      "name": "Bia Sài Gòn Black 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 265000,
-      "price_single_vnd": 11042,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PSG_GD",
-      "name": "Bia Sài Gòn Gold 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 265000,
-      "price_single_vnd": 11000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PSG_LG",
-      "name": "Bia Sài Gòn Lager 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 263000,
-      "price_single_vnd": 10958,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PSTW",
-      "name": "Bia Sư Tử Trắng 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 260000,
-      "price_single_vnd": 13700,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PTB",
-      "name": "Bia Trúc Bạch 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 450000,
-      "price_single_vnd": 21000,
-      "source": "web",
-      "confidence": "medium",
-      "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PTBG",
-      "name": "Tuborg 330ml",
       "pack_case": "24x330ml",
       "price_case_vnd": 297000,
       "price_single_vnd": 74000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 297000,
+          "single_vnd": 74000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PTBG_C",
-      "name": "Tuborg Classic 330ml",
+      "product_id": "PMEX_CO",
+      "name": "Corona Extra 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 364800,
-      "price_single_vnd": 15000,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PTBG_D",
-      "name": "Tuborg Gold 330ml",
+      "product_id": "PMEX_DE",
+      "name": "Dos Equis 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 364800,
-      "price_single_vnd": 15000,
+      "price_case_vnd": 273600,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 273600,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 469999,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PTBG_G",
-      "name": "Tuborg Green 330ml",
+      "product_id": "PMEX_ME",
+      "name": "Modelo Especial 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 1512000,
-      "price_single_vnd": 63000,
-      "source": "tiki",
-      "confidence": "high",
-      "note": "auto-tiki",
-      "captured_date": "2026-08-18"
-    },
-    {
-      "product_id": "PTGR_C",
-      "name": "Tiger Crystal 330ml",
-      "pack_case": "24x330ml",
-      "price_case_vnd": 292000,
+      "price_case_vnd": 300000,
       "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
-      "product_id": "PTGR_T",
-      "name": "Tiger Tail 330ml",
+      "product_id": "PMEX_NM",
+      "name": "Negra Modelo 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 391600,
-      "price_single_vnd": 14833,
+      "price_case_vnd": 273600,
+      "price_single_vnd": 28000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 273600,
+          "single_vnd": 28000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 650000,
+          "single_vnd": 27500,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PTH_CH",
-      "name": "Chang 330ml",
+      "product_id": "PMEX_PA",
+      "name": "Pacifico 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 580000,
-      "price_single_vnd": 24000,
+      "price_case_vnd": 219000,
+      "price_single_vnd": 50490,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 300000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 219000,
+          "single_vnd": 50490,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
-      "product_id": "PTH_SG",
-      "name": "Singha 330ml",
+      "product_id": "PMEX_SO",
+      "name": "Sol 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 490000,
-      "price_single_vnd": 20000,
+      "price_case_vnd": 300000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 300000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PVT",
-      "name": "Bia Vĩnh Tuy 330ml",
+      "product_id": "PRUS_B0",
+      "name": "Baltika 0 (khong con) 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 268000,
-      "price_single_vnd": 11000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 750000,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PZ_AS",
-      "name": "Asahi Dry Zero 330ml",
+      "product_id": "PRUS_BA",
+      "name": "Baltika 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 2026379000,
-      "price_single_vnd": 18000,
+      "price_case_vnd": 360000,
+      "price_single_vnd": 87600,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 737000,
+          "single_vnd": 38500,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PZ_BK",
-      "name": "Beck's Blue 330ml",
+      "product_id": "PSG_BC",
+      "name": "Bia Sài Gòn Bạc 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 240000,
-      "price_single_vnd": 12000,
+      "price_case_vnd": 219000,
+      "price_single_vnd": 9000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 265000,
+          "single_vnd": 23000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 219000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
-      "product_id": "PZ_BUD",
-      "name": "Budweiser 330ml",
+      "product_id": "PSG_BK",
+      "name": "Bia Sài Gòn Black 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 448800,
-      "price_single_vnd": 22000,
+      "price_case_vnd": 340470,
+      "price_single_vnd": 12430,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 340470,
+          "single_vnd": 12430,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
-      "product_id": "PZ_BW",
-      "name": "Budweiser Zero 330ml",
+      "product_id": "PSG_GD",
+      "name": "Bia Sài Gòn Gold 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 395000,
-      "price_single_vnd": 22000,
+      "price_case_vnd": 340470,
+      "price_single_vnd": 22400,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 340470,
+          "single_vnd": 22400,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 340470,
+          "single_vnd": 14000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
     },
     {
-      "product_id": "PZ_ER",
-      "name": "Erdinger Alkoholfrei 330ml",
+      "product_id": "PSG_LG",
+      "name": "Bia Sài Gòn Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 850000,
-      "price_single_vnd": 16000,
+      "price_case_vnd": 250000,
+      "price_single_vnd": 10000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 265000,
+          "single_vnd": 11042,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 250000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     },
     {
-      "product_id": "PZ_HN",
-      "name": "Heineken 0.0 330ml",
+      "product_id": "PSTW",
+      "name": "Bia Sư Tử Trắng 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 260000,
+      "price_single_vnd": 87600,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 260000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 260000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
+    },
+    {
+      "product_id": "PTB",
+      "name": "Bia Trúc Bạch 330ml",
       "pack_case": "24x330ml",
       "price_case_vnd": 450000,
       "price_single_vnd": 19000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 465000,
+          "single_vnd": 19200,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 450000,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PTBG",
+      "name": "Tuborg 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 295000,
+      "price_single_vnd": 12000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 337000,
+          "single_vnd": 14042,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 295000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PTBG_C",
+      "name": "Tuborg Classic 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 295000,
+      "price_single_vnd": 12000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 337000,
+          "single_vnd": 14042,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 295000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PTBG_D",
+      "name": "Tuborg Gold 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 295000,
+      "price_single_vnd": 12000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 337000,
+          "single_vnd": 14042,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 295000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PTBG_G",
+      "name": "Tuborg Green 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 337000,
+      "price_single_vnd": 14042,
+      "source": "tiki",
+      "confidence": "high",
+      "note": "auto-tiki",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 337000,
+          "single_vnd": 14042,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 364800,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
+    },
+    {
+      "product_id": "PTGR_C",
+      "name": "Tiger Crystal 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 300000,
+      "price_single_vnd": 12000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 359000,
+          "single_vnd": 80000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PTGR_T",
+      "name": "Tiger Tail 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 300000,
+      "price_single_vnd": 12000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 300000,
+          "single_vnd": 15180,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
+    },
+    {
+      "product_id": "PTH_CH",
+      "name": "Chang 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 350000,
+      "price_single_vnd": 87600,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 350000,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 405900,
+          "single_vnd": 20900,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
+    },
+    {
+      "product_id": "PTH_SG",
+      "name": "Singha 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 490000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
+    },
+    {
+      "product_id": "PVT",
+      "name": "Bia Vĩnh Tuy 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 219000,
+      "price_single_vnd": 9000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 343740,
+          "single_vnd": 87600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 219000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PZ_AS",
+      "name": "Asahi Dry Zero 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 600000,
+      "price_single_vnd": 27500,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 680000,
+          "single_vnd": 28000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 600000,
+          "single_vnd": 27500,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PZ_BK",
+      "name": "Beck's Blue 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 220000,
+      "price_single_vnd": 9000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 336000,
+          "single_vnd": 20900,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 220000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PZ_BUD",
+      "name": "Budweiser 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 219000,
+      "price_single_vnd": 9000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 436800,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 219000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PZ_BW",
+      "name": "Budweiser Zero 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 219000,
+      "price_single_vnd": 9000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 436800,
+          "single_vnd": 76900,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 219000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
+    },
+    {
+      "product_id": "PZ_ER",
+      "name": "Erdinger Alkoholfrei 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 360000,
+      "price_single_vnd": 62000,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 360000,
+          "single_vnd": 62000,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 750000,
+          "single_vnd": 62000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "lotte"
+    },
+    {
+      "product_id": "PZ_HN",
+      "name": "Heineken 0.0 330ml",
+      "pack_case": "24x330ml",
+      "price_case_vnd": 360000,
+      "price_single_vnd": 17600,
+      "source": "web",
+      "confidence": "medium",
+      "note": "deep-scan-live",
+      "captured_date": "2026-08-18",
+      "channels": {
+        "lotte": {
+          "case_vnd": 460800,
+          "single_vnd": 17600,
+          "confidence": "medium"
+        },
+        "websosanh": {
+          "case_vnd": 360000,
+          "single_vnd": 17600,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "websosanh"
     }
   ]
 }
