@@ -1,149 +1,142 @@
-{
-  "meta": {
-    "description": "Tin tức thật về thị trường bia VN (thuế TTĐB, giá, doanh nghiệp). Nguồn: web_search + RSS (VnExpress/CafeF/Đời sống Pháp luật) qua extensions/pi/news_collector.py.",
-    "updated_at": "2026-08-18T03:07:32.634249+00:00",
-    "count": 20
+[
+  {
+    "title": "Carlsberg Việt Nam duy trì đầu tư giữa bối cảnh thị trường bia sụt giảm",
+    "url": "https://kinhtetieudung.vn/carlsberg-viet-nam-duy-tri-dau-tu-giua-boi-canh-thi-truong-bia-sut-giam-a24272.html",
+    "snippet": "Dù sản lượng tiêu thụ giảm trong nửa đầu năm 2025, Carlsberg Việt Nam vẫn tiếp tục triển khai dự án mở rộng nhà máy bia Huế với tổng vốn đầu ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634246+00:00"
   },
-  "items": [
-    {
-      "title": "Giá rượu, bia dự kiến tăng 20% từ 2026 sau khi đồng loạt tăng thuế ...",
-      "url": "https://itpc.hochiminhcity.gov.vn/-/gia-ruou-bia-du-kien-tang-20-tu-2026-sau-khi-ong-loat-tang-thue-tieu-thu-ac-biet",
-      "snippet": "Bộ Tài chính đề xuất lộ trình tăng thuế tiêu thụ đặc biệt để tăng tỷ trọng thuế rượu, bia lên 40% giá bán lẻ, từ mức 30% như hiện nay.",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634123+00:00"
-    },
-    {
-      "title": "Tác động của việc tăng thuế tiêu thụ đặc biệt với ngành bia",
-      "url": "https://thitruongtaichinhtiente.vn/tac-dong-cua-viec-tang-thue-tieu-thu-dac-biet-voi-nganh-bia-64183.html",
-      "snippet": "Từ năm 2027, mỗi năm tăng 5%, tới năm 2030, tăng tiếp lên 5% với lộ trình 2 năm tăng 5% lên tổng số 15% như thông lệ đã và đang làm với ngành đồ ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634141+00:00"
-    },
-    {
-      "title": "Mặt hàng bia chính thức chịu thuế TTĐB lên 70% từ năm 2027 ...",
-      "url": "https://nguoiquansat.vn/mat-hang-bia-chinh-thuc-chiu-thue-ttdb-len-70-tu-nam-2027-sabeco-se-chuyen-phan-thue-tang-them-vao-gia-ban-224988.html",
-      "snippet": "Cụ thể, rượu từ 20 độ trở lên và mặt hàng bia sẽ chịu mức thuế 65% từ đầu năm 2026, sau đó mỗi năm tăng thêm 5%, đạt mức 90% vào năm 2031.",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634146+00:00"
-    },
-    {
-      "title": "ĐÁNH GIÁ TÁC ĐỘNG CỦA THUẾ TIÊU THỤ ĐẶC BIỆT LÊN TIÊU ...",
-      "url": "https://fwps.ftu.edu.vn/2025/08/14/danh-gia-tac-dong-cua-thue-tieu-thu-dac-biet-len-tieu-dung-bia-o-viet-nam-va-de-xuat-chinh-sach-giai-doan-2026-2030/",
-      "snippet": "Mức thuế tiêu thụ đặc biệt tại Việt Nam đối với bia rượu, đặc biệt là với mặt hàng bia đang được cân nhắc sửa đổi tăng lên mức mới trong tương ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634150+00:00"
-    },
-    {
-      "title": "Không cần lo bán bia, một doanh nghiệp Việt Nam nhận về ...",
-      "url": "https://nhipsongkinhdoanh.vn/khong-can-lo-ban-bia--mot-doanh-nghiep-viet-nam-nhan-ve-2-800-ty-tu-heineken-chi-trong-6t2025--bao-lai-gap-5-lan-cung-ky-19714.htm",
-      "snippet": "Nhà Máy Bia Heineken Việt Nam là liên doanh giữa Satra với 40% và Heineken Asia Pacific với 60%. Năm 2025, Satra đặt mục tiêu doanh thu 10.692 ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634154+00:00"
-    },
-    {
-      "title": "Việt Nam là một trong những thị trường 'gánh' lợi nhuận ...",
-      "url": "https://vietnambiz.vn/viet-nam-la-mot-trong-nhung-thi-truong-ganh-loi-nhuan-cho-heineken-nam-2025-202639151245860.htm",
-      "snippet": "Doanh thu ròng của Heineken trong 2025 đạt gần 29 tỷ Euro, giảm gần 3,6%. Lợi nhuận hoạt động gần 4,4 tỷ Euro và lợi nhuận ròng đạt 2,66 tỷ Euro ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634158+00:00"
-    },
-    {
-      "title": "Lợi nhuận Heineken tại Việt Nam tiếp tục giảm",
-      "url": "https://vnexpress.net/loi-nhuan-heineken-tai-viet-nam-tiep-tuc-giam-4799277.html",
-      "snippet": "Ước tính từ phần cổ tức trả cho Satra, lợi nhuận của Heineken Việt Nam có thể giảm hơn 28% về quanh 1.100 tỷ đồng nửa đầu năm. - VnExpress.",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634181+00:00"
-    },
-    {
-      "title": "Báo cáo Bia heineken - Nghiên cứu thị trường sàn TMĐT",
-      "url": "https://metric.vn/ereport/bia-heineken?srsltid=AfmBOopUK3ErzrzkVtQ5zugcgb14WjY-p5vNpWCZqBvH-pywGS5PtQFG",
-      "snippet": "Báo cáo doanh thu. Đánh giá thị trường Bia heineken, phân khúc giá có doanh số cao nhất là từ 10.000₫ - 50.000₫.",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634192+00:00"
-    },
-    {
-      "title": "Sabeco hưởng lợi từ đà phục hồi tiêu thụ bia, lợi nhuận năm 2026 được ...",
-      "url": "https://baomoi.com/sabeco-huong-loi-tu-da-phuc-hoi-tieu-thu-bia-loi-nhuan-nam-2026-duoc-du-bao-tang-nhe-c55347150.epi",
-      "snippet": "CTCP Bia – Rượu – Nước giải khát Sài Gòn (Sabeco, mã: SAB) ghi nhận kết quả kinh doanh tích cực trong quý I/2026 khi doanh thu thuần đạt 6.457",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634199+00:00"
-    },
-    {
-      "title": "Chủ hãng bia Sài Gòn có doanh số thấp nhất 10 năm - VnExpress",
-      "url": "https://vnexpress.net/chu-hang-bia-sai-gon-co-doanh-so-thap-nhat-10-nam-5042490.html",
-      "snippet": "Gần 93% doanh thu Sabeco đến từ bia. Chỉ một phần nhỏ từ nước giải khát, rượu và nguyên vật liệu. Sabeco chưa giải trình về kết quả kinh doanh ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634204+00:00"
-    },
-    {
-      "title": "Tăng giá bia 2 lần trong 2 tháng, Sabeco bất ngờ bán chạy nhất ...",
-      "url": "https://m.cafef.vn/tang-gia-bia-2-lan-trong-2-thang-sabeco-bat-ngo-ban-chay-nhat-shopee-va-lazada-phan-khuc-cao-cap-tang-214-188260806101602981.chn",
-      "snippet": "doanh thu quý 2/2026 tăng 1% so sản lượng bia giảm, doanh thu 6 tháng đầu năm 2026 tăng 6%",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634208+00:00"
-    },
-    {
-      "title": "Tổng Giám đốc Sabeco: Chưa có công ty bia giữ chắc thị phần số một ...",
-      "url": "https://vietstock.vn/2026/04/tong-giam-doc-sabeco-chua-co-cong-ty-bia-giu-chac-thi-phan-so-mot-tai-viet-nam-737-1432424.htm",
-      "snippet": "trường bia, 12% về doanh thu và 8% về lợi nhuận sau thuế cho năm 2026. Lợi nhuận quý 1 tăng 56%",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634212+00:00"
-    },
-    {
-      "title": "nhập khẩu bia rượu năm 2026 cần đóng những loại thuế ...",
-      "url": "https://www.facebook.com/groups/vnaccs/posts/26604162082546132/",
-      "snippet": "Bia & Rượu từ 20 độ trở lên: Mức thuế 65% (năm 2026) ➡️ Tăng đều mỗi năm lên 90% (năm 2031) . Rượu dưới 20 độ: Mức thuế 35% (năm 2026) ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634220+00:00"
-    },
-    {
-      "title": "Thủ tục và thuế nhập khẩu Bia",
-      "url": "https://hptoancau.com/nhap-khau-bia/",
-      "snippet": "Thuế giá trị gia tăng – hay còn gọi là % 52.5% 65% 22030099 – Loại khác 8/10% 35% 52.5% 65% Lưu ý:",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634224+00:00"
-    },
-    {
-      "title": "Giá rượu, bia dự kiến tăng 20% từ 2026 sau khi đồng loạt ...",
-      "url": "https://itpc.hochiminhcity.gov.vn/-/gia-ruou-bia-du-kien-tang-20-tu-2026-sau-khi-ong-loat-tang-thue-tieu-thu-ac-biet",
-      "snippet": "Ba là, đối với mặt hàng bia, giá bán năm 2026 sẽ tăng 20% so với năm 2025 và các năm tiếp theo mỗi năm giá bán sẽ tăng 2-3% so với năm trước để đảm bảo giả sản ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634227+00:00"
-    },
-    {
-      "title": "Giá rượu, bia dự kiến tăng 20% từ 2026 sau khi đồng loạt ...",
-      "url": "https://vneconomy.vn/gia-ruou-bia-du-kien-tang-20-tu-2026-sau-khi-dong-loat-tang-thue-tieu-thu-dac-biet.htm",
-      "snippet": "Bộ Tài chính đề xuất lộ trình tăng thuế tiêu thụ đặc biệt để tăng tỷ trọng thuế rượu, bia lên 40% giá bán lẻ, từ mức 30% như hiện nay.",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634231+00:00"
-    },
-    {
-      "title": "Thị trường bia Việt Nam: Triển vọng năm 2026 - Công ty B - B&Company",
-      "url": "https://b-company.jp/vi/vietnam-beer-market-2026-outlook/",
-      "snippet": "Các thương hiệu khác vẫn giữ thị phần nhỏ hơn nhiều, với Carlsberg ở mức 9,2%, Sabeco ở mức 7,5% và các thương hiệu khác ở mức 6,4% vào năm 2023.[7].",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634235+00:00"
-    },
-    {
-      "title": "Carlsberg Việt Nam hiện thực hóa cam kết phát triển bền vững qua ...",
-      "url": "https://carlsbergvietnam.vn/vi/newsroom/carlsberg-viet-nam-hien-thuc-hoa-cam-ket-phat-trien-ben-vung-qua-nhung-hanh-dong-thiet-thuc-nhan-ngay-moi-truong-the-gioi-2026/",
-      "snippet": "Hơn 150 tình nguyện viên đã cùng chung tay làm sạch bãi biển tại Đà Nẵng trong khuôn khổ chương trình Ngày Môi trường Thế giới 2026 do Carlsberg Việt Nam tổ ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634238+00:00"
-    },
-    {
-      "title": "Nốt trầm ngành bia Việt mùa World Cup 2026 - TheLEADER",
-      "url": "https://theleader.vn/not-tram-nganh-bia-viet-mua-world-cup-2026-d46569.html",
-      "snippet": "Năm ngoái, Việt Nam được xếp hạng là thị trường lớn thứ sáu trên quy mô toàn cầu của tập đoàn, mang về mức doanh thu khoảng 15.700 tỷ đồng.",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634242+00:00"
-    },
-    {
-      "title": "Carlsberg Việt Nam duy trì đầu tư giữa bối cảnh thị trường bia sụt giảm",
-      "url": "https://kinhtetieudung.vn/carlsberg-viet-nam-duy-tri-dau-tu-giua-boi-canh-thi-truong-bia-sut-giam-a24272.html",
-      "snippet": "Dù sản lượng tiêu thụ giảm trong nửa đầu năm 2025, Carlsberg Việt Nam vẫn tiếp tục triển khai dự án mở rộng nhà máy bia Huế với tổng vốn đầu ...",
-      "source": "web_search",
-      "fetched_at": "2026-08-18T03:07:32.634246+00:00"
-    }
-  ]
-}
+  {
+    "title": "Nốt trầm ngành bia Việt mùa World Cup 2026 - TheLEADER",
+    "url": "https://theleader.vn/not-tram-nganh-bia-viet-mua-world-cup-2026-d46569.html",
+    "snippet": "Năm ngoái, Việt Nam được xếp hạng là thị trường lớn thứ sáu trên quy mô toàn cầu của tập đoàn, mang về mức doanh thu khoảng 15.700 tỷ đồng.",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634242+00:00"
+  },
+  {
+    "title": "Carlsberg Việt Nam hiện thực hóa cam kết phát triển bền vững qua ...",
+    "url": "https://carlsbergvietnam.vn/vi/newsroom/carlsberg-viet-nam-hien-thuc-hoa-cam-ket-phat-trien-ben-vung-qua-nhung-hanh-dong-thiet-thuc-nhan-ngay-moi-truong-the-gioi-2026/",
+    "snippet": "Hơn 150 tình nguyện viên đã cùng chung tay làm sạch bãi biển tại Đà Nẵng trong khuôn khổ chương trình Ngày Môi trường Thế giới 2026 do Carlsberg Việt Nam tổ ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634238+00:00"
+  },
+  {
+    "title": "Thị trường bia Việt Nam: Triển vọng năm 2026 - Công ty B - B&Company",
+    "url": "https://b-company.jp/vi/vietnam-beer-market-2026-outlook/",
+    "snippet": "Các thương hiệu khác vẫn giữ thị phần nhỏ hơn nhiều, với Carlsberg ở mức 9,2%, Sabeco ở mức 7,5% và các thương hiệu khác ở mức 6,4% vào năm 2023.[7].",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634235+00:00"
+  },
+  {
+    "title": "Giá rượu, bia dự kiến tăng 20% từ 2026 sau khi đồng loạt ...",
+    "url": "https://vneconomy.vn/gia-ruou-bia-du-kien-tang-20-tu-2026-sau-khi-dong-loat-tang-thue-tieu-thu-dac-biet.htm",
+    "snippet": "Bộ Tài chính đề xuất lộ trình tăng thuế tiêu thụ đặc biệt để tăng tỷ trọng thuế rượu, bia lên 40% giá bán lẻ, từ mức 30% như hiện nay.",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634231+00:00"
+  },
+  {
+    "title": "Giá rượu, bia dự kiến tăng 20% từ 2026 sau khi đồng loạt ...",
+    "url": "https://itpc.hochiminhcity.gov.vn/-/gia-ruou-bia-du-kien-tang-20-tu-2026-sau-khi-ong-loat-tang-thue-tieu-thu-ac-biet",
+    "snippet": "Ba là, đối với mặt hàng bia, giá bán năm 2026 sẽ tăng 20% so với năm 2025 và các năm tiếp theo mỗi năm giá bán sẽ tăng 2-3% so với năm trước để đảm bảo giả sản ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634227+00:00"
+  },
+  {
+    "title": "Thủ tục và thuế nhập khẩu Bia",
+    "url": "https://hptoancau.com/nhap-khau-bia/",
+    "snippet": "Thuế giá trị gia tăng – hay còn gọi là % 52.5% 65% 22030099 – Loại khác 8/10% 35% 52.5% 65% Lưu ý:",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634224+00:00"
+  },
+  {
+    "title": "nhập khẩu bia rượu năm 2026 cần đóng những loại thuế ...",
+    "url": "https://www.facebook.com/groups/vnaccs/posts/26604162082546132/",
+    "snippet": "Bia & Rượu từ 20 độ trở lên: Mức thuế 65% (năm 2026) ➡️ Tăng đều mỗi năm lên 90% (năm 2031) . Rượu dưới 20 độ: Mức thuế 35% (năm 2026) ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634220+00:00"
+  },
+  {
+    "title": "Tổng Giám đốc Sabeco: Chưa có công ty bia giữ chắc thị phần số một ...",
+    "url": "https://vietstock.vn/2026/04/tong-giam-doc-sabeco-chua-co-cong-ty-bia-giu-chac-thi-phan-so-mot-tai-viet-nam-737-1432424.htm",
+    "snippet": "trường bia, 12% về doanh thu và 8% về lợi nhuận sau thuế cho năm 2026. Lợi nhuận quý 1 tăng 56%",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634212+00:00"
+  },
+  {
+    "title": "Tăng giá bia 2 lần trong 2 tháng, Sabeco bất ngờ bán chạy nhất ...",
+    "url": "https://m.cafef.vn/tang-gia-bia-2-lan-trong-2-thang-sabeco-bat-ngo-ban-chay-nhat-shopee-va-lazada-phan-khuc-cao-cap-tang-214-188260806101602981.chn",
+    "snippet": "doanh thu quý 2/2026 tăng 1% so sản lượng bia giảm, doanh thu 6 tháng đầu năm 2026 tăng 6%",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634208+00:00"
+  },
+  {
+    "title": "Chủ hãng bia Sài Gòn có doanh số thấp nhất 10 năm - VnExpress",
+    "url": "https://vnexpress.net/chu-hang-bia-sai-gon-co-doanh-so-thap-nhat-10-nam-5042490.html",
+    "snippet": "Gần 93% doanh thu Sabeco đến từ bia. Chỉ một phần nhỏ từ nước giải khát, rượu và nguyên vật liệu. Sabeco chưa giải trình về kết quả kinh doanh ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634204+00:00"
+  },
+  {
+    "title": "Sabeco hưởng lợi từ đà phục hồi tiêu thụ bia, lợi nhuận năm 2026 được ...",
+    "url": "https://baomoi.com/sabeco-huong-loi-tu-da-phuc-hoi-tieu-thu-bia-loi-nhuan-nam-2026-duoc-du-bao-tang-nhe-c55347150.epi",
+    "snippet": "CTCP Bia – Rượu – Nước giải khát Sài Gòn (Sabeco, mã: SAB) ghi nhận kết quả kinh doanh tích cực trong quý I/2026 khi doanh thu thuần đạt 6.457",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634199+00:00"
+  },
+  {
+    "title": "Báo cáo Bia heineken - Nghiên cứu thị trường sàn TMĐT",
+    "url": "https://metric.vn/ereport/bia-heineken?srsltid=AfmBOopUK3ErzrzkVtQ5zugcgb14WjY-p5vNpWCZqBvH-pywGS5PtQFG",
+    "snippet": "Báo cáo doanh thu. Đánh giá thị trường Bia heineken, phân khúc giá có doanh số cao nhất là từ 10.000₫ - 50.000₫.",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634192+00:00"
+  },
+  {
+    "title": "Lợi nhuận Heineken tại Việt Nam tiếp tục giảm",
+    "url": "https://vnexpress.net/loi-nhuan-heineken-tai-viet-nam-tiep-tuc-giam-4799277.html",
+    "snippet": "Ước tính từ phần cổ tức trả cho Satra, lợi nhuận của Heineken Việt Nam có thể giảm hơn 28% về quanh 1.100 tỷ đồng nửa đầu năm. - VnExpress.",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634181+00:00"
+  },
+  {
+    "title": "Việt Nam là một trong những thị trường 'gánh' lợi nhuận ...",
+    "url": "https://vietnambiz.vn/viet-nam-la-mot-trong-nhung-thi-truong-ganh-loi-nhuan-cho-heineken-nam-2025-202639151245860.htm",
+    "snippet": "Doanh thu ròng của Heineken trong 2025 đạt gần 29 tỷ Euro, giảm gần 3,6%. Lợi nhuận hoạt động gần 4,4 tỷ Euro và lợi nhuận ròng đạt 2,66 tỷ Euro ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634158+00:00"
+  },
+  {
+    "title": "Không cần lo bán bia, một doanh nghiệp Việt Nam nhận về ...",
+    "url": "https://nhipsongkinhdoanh.vn/khong-can-lo-ban-bia--mot-doanh-nghiep-viet-nam-nhan-ve-2-800-ty-tu-heineken-chi-trong-6t2025--bao-lai-gap-5-lan-cung-ky-19714.htm",
+    "snippet": "Nhà Máy Bia Heineken Việt Nam là liên doanh giữa Satra với 40% và Heineken Asia Pacific với 60%. Năm 2025, Satra đặt mục tiêu doanh thu 10.692 ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634154+00:00"
+  },
+  {
+    "title": "ĐÁNH GIÁ TÁC ĐỘNG CỦA THUẾ TIÊU THỤ ĐẶC BIỆT LÊN TIÊU ...",
+    "url": "https://fwps.ftu.edu.vn/2025/08/14/danh-gia-tac-dong-cua-thue-tieu-thu-dac-biet-len-tieu-dung-bia-o-viet-nam-va-de-xuat-chinh-sach-giai-doan-2026-2030/",
+    "snippet": "Mức thuế tiêu thụ đặc biệt tại Việt Nam đối với bia rượu, đặc biệt là với mặt hàng bia đang được cân nhắc sửa đổi tăng lên mức mới trong tương ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634150+00:00"
+  },
+  {
+    "title": "Mặt hàng bia chính thức chịu thuế TTĐB lên 70% từ năm 2027 ...",
+    "url": "https://nguoiquansat.vn/mat-hang-bia-chinh-thuc-chiu-thue-ttdb-len-70-tu-nam-2027-sabeco-se-chuyen-phan-thue-tang-them-vao-gia-ban-224988.html",
+    "snippet": "Cụ thể, rượu từ 20 độ trở lên và mặt hàng bia sẽ chịu mức thuế 65% từ đầu năm 2026, sau đó mỗi năm tăng thêm 5%, đạt mức 90% vào năm 2031.",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634146+00:00"
+  },
+  {
+    "title": "Tác động của việc tăng thuế tiêu thụ đặc biệt với ngành bia",
+    "url": "https://thitruongtaichinhtiente.vn/tac-dong-cua-viec-tang-thue-tieu-thu-dac-biet-voi-nganh-bia-64183.html",
+    "snippet": "Từ năm 2027, mỗi năm tăng 5%, tới năm 2030, tăng tiếp lên 5% với lộ trình 2 năm tăng 5% lên tổng số 15% như thông lệ đã và đang làm với ngành đồ ...",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634141+00:00"
+  },
+  {
+    "title": "Giá rượu, bia dự kiến tăng 20% từ 2026 sau khi đồng loạt tăng thuế ...",
+    "url": "https://itpc.hochiminhcity.gov.vn/-/gia-ruou-bia-du-kien-tang-20-tu-2026-sau-khi-ong-loat-tang-thue-tieu-thu-ac-biet",
+    "snippet": "Bộ Tài chính đề xuất lộ trình tăng thuế tiêu thụ đặc biệt để tăng tỷ trọng thuế rượu, bia lên 40% giá bán lẻ, từ mức 30% như hiện nay.",
+    "source": "web_search",
+    "fetched_at": "2026-08-18T03:07:32.634123+00:00"
+  }
+]
