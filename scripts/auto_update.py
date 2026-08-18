@@ -23,7 +23,7 @@ Env cần (đặt khi chạy cron / shell):
 """
 
 from __future__ import annotations
-import json, os, sys, re, time, subprocess, datetime, urllib.request, urllib.error, urllib.parse
+import json, os, sys, re, time, shutil, subprocess, datetime, urllib.request, urllib.error, urllib.parse
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -219,10 +219,26 @@ def render_deploy(key):
 
 
 # ---------------- NOTIFY ----------------
+def _hermes_bin():
+    """Tìm binary hermes bất kể cron PATH (fallback ~/.local/bin)."""
+    p = shutil.which("hermes")
+    if p:
+        return p
+    for cand in [
+        os.path.expanduser("~/.local/bin/hermes"),
+        "/home/kali/.local/bin/hermes",
+        "/usr/local/bin/hermes",
+        "/opt/homebrew/bin/hermes",
+    ]:
+        if os.path.exists(cand):
+            return cand
+    return "hermes"  # último fallback, sẽ báo lỗi rõ ràng nếu thiếu
+
+
 def _hermes_send(platform_target, text):
     """Gửi qua Hermes gateway (telegram/discord chat_id đã connected)."""
     try:
-        subprocess.run(["hermes", "send", "--to", platform_target, text],
+        subprocess.run([_hermes_bin(), "send", "--to", platform_target, text],
                        capture_output=True, text=True, timeout=30)
         return True
     except Exception as e:
