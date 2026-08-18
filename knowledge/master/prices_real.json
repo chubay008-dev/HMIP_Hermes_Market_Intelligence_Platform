@@ -39,6 +39,16 @@
           "case_vnd": 220000,
           "single_vnd": 9000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 220000,
+          "single_vnd": 109000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 240000,
+          "single_vnd": 10000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -63,6 +73,16 @@
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 370000,
+          "single_vnd": 15208,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -71,7 +91,7 @@
       "product_id": "P333",
       "name": "Bia Larue 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 275000,
+      "price_case_vnd": 259091,
       "price_single_vnd": 11000,
       "source": "tiki",
       "confidence": "high",
@@ -92,9 +112,19 @@
           "case_vnd": 275000,
           "single_vnd": 11000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 275000,
+          "single_vnd": 25000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 259091,
+          "single_vnd": 11000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "emart"
     },
     {
       "product_id": "P456",
@@ -121,6 +151,16 @@
           "case_vnd": 360000,
           "single_vnd": 19375,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 392000,
+          "single_vnd": 8000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 447000,
+          "single_vnd": 8000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -129,8 +169,8 @@
       "product_id": "P555",
       "name": "Bia Saigon Export 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 299999,
-      "price_single_vnd": 12430,
+      "price_case_vnd": 280000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -150,16 +190,26 @@
           "case_vnd": 299999,
           "single_vnd": 12430,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 280000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 370000,
+          "single_vnd": 12292,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "P777",
       "name": "Sapporo Premium 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 469000,
-      "price_single_vnd": 20000,
+      "price_case_vnd": 432200,
+      "price_single_vnd": 18000,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
@@ -179,9 +229,19 @@
           "case_vnd": 469000,
           "single_vnd": 20000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 482000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 432200,
+          "single_vnd": 18000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "emart"
     },
     {
       "product_id": "P789",
@@ -208,6 +268,16 @@
           "case_vnd": 292000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 292000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 360000,
+          "single_vnd": 15000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -232,6 +302,16 @@
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 418000,
+          "single_vnd": 17000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -240,8 +320,8 @@
       "product_id": "PASP",
       "name": "Asahi Super Dry 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 512000,
-      "price_single_vnd": 21000,
+      "price_case_vnd": 270000,
+      "price_single_vnd": 18000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -261,16 +341,26 @@
           "case_vnd": 603900,
           "single_vnd": 25000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 270000,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 375000,
+          "single_vnd": 18000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "tiki"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PAT_ED",
       "name": "Edelweiss Wheat Beer 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 470000,
-      "price_single_vnd": 20000,
+      "price_case_vnd": 399000,
+      "price_single_vnd": 17000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -290,15 +380,25 @@
           "case_vnd": 740000,
           "single_vnd": 31000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 399000,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 450000,
+          "single_vnd": 19000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PBE_HG",
       "name": "Hoegaarden White 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 372000,
+      "price_case_vnd": 297000,
       "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
@@ -314,9 +414,19 @@
           "case_vnd": 600000,
           "single_vnd": 16500,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 515000,
+          "single_vnd": 21000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PBE_LF",
@@ -343,6 +453,16 @@
           "case_vnd": 935000,
           "single_vnd": 55000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 1050000,
+          "single_vnd": 50000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 935000,
+          "single_vnd": 39000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -367,6 +487,16 @@
           "case_vnd": 300000,
           "single_vnd": 17600,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 400000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 446200,
+          "single_vnd": 19000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -375,8 +505,8 @@
       "product_id": "PCN_19",
       "name": "Tsingtao 1903 Premium Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 412500,
-      "price_single_vnd": 17000,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -391,9 +521,19 @@
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 799000,
+          "single_vnd": 89000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PCN_19B",
@@ -415,6 +555,16 @@
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -423,8 +573,8 @@
       "product_id": "PCN_LM",
       "name": "Tsingtao Lemon 0.0 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 480000,
-      "price_single_vnd": 61900,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -434,16 +584,26 @@
           "case_vnd": 480000,
           "single_vnd": 61900,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PCN_OB",
       "name": "Tsingtao Oak Barrel Luxury Legend 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 412500,
-      "price_single_vnd": 17000,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -458,27 +618,45 @@
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 499000,
+          "single_vnd": 21000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PCN_PD",
       "name": "Tsingtao Pure Draft 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 297000,
-      "price_single_vnd": 13700,
+      "price_case_vnd": 490000,
+      "price_single_vnd": 20000,
       "source": "web",
       "confidence": "high",
       "note": "web thùng",
-      "captured_date": "2026-08-18"
+      "captured_date": "2026-08-18",
+      "channels": {
+        "emart": {
+          "case_vnd": 490000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        }
+      },
+      "best_channel": "emart"
     },
     {
       "product_id": "PCN_SE",
       "name": "Tsingtao 2026 Special Edition 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 412500,
-      "price_single_vnd": 17000,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -493,16 +671,26 @@
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 1999000,
+          "single_vnd": 83000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PCN_TL",
       "name": "Tsingtao Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 412500,
-      "price_single_vnd": 17000,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -517,9 +705,19 @@
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 450000,
+          "single_vnd": 21000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PCN_TP",
@@ -540,6 +738,16 @@
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 504000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 799000,
+          "single_vnd": 20000,
           "confidence": "medium"
         }
       },
@@ -565,6 +773,16 @@
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 590000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 590000,
+          "single_vnd": 25000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -573,8 +791,8 @@
       "product_id": "PDE_PA",
       "name": "Paulaner 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 360000,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 265000,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -584,16 +802,26 @@
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 1150000,
+          "single_vnd": 48000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PDE_WE",
       "name": "Weihenstephaner Hefeweissbier 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 396000,
-      "price_single_vnd": 15000,
+      "price_case_vnd": 392000,
+      "price_single_vnd": 20000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -608,16 +836,26 @@
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 392000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 396000,
+          "single_vnd": 16000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PESP_ED",
       "name": "Estrella Damm 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 360000,
-      "price_single_vnd": 10000,
+      "price_case_vnd": 270000,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -632,9 +870,19 @@
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 270000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 780000,
+          "single_vnd": 32000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PESP_EG",
@@ -655,6 +903,16 @@
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 31000,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
           "confidence": "medium"
         }
       },
@@ -680,6 +938,16 @@
           "case_vnd": 259300,
           "single_vnd": 11000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 375000,
+          "single_vnd": 16000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 280000,
+          "single_vnd": 12000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -688,8 +956,8 @@
       "product_id": "PESP_SM",
       "name": "San Miguel 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 408000,
-      "price_single_vnd": 17000,
+      "price_case_vnd": 265000,
+      "price_single_vnd": 11042,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -704,16 +972,26 @@
           "case_vnd": 650000,
           "single_vnd": 27500,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 11042,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PHN_CH",
       "name": "Bia Hà Nội Chai 450ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 250000,
-      "price_single_vnd": 10000,
+      "price_case_vnd": 220000,
+      "price_single_vnd": 9000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -728,9 +1006,19 @@
           "case_vnd": 250000,
           "single_vnd": 10000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 220000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 247000,
+          "single_vnd": 10000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PHUDA",
@@ -752,6 +1040,16 @@
           "case_vnd": 289000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 290000,
+          "single_vnd": 12375,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -760,8 +1058,8 @@
       "product_id": "PIRE_G0",
       "name": "Guinness 0.0 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 1900000,
-      "price_single_vnd": 79000,
+      "price_case_vnd": 292000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -771,16 +1069,26 @@
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 292000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 1555000,
+          "single_vnd": 65000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PIRE_GD",
       "name": "Guinness Draught 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 1900000,
-      "price_single_vnd": 79000,
+      "price_case_vnd": 299000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -795,16 +1103,26 @@
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 299000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 2400000,
+          "single_vnd": 100000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PIRE_GE",
       "name": "Guinness Extra Stout 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 1900000,
-      "price_single_vnd": 79000,
+      "price_case_vnd": 299000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -819,16 +1137,21 @@
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 299000,
+          "single_vnd": 12000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PIRE_GF",
       "name": "Guinness Foreign Extra Stout 440ml",
       "pack_case": "24x(chai/lon)",
-      "price_case_vnd": 1900000,
-      "price_single_vnd": 79000,
+      "price_case_vnd": 299000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -843,16 +1166,26 @@
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 299000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 2600000,
+          "single_vnd": 108000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PITA_BM",
       "name": "Birra Messina 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 300000,
-      "price_single_vnd": 22550,
+      "price_case_vnd": 265000,
+      "price_single_vnd": 11042,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -867,9 +1200,14 @@
           "case_vnd": 300000,
           "single_vnd": 22550,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 11042,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PITA_MN",
@@ -891,6 +1229,16 @@
           "case_vnd": 300000,
           "single_vnd": 22550,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 300000,
+          "single_vnd": 14000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 343740,
+          "single_vnd": 76900,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -899,7 +1247,7 @@
       "product_id": "PITA_MO",
       "name": "Moretti 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 259300,
+      "price_case_vnd": 259091,
       "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
@@ -915,9 +1263,19 @@
           "case_vnd": 259300,
           "single_vnd": 11000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 359000,
+          "single_vnd": 8000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 259091,
+          "single_vnd": 11000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "emart"
     },
     {
       "product_id": "PITA_P",
@@ -939,6 +1297,16 @@
           "case_vnd": 850000,
           "single_vnd": 29700,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 365000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 744000,
+          "single_vnd": 45000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -947,7 +1315,7 @@
       "product_id": "PITA_PN",
       "name": "Peroni Nastro Azzurro 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 360000,
+      "price_case_vnd": 340000,
       "price_single_vnd": 45000,
       "source": "web",
       "confidence": "medium",
@@ -963,16 +1331,26 @@
           "case_vnd": 850000,
           "single_vnd": 29700,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 1000000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 340000,
+          "single_vnd": 45000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "emart"
     },
     {
       "product_id": "PKIR",
       "name": "Kirin Ichiban 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 620000,
-      "price_single_vnd": 26000,
+      "price_case_vnd": 270000,
+      "price_single_vnd": 10000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -987,9 +1365,14 @@
           "case_vnd": 620000,
           "single_vnd": 26000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 270000,
+          "single_vnd": 10000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PLA_GD",
@@ -1010,6 +1393,16 @@
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 31000,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 450000,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 662000,
+          "single_vnd": 28000,
           "confidence": "medium"
         }
       },
@@ -1035,6 +1428,16 @@
           "case_vnd": 650000,
           "single_vnd": 27000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 1200000,
+          "single_vnd": 11042,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 619000,
+          "single_vnd": 26000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -1043,8 +1446,8 @@
       "product_id": "PMEX_CC",
       "name": "Corona Cero 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 297000,
-      "price_single_vnd": 74000,
+      "price_case_vnd": 220000,
+      "price_single_vnd": 34000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1059,15 +1462,25 @@
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 220000,
+          "single_vnd": 34000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 280000,
+          "single_vnd": 12000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PMEX_CO",
       "name": "Corona Extra 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 297000,
+      "price_case_vnd": 215000,
       "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
@@ -1083,16 +1496,26 @@
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 220000,
+          "single_vnd": 12300,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 215000,
+          "single_vnd": 13700,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "emart"
     },
     {
       "product_id": "PMEX_DE",
       "name": "Dos Equis 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 273600,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 270000,
+      "price_single_vnd": 11042,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1107,9 +1530,19 @@
           "case_vnd": 469999,
           "single_vnd": 20000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 270000,
+          "single_vnd": 11042,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 270000,
+          "single_vnd": 11000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PMEX_ME",
@@ -1130,6 +1563,11 @@
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 359000,
+          "single_vnd": 20000,
           "confidence": "medium"
         }
       },
@@ -1155,6 +1593,16 @@
           "case_vnd": 650000,
           "single_vnd": 27500,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 365000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 650000,
+          "single_vnd": 27000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -1179,6 +1627,16 @@
           "case_vnd": 219000,
           "single_vnd": 50490,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 375000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 343740,
+          "single_vnd": 14000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1187,8 +1645,8 @@
       "product_id": "PMEX_SO",
       "name": "Sol 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 300000,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 270000,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1203,9 +1661,19 @@
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 359000,
+          "single_vnd": 8000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 270000,
+          "single_vnd": 11000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "emart"
     },
     {
       "product_id": "PRUS_B0",
@@ -1227,6 +1695,16 @@
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 450000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 750000,
+          "single_vnd": 31000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -1235,8 +1713,8 @@
       "product_id": "PRUS_BA",
       "name": "Baltika 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 360000,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 270000,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1251,9 +1729,19 @@
           "case_vnd": 737000,
           "single_vnd": 38500,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 270000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 520000,
+          "single_vnd": 22000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PSG_BC",
@@ -1275,6 +1763,16 @@
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 375000,
+          "single_vnd": 16000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 265000,
+          "single_vnd": 11042,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1283,8 +1781,8 @@
       "product_id": "PSG_BK",
       "name": "Bia Sài Gòn Black 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 340470,
-      "price_single_vnd": 12430,
+      "price_case_vnd": 265000,
+      "price_single_vnd": 14000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1299,16 +1797,26 @@
           "case_vnd": 340470,
           "single_vnd": 12430,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 14000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 265000,
+          "single_vnd": 102000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PSG_GD",
       "name": "Bia Sài Gòn Gold 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 340470,
-      "price_single_vnd": 22400,
+      "price_case_vnd": 265000,
+      "price_single_vnd": 21000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1323,9 +1831,19 @@
           "case_vnd": 340470,
           "single_vnd": 14000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 340470,
+          "single_vnd": 22400,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PSG_LG",
@@ -1347,6 +1865,16 @@
           "case_vnd": 250000,
           "single_vnd": 10000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 11042,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 270000,
+          "single_vnd": 50000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1355,8 +1883,8 @@
       "product_id": "PSTW",
       "name": "Bia Sư Tử Trắng 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 260000,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 249000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1371,16 +1899,26 @@
           "case_vnd": 260000,
           "single_vnd": 11000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 249000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 260000,
+          "single_vnd": 11000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PTB",
       "name": "Bia Trúc Bạch 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 450000,
-      "price_single_vnd": 19000,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 21000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1395,9 +1933,19 @@
           "case_vnd": 450000,
           "single_vnd": 19000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 465000,
+          "single_vnd": 39000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PTBG",
@@ -1418,6 +1966,16 @@
         "websosanh": {
           "case_vnd": 295000,
           "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
           "confidence": "medium"
         }
       },
@@ -1443,6 +2001,16 @@
           "case_vnd": 295000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 364800,
+          "single_vnd": 15000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1467,6 +2035,16 @@
           "case_vnd": 295000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 364800,
+          "single_vnd": 15000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1475,8 +2053,8 @@
       "product_id": "PTBG_G",
       "name": "Tuborg Green 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 337000,
-      "price_single_vnd": 14042,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
@@ -1491,15 +2069,25 @@
           "case_vnd": 364800,
           "single_vnd": 13700,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 364000,
+          "single_vnd": 20000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PTGR_C",
       "name": "Tiger Crystal 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 300000,
+      "price_case_vnd": 292000,
       "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
@@ -1515,16 +2103,26 @@
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 292000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 405600,
+          "single_vnd": 17000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PTGR_T",
       "name": "Tiger Tail 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 300000,
-      "price_single_vnd": 12000,
+      "price_case_vnd": 292000,
+      "price_single_vnd": 10000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1539,16 +2137,26 @@
           "case_vnd": 300000,
           "single_vnd": 15180,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 292000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 361000,
+          "single_vnd": 15000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PTH_CH",
       "name": "Chang 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 350000,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 297000,
+      "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1563,9 +2171,19 @@
           "case_vnd": 405900,
           "single_vnd": 20900,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PTH_SG",
@@ -1586,6 +2204,16 @@
         "websosanh": {
           "case_vnd": 490000,
           "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 375000,
+          "single_vnd": 16000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
           "confidence": "medium"
         }
       },
@@ -1611,6 +2239,16 @@
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 263000,
+          "single_vnd": 11000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1619,8 +2257,8 @@
       "product_id": "PZ_AS",
       "name": "Asahi Dry Zero 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 600000,
-      "price_single_vnd": 27500,
+      "price_case_vnd": 270000,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1635,9 +2273,19 @@
           "case_vnd": 600000,
           "single_vnd": 27500,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 270000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 1200000,
+          "single_vnd": 50000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PZ_BK",
@@ -1658,6 +2306,16 @@
         "websosanh": {
           "case_vnd": 220000,
           "single_vnd": 9000,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 264000,
+          "single_vnd": 11000,
           "confidence": "medium"
         }
       },
@@ -1683,6 +2341,16 @@
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 418000,
+          "single_vnd": 17000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1707,6 +2375,16 @@
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 265000,
+          "single_vnd": 29000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 418000,
+          "single_vnd": 76900,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -1715,7 +2393,7 @@
       "product_id": "PZ_ER",
       "name": "Erdinger Alkoholfrei 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 360000,
+      "price_case_vnd": 270000,
       "price_single_vnd": 62000,
       "source": "web",
       "confidence": "medium",
@@ -1731,9 +2409,14 @@
           "case_vnd": 750000,
           "single_vnd": 62000,
           "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 270000,
+          "single_vnd": 62000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PZ_HN",
@@ -1754,6 +2437,16 @@
         "websosanh": {
           "case_vnd": 360000,
           "single_vnd": 17600,
+          "confidence": "medium"
+        },
+        "bachhoaxanh": {
+          "case_vnd": 392000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "emart": {
+          "case_vnd": 447000,
+          "single_vnd": 8000,
           "confidence": "medium"
         }
       },
