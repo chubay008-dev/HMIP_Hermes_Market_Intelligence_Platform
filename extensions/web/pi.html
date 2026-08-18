@@ -259,6 +259,20 @@
     <div id="realChInfo" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
   </div>
 
+  <!-- Channel Comparison Chart (Giá thật) -->
+  <div class="card" style="margin-top:14px">
+    <h3>📊 <span data-i18n="realChChartTitle">Channel Comparison — Biểu đồ giá thật</span></h3>
+    <div class="note" data-i18n="realChChartSub">Giá trung bình thùng 24 lon theo kênh (Tiki / Lotte / BachHoaXanh / Emart / websosanh) từ research web thực tế.</div>
+    <div id="realChChart" style="height:300px"></div>
+    <div class="tbl-wrap" style="margin-top:8px">
+      <table id="realChStatTable">
+        <thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th>Index</th><th>N</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="realChStatInfo" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+  </div>
+
   <!-- SKU Explorer + AI -->
   <div class="card" style="margin-top:14px">
     <h3 data-i18n="skuAi">🔬 SKU Explorer + AI Analyst</h3>
@@ -543,6 +557,7 @@ async function loadAll(){
   safe(()=>renderAlerts(ws.alerts));
   // Channel Comparison (giá thật đa kênh)
   safe(()=>renderRealChannels());
+  safe(()=>renderRealChannelsChart());
 }
 
 // ---- Channel Comparison (giá thật đa kênh) ----
@@ -570,6 +585,55 @@ async function renderRealChannels(){
   }).join('');
   $('#realChInfo').textContent = `Cập nhật: ${data.captured_date||'?'} • ${rows.length} SKU • kênh: ${(data.channels||[]).join(', ')}`;
   $('#f_real_chan').oninput = ()=>renderRealChannels();
+}
+
+// ---- Channel Comparison CHART (giá thật đa kênh) ----
+async function renderRealChannelsChart(){
+  const data = await api('/api/prices-real/channels');
+  const CH_ORDER = ['tiki','lotte','bachhoaxanh','emart','websosanh'];
+  const chs = (data.channels||[]).filter(c=>CH_ORDER.includes(c)).sort((a,b)=>CH_ORDER.indexOf(a)-CH_ORDER.indexOf(b));
+  // tính giá TB + N cho mỗi kênh
+  const stat = {};
+  for(const p of (data.products||[])){
+    const bc = p.by_channel||{};
+    for(const k of chs){
+      const v = bc[k];
+      if(v && v.case_vnd){
+        if(!stat[k]) stat[k]={sum:0,n:0};
+        stat[k].sum += v.case_vnd; stat[k].n += 1;
+      }
+    }
+  }
+  const chNames = Object.keys(stat);
+  const avgs = chNames.map(k=> Math.round(stat[k].sum/stat[k].n));
+  const minAvg = Math.min(...avgs);
+  // Bar chart
+  const el = $('#realChChart');
+  el.innerHTML = '<div id="realChChart-apex"></div>';
+  if(window.ApexCharts && chNames.length){
+    new ApexCharts(document.querySelector('#realChChart-apex'), {
+      chart:{ type:'bar', height:300, background:'transparent', toolbar:{show:false} },
+      theme:{ mode: document.documentElement.getAttribute('data-theme')==='light'?'light':'dark' },
+      series:[{ name:'Giá TB thùng 24 lon', data: avgs }],
+      xaxis:{ categories: chNames.map(c=>c.toUpperCase()), labels:{style:{colors:'#8b98a5'}} },
+      yaxis:{ labels:{ style:{colors:'#8b98a5'}, formatter:v=>fmt(v) } },
+      plotOptions:{ bar:{ borderRadius:4, distributed:true, horizontal:false } },
+      colors:['#4f9cff','#7c5cff','#2ea043','#db8b1a','#f85149'],
+      legend:{ show:false },
+      dataLabels:{ enabled:true, formatter:v=>fmt(v), style:{colors:['#fff']} },
+      tooltip:{ y:{ formatter:v=>fmt(v) } },
+    }).render();
+  }
+  // Bảng thống kê: KÊNH / GIÁ TB / INDEX / N
+  const body = $('#realChStatTable tbody');
+  const maxAvg = Math.max(...avgs);
+  body.innerHTML = chNames.map((k,i)=>{
+    const idx = minAvg? (avgs[i]/minAvg*100).toFixed(2) : '—';
+    const cls = (avgs[i]===minAvg)?'style="color:var(--good);font-weight:700"':((avgs[i]===maxAvg)?'style="color:var(--bad)"':'');
+    return `<tr><td>${k.toUpperCase()}</td><td ${cls}>${fmt(avgs[i])}</td><td ${cls}>${idx}</td><td>${stat[k].n}</td></tr>`;
+  }).join('');
+  const cheap = chNames[avgs.indexOf(minAvg)]; const exp = chNames[avgs.indexOf(maxAvg)];
+  $('#realChStatInfo').textContent = `Kênh rẻ nhất: ${cheap?cheap.toUpperCase():'?'} (${fmt(minAvg)}) · Cao nhất: ${exp?exp.toUpperCase():'?'} (${fmt(maxAvg)})`;
 }
 function qs(f){ return new URLSearchParams(f).toString(); }
 
