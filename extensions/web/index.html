@@ -105,6 +105,12 @@
   #login .err{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px}
   #login .btn{width:100%;text-align:center}
   .pill{font-size:11px;padding:2px 9px;border-radius:10px;border:1px solid var(--line);color:var(--dim)}
+  .badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .badge.high{background:rgba(130,201,154,.16);color:var(--green)}
+  .badge.medium{background:rgba(244,208,63,.15);color:var(--yellow)}
+  .badge.low{background:rgba(143,163,176,.16);color:var(--dim)}
+  .src{color:var(--dim);font-size:11px}
+  .real-hl{color:var(--yellow);font-weight:600}
   /* ---------- responsive (mobile) ---------- */
   @media(max-width:900px){
     .two-col{grid-template-columns:1fr}
@@ -265,6 +271,16 @@
 </section>
 
 <section>
+  <h2>💰 <span data-i18n="realTitle">Giá thật thị trường VN</span> <span class="note" data-i18n="realSub">— giá niêm yết thực tế (Tiki / siêu thị / nhập khẩu), không phải data mô phỏng</span></h2>
+  <div class="filters">
+    <span class="sub" data-i18n="filterSearch">Tìm:</span><input id="f_real" placeholder="" style="width:200px">
+    <span class="src" id="realMeta"></span>
+    <button class="btn sm alt" id="f_real_reset" data-i18n="reset">Xóa lọc</button>
+  </div>
+  <div id="realPrices"></div>
+</section>
+
+<section>
   <h2>🤖 <span data-i18n="aiTitle">AI Analyst</span></h2>
   <div class="sub" data-i18n="aiHint" style="margin-bottom:10px">Đặt câu hỏi về sản phẩm / thương hiệu. AI phân tích từ dữ liệu thật (rule-based).</div>
   <div class="ai-box">
@@ -316,6 +332,8 @@ const T = {
     promoDate:"Ngày", promoEvent:"Sự kiện", promoProd:"Sản phẩm", promoChange:"Biến động", promoType:"Loại",
     promoNoEvent:"Chưa đủ lịch sử để phát hiện sự kiện giá.",
     observed:"QUAN SÁT", drivers:"NGUYÊN NHÂN GẢI (suy luận)", conf:"ĐỘ TIN CẬY", evid:"BẰNG CHỨNG",
+    realTitle:"Giá thật thị trường VN", realSub:"— giá niêm yết thực tế (Tiki / siêu thị / nhập khẩu), không phải data mô phỏng",
+    realColProduct:"Sản phẩm", realColCase:"Giá thùng 24 lon", realColSingle:"Giá lẻ 1 lon", realColSource:"Nguồn", realColConf:"Độ tin cậy", realCaptured:"Cập nhật",
   },
   en:{
     title:"HMIP — Market Price Intelligence", subtitle:"Runs on HMIP workflow kernel · WF-PRC-001 · source:",
@@ -349,6 +367,8 @@ const T = {
     promoDate:"Date", promoEvent:"Event", promoProd:"Product", promoChange:"Change", promoType:"Type",
     promoNoEvent:"Not enough history to detect price events.",
     observed:"OBSERVED", drivers:"LIKELY DRIVERS (inference)", conf:"CONFIDENCE", evid:"EVIDENCE",
+    realTitle:"Real VN market prices", realSub:"— actual list prices (Tiki / supermarket / import), not simulated data",
+    realColProduct:"Product", realColCase:"Case (24 cans)", realColSingle:"Single can", realColSource:"Source", realColConf:"Confidence", realCaptured:"Updated",
   },
   zh:{
     title:"HMIP — 市场价格情报", subtitle:"运行于 HMIP 工作流内核 · WF-PRC-001 · 来源:",
@@ -382,6 +402,8 @@ const T = {
     promoDate:"日期", promoEvent:"事件", promoProd:"产品", promoChange:"变动", promoType:"类型",
     promoNoEvent:"历史数据不足,无法检测价格事件。",
     observed:"观察", drivers:"可能原因(推断)", conf:"置信度", evid:"证据",
+    realTitle:"越南市场真实价格", realSub:"— 实际标价(Tiki / 超市 / 进口),非模拟数据",
+    realColProduct:"产品", realColCase:"整箱24罐", realColSingle:"单罐", realColSource:"来源", realColConf:"置信度", realCaptured:"更新",
   }
 };
 const LOCALE = {vi:"vi-VN", en:"en-US", zh:"zh-CN"};
@@ -706,6 +728,39 @@ function renderPromo(){
   }).join('')}</tbody></table>`;
 }
 
+/* ---------- Real market prices (giá thật VN) ---------- */
+let REAL = [];
+async function loadRealPrices(){
+  try{
+    const r = await api('/api/prices-real');
+    REAL = r.prices || [];
+    const m = r.meta || {};
+    $('#realMeta').textContent = `${REAL.length} SKU · ${m.captured_date||''} · nguồn: ${(m.sources||[]).join(', ')}`;
+    renderRealPrices();
+  }catch(e){ $('#realPrices').innerHTML = `<div class="empty">Lỗi tải giá thật: ${esc(e.message)}</div>`; }
+}
+function renderRealPrices(){
+  const q = ($('#f_real').value||'').trim().toLowerCase();
+  const rows = REAL.filter(p=> !q || (p.name||'').toLowerCase().includes(q) || (p.product_id||'').toLowerCase().includes(q));
+  if(!rows.length){ $('#realPrices').innerHTML = `<div class="empty">${t('noData')}</div>`; return; }
+  const sorted = rows.slice().sort((a,b)=>(b.price_case_vnd||0)-(a.price_case_vnd||0));
+  $('#realPrices').innerHTML = `<table><thead><tr>
+    <th>${t('realColProduct')}</th><th>${t('realColCase')}</th><th>${t('realColSingle')}</th>
+    <th>${t('realColSource')}</th><th>${t('realColConf')}</th><th>${t('realCaptured')}</th>
+  </tr></thead><tbody>${sorted.map(p=>{
+    const conf = p.confidence||'low';
+    const srcLabel = p.source==='tiki' ? 'Tiki' : 'Web';
+    return `<tr>
+      <td><strong>${esc(p.name)}</strong> <span class="sub">${esc(p.product_id)}</span></td>
+      <td class="mono real-hl">${p.price_case_vnd? fmt(p.price_case_vnd):'—'}</td>
+      <td class="mono">${p.price_single_vnd? fmt(p.price_single_vnd):'—'}</td>
+      <td class="src">${srcLabel}</td>
+      <td><span class="badge ${conf}">${conf}</span></td>
+      <td class="sub">${p.captured_date||''}</td>
+    </tr>`;
+  }).join('')}</tbody></table>`;
+}
+
 /* ---------- render all ---------- */
 function renderAll(){
   renderStats(); fillBrandFilters(); buildProdChecks();
@@ -729,6 +784,7 @@ async function load(){
     $('#mode').textContent = srcLabel;
     CHART = chart || CHART;
     renderAll(); renderChart(chart); renderPromo();
+    loadRealPrices();   // giá thật VN (song song, không block UI)
   }catch(e){ if(e.message!=='no-token') toast('Lỗi tải dữ liệu: '+e.message); }
 }
 
@@ -778,6 +834,8 @@ $('#grpQuick').addEventListener('click',e=>{
 ['#f_brand_a','#f_dec_a','#f_search_a'].forEach(s=>$(s).addEventListener('input',()=>renderAll()));
 $('#f_reset').onclick = () => { $('#f_brand').value=''; $('#f_dec').value=''; $('#f_search').value=''; renderAll(); };
 $('#f_reset_a').onclick = () => { $('#f_brand_a').value=''; $('#f_dec_a').value=''; $('#f_search_a').value=''; renderAll(); };
+$('#f_real').addEventListener('input', renderRealPrices);
+$('#f_real_reset').onclick = () => { $('#f_real').value=''; renderRealPrices(); };
 
 /* ---------- theme & lang ---------- */
 $('#theme').onclick = () => { THEME = THEME==='dark'?'light':'dark'; localStorage.setItem('hmip_theme',THEME); applyTheme(); };
