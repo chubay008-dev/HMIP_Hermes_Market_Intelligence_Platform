@@ -49,6 +49,46 @@
           "case_vnd": 240000,
           "single_vnd": 10000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 289000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 230000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 230000,
+          "single_vnd": 14200,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 220000,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 792000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 230000,
+          "single_vnd": 51000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 250000,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 250000,
+          "single_vnd": 10000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -57,8 +97,8 @@
       "product_id": "P123",
       "name": "Saigon Special 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 300000,
-      "price_single_vnd": 12000,
+      "price_case_vnd": 219500,
+      "price_single_vnd": 9000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -83,9 +123,54 @@
           "case_vnd": 370000,
           "single_vnd": 15208,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 282000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 282000,
+          "single_vnd": 15208,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 336000,
+          "single_vnd": 13800,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 359000,
+          "single_vnd": 15208,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 349000,
+          "single_vnd": 15208,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 752400,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 385000,
+          "single_vnd": 39000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": null,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 219500,
+          "single_vnd": 9000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "seveneleven"
     },
     {
       "product_id": "P333",
@@ -122,6 +207,51 @@
           "case_vnd": 259091,
           "single_vnd": 11000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 268000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 265000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 268000,
+          "single_vnd": 19600,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 397000,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 268000,
+          "single_vnd": 19600,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 285000,
+          "single_vnd": 29000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 275000,
+          "single_vnd": 19600,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 265000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 275000,
+          "single_vnd": 17000,
+          "confidence": "medium"
         }
       },
       "best_channel": "emart"
@@ -130,8 +260,8 @@
       "product_id": "P456",
       "name": "Heineken Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 360000,
-      "price_single_vnd": 19375,
+      "price_case_vnd": 300000,
+      "price_single_vnd": 12000,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
@@ -161,16 +291,61 @@
           "case_vnd": 447000,
           "single_vnd": 8000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 397000,
+          "single_vnd": 19375,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 382000,
+          "single_vnd": 19375,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 444000,
+          "single_vnd": 19375,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 448000,
+          "single_vnd": 19375,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 410000,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 550000,
+          "single_vnd": 23000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 360000,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 410000,
+          "single_vnd": 19375,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "winmart"
     },
     {
       "product_id": "P555",
       "name": "Bia Saigon Export 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 280000,
-      "price_single_vnd": 12000,
+      "price_case_vnd": 259000,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -200,16 +375,61 @@
           "case_vnd": 370000,
           "single_vnd": 12292,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 259000,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 259000,
+          "single_vnd": 12292,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 280000,
+          "single_vnd": 12292,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 359000,
+          "single_vnd": 12292,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 988000,
+          "single_vnd": 12292,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 285455,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 415000,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": null,
+          "single_vnd": 12292,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 336000,
+          "single_vnd": 14000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "bachhoaxanh"
+      "best_channel": "winmart"
     },
     {
       "product_id": "P777",
       "name": "Sapporo Premium 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 432200,
-      "price_single_vnd": 18000,
+      "price_case_vnd": 300000,
+      "price_single_vnd": 12000,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
@@ -239,16 +459,51 @@
           "case_vnd": 432200,
           "single_vnd": 18000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 449500,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 469000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 432200,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 477600,
+          "single_vnd": 9000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": null,
+          "single_vnd": 28000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "emart"
+      "best_channel": "winmart_plus"
     },
     {
       "product_id": "P789",
       "name": "Tiger Beer 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 292000,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 278000,
+      "price_single_vnd": 12000,
       "source": "tiki",
       "confidence": "high",
       "note": "auto-tiki",
@@ -278,9 +533,54 @@
           "case_vnd": 360000,
           "single_vnd": 15000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 292000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 278000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 292000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 356000,
+          "single_vnd": 14958,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 355455,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 360000,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 360000,
+          "single_vnd": 15000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 360000,
+          "single_vnd": 15000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "coopmart"
     },
     {
       "product_id": "P888",
@@ -311,6 +611,51 @@
         "emart": {
           "case_vnd": 418000,
           "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 350000,
+          "single_vnd": 19500,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 448800,
+          "single_vnd": 22000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 448800,
+          "single_vnd": 22000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 267500,
+          "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 530000,
+          "single_vnd": 38000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 448800,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 350000,
+          "single_vnd": 20900,
           "confidence": "medium"
         }
       },
@@ -351,6 +696,46 @@
           "case_vnd": 375000,
           "single_vnd": 18000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 531000,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 650000,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 388000,
+          "single_vnd": 30000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 620000,
+          "single_vnd": 26000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 620000,
+          "single_vnd": 30000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 530000,
+          "single_vnd": 17000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 650000,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 648000,
+          "single_vnd": 18000,
+          "confidence": "medium"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -359,8 +744,8 @@
       "product_id": "PAT_ED",
       "name": "Edelweiss Wheat Beer 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 399000,
-      "price_single_vnd": 17000,
+      "price_case_vnd": 265000,
+      "price_single_vnd": 20000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -390,15 +775,60 @@
           "case_vnd": 450000,
           "single_vnd": 19000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 300000,
+          "single_vnd": 87000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 470000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 265000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 448000,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 450000,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 285455,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 470000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": null,
+          "single_vnd": 28000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "bachhoaxanh"
+      "best_channel": "coopmart"
     },
     {
       "product_id": "PBE_HG",
       "name": "Hoegaarden White 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 297000,
+      "price_case_vnd": 219000,
       "price_single_vnd": 13700,
       "source": "web",
       "confidence": "medium",
@@ -424,9 +854,54 @@
           "case_vnd": 515000,
           "single_vnd": 21000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 515000,
+          "single_vnd": 94500,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 515000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 443000,
+          "single_vnd": 18000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 515000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 285455,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 219000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 515000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 580000,
+          "single_vnd": 39000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "bachhoaxanh"
+      "best_channel": "circlek"
     },
     {
       "product_id": "PBE_LF",
@@ -463,6 +938,51 @@
           "case_vnd": 935000,
           "single_vnd": 39000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 935000,
+          "single_vnd": 39000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 935000,
+          "single_vnd": 39000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 889000,
+          "single_vnd": 37000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 1250000,
+          "single_vnd": 52000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 989000,
+          "single_vnd": 41000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 935000,
+          "single_vnd": 39000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 935000,
+          "single_vnd": 39000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 450000,
+          "single_vnd": 63000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -471,8 +991,8 @@
       "product_id": "PCAR",
       "name": "Carlsberg 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 300000,
-      "price_single_vnd": 17600,
+      "price_case_vnd": 298000,
+      "price_single_vnd": 12000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -497,9 +1017,54 @@
           "case_vnd": 446200,
           "single_vnd": 19000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 298000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 300000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 460800,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 446200,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 460800,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 752400,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 446200,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 460800,
+          "single_vnd": 19000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 460800,
+          "single_vnd": 26000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "websosanh"
+      "best_channel": "winmart"
     },
     {
       "product_id": "PCN_19",
@@ -530,6 +1095,51 @@
         "emart": {
           "case_vnd": 799000,
           "single_vnd": 89000,
+          "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 799000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 799000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 799000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 799000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 799000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": 799000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 799000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 799000,
+          "single_vnd": 33000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 600000,
+          "single_vnd": 36000,
           "confidence": "medium"
         }
       },
@@ -565,6 +1175,46 @@
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 850000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        },
+        "mmmega": {
+          "case_vnd": null,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 850000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": 697368,
+          "single_vnd": 10000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -593,6 +1243,46 @@
         "emart": {
           "case_vnd": 480000,
           "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "coopmart": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "gs25": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "seveneleven": {
+          "case_vnd": null,
+          "single_vnd": 36000,
           "confidence": "medium"
         }
       },
@@ -625,6 +1315,36 @@
           "confidence": "medium"
         },
         "emart": {
+          "case_vnd": 499000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "winmart": {
+          "case_vnd": 499000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "winmart_plus": {
+          "case_vnd": 499000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "aeon": {
+          "case_vnd": 499000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "go": {
+          "case_vnd": 480000,
+          "single_vnd": 20000,
+          "confidence": "medium"
+        },
+        "circlek": {
+          "case_vnd": 499000,
+          "single_vnd": 21000,
+          "confidence": "medium"
+        },
+        "gs25": {
           "case_vnd": 499000,
           "single_vnd": 21000,
           "confidence": "medium"
@@ -880,6 +1600,21 @@
           "case_vnd": 780000,
           "single_vnd": 32000,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 888000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 318000,
+          "single_vnd": 59700,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 680000,
+          "single_vnd": 10000,
+          "confidence": "medium"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -911,6 +1646,11 @@
           "confidence": "medium"
         },
         "emart": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
+        },
+        "shopee": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium"
@@ -948,6 +1688,21 @@
           "case_vnd": 280000,
           "single_vnd": 12000,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 343740,
+          "single_vnd": 14000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 343740,
+          "single_vnd": 14000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 280000,
+          "single_vnd": 12000,
+          "confidence": "medium"
         }
       },
       "best_channel": "websosanh"
@@ -956,8 +1711,8 @@
       "product_id": "PESP_SM",
       "name": "San Miguel 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 265000,
-      "price_single_vnd": 11042,
+      "price_case_vnd": 240000,
+      "price_single_vnd": 10000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -982,9 +1737,24 @@
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 820000,
+          "single_vnd": 34000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 240000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 297000,
+          "single_vnd": 13700,
+          "confidence": "medium"
         }
       },
-      "best_channel": "bachhoaxanh"
+      "best_channel": "lazada"
     },
     {
       "product_id": "PHN_CH",
@@ -1013,6 +1783,21 @@
           "confidence": "medium"
         },
         "emart": {
+          "case_vnd": 247000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 230000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 230000,
+          "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "tiktok": {
           "case_vnd": 247000,
           "single_vnd": 10000,
           "confidence": "medium"
@@ -1050,6 +1835,21 @@
           "case_vnd": 290000,
           "single_vnd": 12375,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 289000,
+          "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 305000,
+          "single_vnd": 13000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 290000,
+          "single_vnd": 12375,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -1076,6 +1876,11 @@
           "confidence": "medium"
         },
         "emart": {
+          "case_vnd": 1555000,
+          "single_vnd": 65000,
+          "confidence": "medium"
+        },
+        "lazada": {
           "case_vnd": 1555000,
           "single_vnd": 65000,
           "confidence": "medium"
@@ -1113,6 +1918,11 @@
           "case_vnd": 2400000,
           "single_vnd": 100000,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 2400000,
+          "single_vnd": 100000,
+          "confidence": "medium"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -1141,6 +1951,16 @@
         "bachhoaxanh": {
           "case_vnd": 299000,
           "single_vnd": 12000,
+          "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 2160000,
+          "single_vnd": 90000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 2400000,
+          "single_vnd": 100000,
           "confidence": "medium"
         }
       },
@@ -1176,6 +1996,16 @@
           "case_vnd": 2600000,
           "single_vnd": 108000,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 950000,
+          "single_vnd": 40000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 2600000,
+          "single_vnd": 108000,
+          "confidence": "medium"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -1205,6 +2035,11 @@
           "case_vnd": 265000,
           "single_vnd": 11042,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 343740,
+          "single_vnd": 14000,
+          "confidence": "medium"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -1213,8 +2048,8 @@
       "product_id": "PITA_MN",
       "name": "Menabrea 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 300000,
-      "price_single_vnd": 87600,
+      "price_case_vnd": 275000,
+      "price_single_vnd": 11000,
       "source": "web",
       "confidence": "medium",
       "note": "deep-scan-live",
@@ -1239,9 +2074,14 @@
           "case_vnd": 343740,
           "single_vnd": 76900,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 275000,
+          "single_vnd": 11000,
+          "confidence": "medium"
         }
       },
-      "best_channel": "lotte"
+      "best_channel": "shopee"
     },
     {
       "product_id": "PITA_MO",
@@ -1272,6 +2112,16 @@
         "emart": {
           "case_vnd": 259091,
           "single_vnd": 11000,
+          "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 343740,
+          "single_vnd": 14000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 343740,
+          "single_vnd": 14000,
           "confidence": "medium"
         }
       },
@@ -1307,6 +2157,21 @@
           "case_vnd": 744000,
           "single_vnd": 45000,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 525000,
+          "single_vnd": 22000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 744000,
+          "single_vnd": 31000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 744000,
+          "single_vnd": 31000,
+          "confidence": "medium"
         }
       },
       "best_channel": "lotte"
@@ -1341,6 +2206,21 @@
           "case_vnd": 340000,
           "single_vnd": 45000,
           "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 1350000,
+          "single_vnd": 45000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 1350000,
+          "single_vnd": 45000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 695000,
+          "single_vnd": 45000,
+          "confidence": "medium"
         }
       },
       "best_channel": "emart"
@@ -1369,6 +2249,21 @@
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 10000,
+          "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 1200000,
+          "single_vnd": 60000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 1200000,
+          "single_vnd": 50000,
+          "confidence": "medium"
+        },
+        "tiktok": {
+          "case_vnd": 1450000,
+          "single_vnd": 60000,
           "confidence": "medium"
         }
       },
@@ -1403,6 +2298,16 @@
         "emart": {
           "case_vnd": 662000,
           "single_vnd": 28000,
+          "confidence": "medium"
+        },
+        "shopee": {
+          "case_vnd": 950000,
+          "single_vnd": 35000,
+          "confidence": "medium"
+        },
+        "lazada": {
+          "case_vnd": 450000,
+          "single_vnd": 19000,
           "confidence": "medium"
         }
       },

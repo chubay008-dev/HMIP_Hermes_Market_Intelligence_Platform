@@ -593,7 +593,7 @@ async function renderRealChannels(){
 // ---- Channel Comparison CHART (giá thật đa kênh) ----
 async function renderRealChannelsChart(){
   const data = await api('/api/prices-real/channels');
-  const CH_ORDER = ['tiki','lotte','bachhoaxanh','emart','websosanh'];
+  const CH_ORDER = ['tiki','lotte','bachhoaxanh','emart','winmart','winmart_plus','coopmart','aeon','go','mmmega','circlek','gs25','seveneleven','shopee','lazada','tiktok','websosanh'];
   const chs = (data.channels||[]).filter(c=>CH_ORDER.includes(c)).sort((a,b)=>CH_ORDER.indexOf(a)-CH_ORDER.indexOf(b));
   // populate dropdown (lần đầu)
   const pick = $('#realChPick');
