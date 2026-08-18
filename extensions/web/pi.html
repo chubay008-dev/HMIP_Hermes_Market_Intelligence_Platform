@@ -69,6 +69,9 @@
   .mono { font-variant-numeric: tabular-nums; }
   /* charts */
   .chart-svg { width:100%; height:260px; }
+  /* Positioning Matrix: SVG lấp đầy khung card (gần bằng kích thước viewBox 1320×640) */
+  #posChart { width:100%; height:680px; }
+  #posChart .chart-svg { width:100%; height:640px; display:block; }
   .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:6px; font-size:12px; color:var(--muted); }
   .legend span { display:inline-flex; align-items:center; gap:5px; }
   .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
@@ -111,9 +114,9 @@
     th, td { padding:6px 5px; }
     .tbl-wrap table { min-width:340px; }
     /* positioning/line chart: giữ tỉ lệ, không méo */
-    .chart-svg, #posChart { width:100%; height:240px; }
-    #posChart { height:560px; }
-    #posChart .chart-svg { height:560px; }
+    .chart-svg { width:100%; height:240px; }
+    #posChart { height:520px; }
+    #posChart .chart-svg { height:480px; display:block; }
   }
   /* Tap target tối thiểu 40px */
   @media(max-width:640px){ .btn, .toggle { min-height:40px; } }
@@ -201,7 +204,7 @@
   <!-- Positioning Matrix (full-width, mở lớn để nhìn rõ) -->
   <div class="card" style="margin-top:14px">
     <h3 data-i18n="positioning">🎯 Price Positioning Matrix</h3>
-    <div id="posChart" style="height:560px"></div>
+    <div id="posChart" style="height:680px"></div>
   </div>
 
   <!-- Price Events -->
