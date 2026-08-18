@@ -167,6 +167,45 @@
   <!-- KPI -->
   <div class="grid kpis" id="kpis"><div class="loading" data-i18n="loadingKpi">Đang tải KPI…</div></div>
 
+  <!-- Channel Comparison — Biểu đồ giá thật (đầu workspace) -->
+  <div class="card" style="margin-top:14px">
+    <h3>📊 <span data-i18n="realChChartTitle">Channel Comparison — Biểu đồ giá thật</span></h3>
+    <div class="note" data-i18n="realChChartSub">Giá trung bình thùng 24 lon theo kênh (Tiki / Lotte / BachHoaXanh / Emart / websosanh) từ research web thực tế.</div>
+    <div class="row-actions" style="margin:8px 0">
+      <select id="realChPick" class="sku-pick"></select>
+    </div>
+    <div id="realChChart" style="height:300px"></div>
+    <div class="tbl-wrap" style="margin-top:8px">
+      <table id="realChStatTable">
+        <thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th>Index</th><th>N</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="realChStatInfo" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+  </div>
+
+  <!-- Channel Comparison — Giá thật thị trường (kế tiếp) -->
+  <div class="card" style="margin-top:14px">
+    <h3>💰 <span data-i18n="realChTitle">Channel Comparison — Giá thật thị trường</span></h3>
+    <div class="note" data-i18n="realChSub">So sánh giá niêm yết thực tế đa kênh (Tiki / Web / LotteMart / BachHoaXanh / Emart / websosanh) — nguồn research web, không phải data ảo.</div>
+    <div class="row-actions" style="margin:8px 0">
+      <input id="f_real_chan" class="sku-pick" placeholder="Tìm SKU…" />
+    </div>
+    <div class="tbl-wrap" style="overflow:auto;max-height:520px">
+      <table id="realChTable">
+        <thead><tr>
+          <th data-i18n="colProduct">Sản phẩm</th>
+          <th data-i18n="colBest">Kênh rẻ nhất</th>
+          <th>Thùng 24 (rẻ nhất)</th>
+          <th>Tiki</th><th>Lotte</th><th>BHX</th><th>Emart</th><th>websosanh</th>
+          <th data-i18n="colSrc">Nguồn</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="realChInfo" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+  </div>
+
   <!-- Trend + Index -->
   <div class="grid two-col" style="margin-top:14px">
     <div class="card">
@@ -215,44 +254,7 @@
     <div id="eventsList" style="max-height:300px;overflow:auto"></div>
   </div>
 
-  <!-- Channel Comparison (Giá thật) -->
-  <div class="card" style="margin-top:14px">
-    <h3>💰 <span data-i18n="realChTitle">Channel Comparison — Giá thật thị trường</span></h3>
-    <div class="note" data-i18n="realChSub">So sánh giá niêm yết thực tế đa kênh (Tiki / Web / LotteMart / BachHoaXanh / Emart / websosanh) — nguồn research web, không phải data ảo.</div>
-    <div class="row-actions" style="margin:8px 0">
-      <input id="f_real_chan" class="sku-pick" placeholder="Tìm SKU…" />
-    </div>
-    <div class="tbl-wrap" style="overflow:auto;max-height:520px">
-      <table id="realChTable">
-        <thead><tr>
-          <th data-i18n="colProduct">Sản phẩm</th>
-          <th data-i18n="colBest">Kênh rẻ nhất</th>
-          <th>Thùng 24 (rẻ nhất)</th>
-          <th>Tiki</th><th>Lotte</th><th>BHX</th><th>Emart</th><th>websosanh</th>
-          <th data-i18n="colSrc">Nguồn</th>
-        </tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div id="realChInfo" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
-  </div>
-
-  <!-- Channel Comparison Chart (Giá thật) -->
-  <div class="card" style="margin-top:14px">
-    <h3>📊 <span data-i18n="realChChartTitle">Channel Comparison — Biểu đồ giá thật</span></h3>
-    <div class="note" data-i18n="realChChartSub">Giá trung bình thùng 24 lon theo kênh (Tiki / Lotte / BachHoaXanh / Emart / websosanh) từ research web thực tế.</div>
-    <div class="row-actions" style="margin:8px 0">
-      <select id="realChPick" class="sku-pick"></select>
-    </div>
-    <div id="realChChart" style="height:300px"></div>
-    <div class="tbl-wrap" style="margin-top:8px">
-      <table id="realChStatTable">
-        <thead><tr><th data-i18n="colChannel">Kênh</th><th data-i18n="colAvg">Giá TB</th><th>Index</th><th>N</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div id="realChStatInfo" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
-  </div>
+  <!-- Channel Comparison (Giá thật) + Chart — đã chuyển lên đầu workspace (sau KPI) -->
 
   <!-- SKU Explorer + AI -->
   <div class="card" style="margin-top:14px">
