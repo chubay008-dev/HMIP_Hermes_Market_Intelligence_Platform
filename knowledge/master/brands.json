@@ -10,208 +10,124 @@
     "country": "NL"
   },
   {
-    "id": "BRAND-PTESTX",
-    "name": "TmpBrand"
-  },
-  {
-    "id": "BRAND-PNEWB",
-    "name": "NewBrand"
-  },
-  {
-    "id": "BRAND-P999",
-    "name": "B"
-  },
-  {
-    "id": "BRAND-P555",
-    "name": "Bia Sài Gòn"
-  },
-  {
-    "id": "BRAND-P123",
-    "name": "Bia Sài Gòn"
-  },
-  {
-    "id": "BRAND-P456",
-    "name": "Heineken"
-  },
-  {
     "id": "BRAND-P789",
-    "name": "Tiger"
+    "name": "Tiger",
+    "country": "VN"
   },
   {
     "id": "BRAND-P012",
-    "name": "Bia Hà Nội"
+    "name": "Bia Hà Nội",
+    "country": "VN"
   },
   {
     "id": "BRAND-P333",
-    "name": "Bia Larue"
+    "name": "Bia Larue",
+    "country": "VN"
   },
   {
     "id": "BRAND-P777",
-    "name": "Sapporo"
+    "name": "Sapporo",
+    "country": "JP"
   },
   {
     "id": "BRAND-P888",
-    "name": "Budweiser"
+    "name": "Budweiser",
+    "country": "US"
   },
   {
     "id": "BRAND-PTBG",
-    "name": "Tuborg"
-  },
-  {
-    "id": "BRAND-PTBG_G",
-    "name": "Tuborg"
-  },
-  {
-    "id": "BRAND-PTBG_C",
-    "name": "Tuborg"
-  },
-  {
-    "id": "BRAND-PTBG_D",
-    "name": "Tuborg"
+    "name": "Tuborg",
+    "country": "DK"
   },
   {
     "id": "BRAND-PESP_EG",
-    "name": "Estrella"
-  },
-  {
-    "id": "BRAND-PESP_ED",
-    "name": "Estrella"
+    "name": "Estrella",
+    "country": "ES"
   },
   {
     "id": "BRAND-PESP_MH",
-    "name": "Mahou"
+    "name": "Mahou",
+    "country": "VN"
   },
   {
     "id": "BRAND-PESP_SM",
-    "name": "San Miguel"
+    "name": "San Miguel",
+    "country": "VN"
   },
   {
     "id": "BRAND-PITA_PN",
-    "name": "Peroni"
-  },
-  {
-    "id": "BRAND-PITA_P",
-    "name": "Peroni"
+    "name": "Peroni",
+    "country": "IT"
   },
   {
     "id": "BRAND-PITA_MO",
-    "name": "Moretti"
+    "name": "Moretti",
+    "country": "VN"
   },
   {
     "id": "BRAND-PITA_BM",
-    "name": "Birra Messina"
+    "name": "Birra Messina",
+    "country": "VN"
   },
   {
     "id": "BRAND-PITA_MN",
-    "name": "Menabrea"
+    "name": "Menabrea",
+    "country": "VN"
   },
   {
     "id": "BRAND-PIRE_GD",
-    "name": "Guinness"
-  },
-  {
-    "id": "BRAND-PIRE_GE",
-    "name": "Guinness"
-  },
-  {
-    "id": "BRAND-PIRE_GF",
-    "name": "Guinness"
-  },
-  {
-    "id": "BRAND-PIRE_G0",
-    "name": "Guinness"
+    "name": "Guinness",
+    "country": "IE"
   },
   {
     "id": "BRAND-PMEX_CO",
-    "name": "Corona"
-  },
-  {
-    "id": "BRAND-PMEX_CC",
-    "name": "Corona"
+    "name": "Corona",
+    "country": "MX"
   },
   {
     "id": "BRAND-PMEX_ME",
-    "name": "Modelo"
-  },
-  {
-    "id": "BRAND-PMEX_NM",
-    "name": "Modelo"
+    "name": "Modelo",
+    "country": "MX"
   },
   {
     "id": "BRAND-PMEX_SO",
-    "name": "Sol"
+    "name": "Sol",
+    "country": "VN"
   },
   {
     "id": "BRAND-PMEX_PA",
-    "name": "Pacifico"
+    "name": "Pacifico",
+    "country": "VN"
   },
   {
     "id": "BRAND-PMEX_DE",
-    "name": "Dos Equis"
+    "name": "Dos Equis",
+    "country": "VN"
   },
   {
     "id": "BRAND-PRUS_BA",
-    "name": "Baltika"
-  },
-  {
-    "id": "BRAND-PRUS_B0",
-    "name": "Baltika"
-  },
-  {
-    "id": "BRAND-PZ_HN",
-    "name": "Heineken"
-  },
-  {
-    "id": "BRAND-PZ_BW",
-    "name": "Budweiser"
+    "name": "Baltika",
+    "country": "RU"
   },
   {
     "id": "BRAND-PZ_ER",
-    "name": "Erdinger"
+    "name": "Erdinger",
+    "country": "VN"
   },
   {
     "id": "BRAND-PZ_AS",
-    "name": "Asahi"
+    "name": "Asahi",
+    "country": "VN"
   },
   {
     "id": "BRAND-PZ_BK",
-    "name": "Beck's"
+    "name": "Beck's",
+    "country": "VN"
   },
   {
     "id": "BRAND-PCN_TL",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_TP",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_TP6",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_19",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_19B",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_PD",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_LM",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_SE",
-    "name": "Tsingtao"
-  },
-  {
-    "id": "BRAND-PCN_OB",
-    "name": "Tsingtao"
+    "name": "Tsingtao",
+    "country": "VN"
   },
   {
     "id": "BRAND-BIATRÚCBẠCH",
