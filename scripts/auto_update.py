@@ -219,28 +219,39 @@ def render_deploy(key):
 
 
 # ---------------- NOTIFY ----------------
+def _hermes_send(platform_target, text):
+    """Gửi qua Hermes gateway (telegram/discord chat_id đã connected)."""
+    try:
+        subprocess.run(["hermes", "send", "--to", platform_target, text],
+                       capture_output=True, text=True, timeout=30)
+        return True
+    except Exception as e:
+        print(f"notify {platform_target} err:", e)
+        return False
+
+
+def _gmail_send(subject, body):
+    """Gửi Gmail qua Google API (token ở ~/.hermes/google_token.json)."""
+    try:
+        api = "/home/kali/.hermes/skills/productivity/google-workspace/scripts/google_api.py"
+        venv = "/home/kali/.hermes/.gw-venv/bin/python"
+        subprocess.run([venv, api, "gmail", "send", "--to", "chubay008@gmail.com",
+                        "--subject", subject, "--body", body],
+                       capture_output=True, text=True, timeout=60)
+        return True
+    except Exception as e:
+        print("gmail err:", e)
+        return False
+
+
 def notify(msg):
-    # Telegram
-    tk = os.getenv("HMIP_TELEGRAM_BOT_TOKEN"); cid = os.getenv("HMIP_TELEGRAM_CHAT_ID")
-    if tk and cid:
-        try:
-            urllib.request.urlopen(urllib.request.Request(
-                f"https://api.telegram.org/bot{tk}/sendMessage",
-                data=urllib.parse.urlencode({"chat_id":cid,"text":msg,"parse_mode":"Markdown"}).encode(),
-                headers={"Content-Type":"application/x-www-form-urlencoded"}, method="POST"), timeout=10)
-        except Exception as e:
-            print("TG err", e)
-    # Discord DM
-    dtk = os.getenv("DISCORD_BOT_TOKEN"); did = os.getenv("DISCORD_DM_USER_ID")
-    if dtk and did:
-        try:
-            urllib.request.urlopen(urllib.request.Request(
-                f"https://discord.com/api/v10/users/@me/channels",
-                data=json.dumps({"recipient_id":did}).encode(),
-                headers={"Authorization":f"Bot {dtk}","Content-Type":"application/json"}, method="POST"), timeout=10)
-            # (simplified: real impl would open DM then send message)
-        except Exception as e:
-            print("Discord err", e)
+    """Báo cáo qua Telegram + Discord (Hermes gateway) + Gmail (Google API)."""
+    # Telegram + Discord qua Hermes gateway (không cần bot token riêng)
+    _hermes_send("telegram:8891619372", msg)
+    _hermes_send("discord:1533881868678725696", msg)
+    # Gmail
+    plain = msg.replace("*", "").replace("_", "")
+    _gmail_send(f"HMIP Auto-Update {datetime.date.today().isoformat()}", plain)
 
 
 # ---------------- MAIN ----------------
