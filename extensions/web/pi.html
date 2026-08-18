@@ -906,21 +906,38 @@ function renderPositioning(p){
   svg+=`<line x1="${x(100)}" y1="${padT}" x2="${x(100)}" y2="${padT+iH}" stroke="#4f9cff" stroke-width="1.8" stroke-dasharray="6 5"/>`;
   svg+=`<text x="${x(100)+6}" y="${padT+14}" fill="#4f9cff" font-size="12" font-weight="600">Index 100</text>`;
   // --- Bubbles (radius capped, opacity, hover tooltip) ---
-  // Chỉ label SP outlier giá (Premium/Value); SP Standard chỉ bubble + hover.
-  pts.forEach(q=>{
+  // Seed cho mọi SP presence=24 (cùng độ phủ kênh) → trục Y đồng nhất. Để sơ
+  // đồ scatter 2D (bong không chồng 1 hàng ngang), jitter Y theo ref/avg_price
+  // (SP rẻ presence cao, SP đắt presence thấp — phản ánh thực tế thị trường)
+  // + jitter X nhẹ theo hash để bong cùng index không chồng cứng.
+  const samePresence = pres.length && pres.every(v=>v===pres[0]);
+  // Avg price range để scale presence ảo: rẻ → presence cao (y thấp), đắt → thấp.
+  const avgMin=Math.min(...pts.map(q=>q.avg_price)), avgMax=Math.max(...pts.map(q=>q.avg_price));
+  pts.forEach((q,i)=>{
     const r=Math.min(26, 8+ q.presence*1.4);
     const col=tierCol(q.price_index);
+    let yv=q.presence;
+    if(samePresence && avgMax>avgMin){
+      // Presence ảo: rẻ (avg thấp) → +jitter cao (y thấp, gần top); đắt → -jitter.
+      const norm=(q.avg_price-avgMin)/(avgMax-avgMin); // 0..1 (rẻ..đắt)
+      // Phủ từ +presence*0.35 (rẻ, cao) đến -presence*0.35 (đắt, thấp).
+      yv=q.presence*(0.65 + 0.35*(1-norm));
+    }
+    // Jitter X nhẹ (hash deterministic) để bong cùng index lệch nhau, không chồng.
+    const xj=((i*1103515245+12345) % 1000)/1000 - 0.5; // -0.5..0.5
+    const xi=q.price_index + xj*(xHi-xLo)*0.012;
     const tip=`${esc(q.name)} (${esc(q.brand)})\nIndex: ${q.price_index} · ${tierName(q.price_index)}\nGiá TB: ${fmt(q.avg_price)}\nPresence: ${q.presence} kênh`;
-    svg+=`<g><circle cx="${x(q.price_index)}" cy="${y(q.presence)}" r="${r}" fill="${col}" fill-opacity="0.45" stroke="${col}" stroke-width="1.8"><title>${tip.replace(/"/g,'&quot;')}</title></circle></g>`;
+    svg+=`<g><circle cx="${x(xi)}" cy="${y(yv)}" r="${r}" fill="${col}" fill-opacity="0.38" stroke="${col}" stroke-width="1.6"><title>${tip.replace(/"/g,'&quot;')}</title></circle></g>`;
   });
   // Labels cho outlier giá (Premium/Value) để gợi ý, tránh clutter cho Standard.
   const labelled=new Set();
   pts.slice().sort((a,b)=>b.price_index-a.price_index).forEach(q=>{
     const out=q.price_index>=110 || q.price_index<=90;
     if(!out) return;
-    // Tránh label trùng Y gần nhau: bỏ nếu label đã có trong ±22px Y (canvas lớn → giãn label).
-    const ly=y(q.presence); let ok=true;
-    labelled.forEach(k=>{ if(Math.abs(k-ly)<22) ok=false; });
+    // Tránh label trùng Y gần nhau: bỏ nếu label đã có trong ±20px Y.
+    const norm=(avgMax>avgMin)?(q.avg_price-avgMin)/(avgMax-avgMin):0.5;
+    const ly=y(samePresence&&avgMax>avgMin ? q.presence*(0.65+0.35*(1-norm)) : q.presence); let ok=true;
+    labelled.forEach(k=>{ if(Math.abs(k-ly)<20) ok=false; });
     if(!ok) return;
     labelled.add(ly);
     const lx=x(q.price_index);
