@@ -34,6 +34,7 @@ from extensions.collect_adapters import _DEMO_CATALOG, COLLECT_MODE
 from extensions.notifiers.discord import is_configured as discord_configured
 from extensions.notifiers.telegram import is_configured as telegram_configured
 from extensions.pi import service as pi_service
+from extensions.pi import real_prices as real_prices_mod
 from extensions.run_workflow import resolve_base_price, run_prc_001
 from extensions.scheduler import scan_once
 
@@ -233,6 +234,40 @@ def catalog() -> list[dict[str, Any]]:
 @app.get("/api/products")
 def products() -> list[dict[str, Any]]:
     return db.get_products()
+
+
+@app.get("/api/prices-real")
+def prices_real() -> dict[str, Any]:
+    """Bảng giá bia THẬT thị trường VN (không phải data ảo seed).
+
+    Trả toàn bộ 72 SKU: giá thùng 24 lon + lẻ 1 lon, kèm nguồn và
+    confidence. Frontend dùng để hiển thị cột 'Giá thật' và so sánh với
+    giá quét. Dữ liệu từ knowledge/master/prices_real.json (research web
+    thực tế: Tiki API + LotteMart/BachHoaXanh/Emart/websosanh/importers).
+    """
+    return {
+        "meta": real_prices_mod.get_meta(),
+        "prices": real_prices_mod.get_real_prices(),
+    }
+
+
+@app.get("/api/catalog-real")
+def catalog_real() -> list[dict[str, Any]]:
+    """Catalog kết hợp: tên SP + giá thật (nếu có). Dùng tab Giám sát."""
+    real_map = real_prices_mod.get_real_price_map()
+    out = []
+    for pid, meta in _DEMO_CATALOG.items():
+        rec = real_map.get(pid, {})
+        out.append({
+            "product_id": pid,
+            "product_name": meta["product_name"],
+            "brand": meta["brand"],
+            "real_price_case_vnd": rec.get("price_case_vnd"),
+            "real_price_single_vnd": rec.get("price_single_vnd"),
+            "real_source": rec.get("source"),
+            "real_confidence": rec.get("confidence"),
+        })
+    return out
 
 
 class AddProductRequest(BaseModel):

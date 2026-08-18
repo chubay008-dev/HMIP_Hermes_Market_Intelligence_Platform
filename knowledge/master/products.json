@@ -13,7 +13,7 @@
   },
   {
     "id": "P555",
-    "brand_id": "BRAND-P555",
+    "brand_id": "BRAND-SAIGON",
     "name": "Bia Saigon Export 330ml",
     "category": "beer"
   },
@@ -55,19 +55,19 @@
   },
   {
     "id": "PTBG_G",
-    "brand_id": "BRAND-PTBG_G",
+    "brand_id": "BRAND-PTBG",
     "name": "Tuborg Green 330ml",
     "category": "beer"
   },
   {
     "id": "PTBG_C",
-    "brand_id": "BRAND-PTBG_C",
+    "brand_id": "BRAND-PTBG",
     "name": "Tuborg Classic 330ml",
     "category": "beer"
   },
   {
     "id": "PTBG_D",
-    "brand_id": "BRAND-PTBG_D",
+    "brand_id": "BRAND-PTBG",
     "name": "Tuborg Gold 330ml",
     "category": "beer"
   },
@@ -79,7 +79,7 @@
   },
   {
     "id": "PESP_ED",
-    "brand_id": "BRAND-PESP_ED",
+    "brand_id": "BRAND-PESP_EG",
     "name": "Estrella Damm 330ml",
     "category": "beer"
   },
@@ -103,7 +103,7 @@
   },
   {
     "id": "PITA_P",
-    "brand_id": "BRAND-PITA_P",
+    "brand_id": "BRAND-PITA_PN",
     "name": "Peroni 330ml",
     "category": "beer"
   },
@@ -133,19 +133,19 @@
   },
   {
     "id": "PIRE_GE",
-    "brand_id": "BRAND-PIRE_GE",
+    "brand_id": "BRAND-PIRE_GD",
     "name": "Guinness Extra Stout 440ml",
     "category": "beer"
   },
   {
     "id": "PIRE_GF",
-    "brand_id": "BRAND-PIRE_GF",
+    "brand_id": "BRAND-PIRE_GD",
     "name": "Guinness Foreign Extra Stout 440ml",
     "category": "beer"
   },
   {
     "id": "PIRE_G0",
-    "brand_id": "BRAND-PIRE_G0",
+    "brand_id": "BRAND-PIRE_GD",
     "name": "Guinness 0.0 440ml",
     "category": "beer"
   },
@@ -157,7 +157,7 @@
   },
   {
     "id": "PMEX_CC",
-    "brand_id": "BRAND-PMEX_CC",
+    "brand_id": "BRAND-PMEX_CO",
     "name": "Corona Cero 330ml",
     "category": "beer"
   },
@@ -169,7 +169,7 @@
   },
   {
     "id": "PMEX_NM",
-    "brand_id": "BRAND-PMEX_NM",
+    "brand_id": "BRAND-PMEX_ME",
     "name": "Negra Modelo 330ml",
     "category": "beer"
   },
@@ -199,19 +199,19 @@
   },
   {
     "id": "PRUS_B0",
-    "brand_id": "BRAND-PRUS_B0",
+    "brand_id": "BRAND-PRUS_BA",
     "name": "Baltika 0 (khong con) 330ml",
     "category": "beer"
   },
   {
     "id": "PZ_HN",
-    "brand_id": "BRAND-PZ_HN",
+    "brand_id": "BRAND-HEINEKEN",
     "name": "Heineken 0.0 330ml",
     "category": "beer"
   },
   {
     "id": "PZ_BW",
-    "brand_id": "BRAND-PZ_BW",
+    "brand_id": "BRAND-P888",
     "name": "Budweiser Zero 330ml",
     "category": "beer"
   },
@@ -241,49 +241,49 @@
   },
   {
     "id": "PCN_TP",
-    "brand_id": "BRAND-PCN_TP",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao Premium Lager 330ml",
     "category": "beer"
   },
   {
     "id": "PCN_TP6",
-    "brand_id": "BRAND-PCN_TP6",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao Premium Lager 640ml",
     "category": "beer"
   },
   {
     "id": "PCN_19",
-    "brand_id": "BRAND-PCN_19",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao 1903 Premium Lager 330ml",
     "category": "beer"
   },
   {
     "id": "PCN_19B",
-    "brand_id": "BRAND-PCN_19B",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao 1903 Premium Lager 500ml",
     "category": "beer"
   },
   {
     "id": "PCN_PD",
-    "brand_id": "BRAND-PCN_PD",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao Pure Draft 330ml",
     "category": "beer"
   },
   {
     "id": "PCN_LM",
-    "brand_id": "BRAND-PCN_LM",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao Lemon 0.0 330ml",
     "category": "beer"
   },
   {
     "id": "PCN_SE",
-    "brand_id": "BRAND-PCN_SE",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao 2026 Special Edition 330ml",
     "category": "beer"
   },
   {
     "id": "PCN_OB",
-    "brand_id": "BRAND-PCN_OB",
+    "brand_id": "BRAND-PCN_TL",
     "name": "Tsingtao Oak Barrel Luxury Legend 330ml",
     "category": "beer"
   },
