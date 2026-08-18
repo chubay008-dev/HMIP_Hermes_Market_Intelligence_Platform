@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "Xu hướng bia mới tại Việt Nam",
+    "captured_date": "2026-08-18",
+    "source": "Tổng hợp từ IMARC Group, báo chí ngành bia 2024-2025"
+  },
+  "trends": [
+    {
+      "id": "craft_beer",
+      "name": "Bia thủ công (Craft Beer)",
+      "status": "tăng_trưởng",
+      "market_size_2024_usd_m": 570.4,
+      "forecast_2033_usd_m": 1241.3,
+      "cagr_pct": 9.0,
+      "note": "Phân khúc cao cấp, giới trẻ thành thị ưa chuộng. Tập trung TP.HCM, Hà Nội."
+    },
+    {
+      "id": "non_alc",
+      "name": "Bia không cồn (Alcohol-free)",
+      "status": "tăng_trưởng_nhanh",
+      "cagr_pct": 15.0,
+      "note": "Xu hướng toàn cầu, hướng tới người lái xe, gen Z quan tâm sức khỏe."
+    },
+    {
+      "id": "premiumization",
+      "name": "Cao cấp hóa (Premiumization)",
+      "status": "tăng_trưởng",
+      "note": "Người dùng chuyển sang bia nhập khẩu cao cấp (Guinness, Rochefort, La Trappe)."
+    },
+    {
+      "id": "rtd_shift",
+      "name": "Chuyển dịch sang RTD / Whisky",
+      "status": "rủi_ro_cho_bia",
+      "note": "Gen Z giảm uống bia, chuyển sang đồ uống có cồn sẵn (RTD), whisky, cocktail."
+    },
+    {
+      "id": "health_conscious",
+      "name": "Ý thức sức khỏe",
+      "status": "thay_đổi_hành_vi",
+      "note": "Thuế TTĐB tăng 2026-2027 làm giá bia tăng, đẩy người dùng cắt giảm."
+    },
+    {
+      "id": "import_growth",
+      "name": "Bia nhập khẩu tăng",
+      "status": "tăng_trưởng",
+      "note": "Thái Lan (Singha, Chang), Bỉ (Chimay, Rochefort), Nhật (Sapporo) phổ biến. Tăng trưởng 2 con số."
+    }
+  ],
+  "summary": "Thị trường bia VN đang dịch chuyển: tăng trưởng chậm lại ở bia đại trà, bùng nổ ở craft beer & không cồn, cao cấp hóa mạnh. Gen Z là động lực chính của sự dịch chuyển này."
+}

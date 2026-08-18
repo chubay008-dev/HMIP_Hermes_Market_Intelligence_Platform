@@ -258,6 +258,13 @@ def prices_real_channels() -> dict[str, Any]:
     return real_prices_mod.get_channel_comparison()
 
 
+@app.get("/api/market-overview")
+def market_overview() -> dict[str, Any]:
+    """Thị trường bia VN: thị phần + xu hướng (data research web thực tế)."""
+    from extensions.pi import market_overview as mo
+    return mo.get_market_overview()
+
+
 @app.get("/api/catalog-real")
 def catalog_real() -> list[dict[str, Any]]:
     """Catalog kết hợp: tên SP + giá thật (nếu có). Dùng tab Giám sát."""

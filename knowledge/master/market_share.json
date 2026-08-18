@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "title": "Thị phần bia Việt Nam",
+    "captured_date": "2026-08-18",
+    "source": "Tổng hợp từ VBA (Hiệp hội Bia-Rượu-Nước giải khát VN), báo chí tài chính 2023-2024",
+    "note": "Thị phần theo tổng sản lượng tiêu thụ toàn ngành. Uớc tính từ báo cáo ngành, không có API công khai - cần xác nhận từ chuyên gia thị trường."
+  },
+  "total_volume_2024_liter": 4100000000,
+  "by_brand": [
+    {"brand": "Heineken", "share_pct": 43.0, "country": "NL", "group": "Heineken NV"},
+    {"brand": "Sabeco", "share_pct": 33.9, "country": "VN", "group": "Sabeco (BĐS Phát)"},
+    {"brand": "Carlsberg", "share_pct": 9.0, "country": "DK", "group": "Carlsberg VN (Huda)"},
+    {"brand": "Habeco", "share_pct": 4.5, "country": "VN", "group": "Habeco"},
+    {"brand": "ThaiBev", "share_pct": 3.6, "country": "TH", "group": "ThaiBev (Bia Saigon/B Viet)"},
+    {"brand": "Khác", "share_pct": 6.0, "country": "MIX", "group": "Craft + nhập khẩu nhỏ"}
+  ],
+  "by_segment": [
+    {"segment": "Bia nội (Sabeco/Habeco/ThaiBev nội địa)", "share_pct": 65.0},
+    {"segment": "Bia nhập khẩu & liên doanh (Heineken/Carlsberg + ngoại)", "share_pct": 35.0}
+  ],
+  "top4_concentration_pct": 90.4,
+  "key_facts": [
+    "Heineken + Sabeco chiếm 76.9% thị phần (2023).",
+    "Top 4 (Heineken, Sabeco, Carlsberg, Habeco) ~94% thị trường.",
+    "Tiêu thụ bia VN 2024 giảm nhẹ (~0.5%) do gen Z giảm uống, chuyển sang RTD/whisky.",
+    "VN nằm trong top 10 nước uống bia nhiều nhất thế giới."
+  ]
+}

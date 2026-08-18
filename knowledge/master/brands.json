@@ -2,201 +2,321 @@
   {
     "id": "BRAND-SAIGON",
     "name": "Bia Sài Gòn",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-HEINEKEN",
     "name": "Heineken",
-    "country": "NL"
+    "country": "NL",
+    "market_share_pct": 43.0,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-P789",
     "name": "Tiger",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-P012",
     "name": "Bia Hà Nội",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-P333",
     "name": "Bia Larue",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-P777",
     "name": "Sapporo",
-    "country": "JP"
+    "country": "JP",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-P888",
     "name": "Budweiser",
-    "country": "US"
+    "country": "US",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PTBG",
     "name": "Tuborg",
-    "country": "DK"
+    "country": "DK",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PESP_EG",
     "name": "Estrella",
-    "country": "ES"
+    "country": "ES",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PESP_MH",
     "name": "Mahou",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PESP_SM",
     "name": "San Miguel",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PITA_PN",
     "name": "Peroni",
-    "country": "IT"
+    "country": "IT",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PITA_MO",
     "name": "Moretti",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PITA_BM",
     "name": "Birra Messina",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PITA_MN",
     "name": "Menabrea",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PIRE_GD",
     "name": "Guinness",
-    "country": "IE"
+    "country": "IE",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PMEX_CO",
     "name": "Corona",
-    "country": "MX"
+    "country": "MX",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PMEX_ME",
     "name": "Modelo",
-    "country": "MX"
+    "country": "MX",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PMEX_SO",
     "name": "Sol",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PMEX_PA",
     "name": "Pacifico",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PMEX_DE",
     "name": "Dos Equis",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PRUS_BA",
     "name": "Baltika",
-    "country": "RU"
+    "country": "RU",
+    "market_share_pct": null,
+    "segment": "nhập khẩu",
+    "imported": true
   },
   {
     "id": "BRAND-PZ_ER",
     "name": "Erdinger",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PZ_AS",
     "name": "Asahi",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PZ_BK",
     "name": "Beck's",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PCN_TL",
     "name": "Tsingtao",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-BIATRÚCBẠCH",
     "name": "Bia Trúc Bạch",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-BIASƯTỬTRẮNG",
     "name": "Bia Sư Tử Trắng",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-BIAHUDA",
     "name": "Bia Huda",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-BIAVĨNHTUY",
     "name": "Bia Vĩnh Tuy",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-CARLSBERG",
     "name": "Carlsberg",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": 9.0,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-KIRIN",
     "name": "Kirin",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-CHANG",
     "name": "Chang",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-SINGHA",
     "name": "Singha",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-PAULANER",
     "name": "Paulaner",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-WEIHENSTEPHANER",
     "name": "Weihenstephaner",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-EDELWEISS",
     "name": "Edelweiss",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-HOEGAARDEN",
     "name": "Hoegaarden",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-LEFFE",
     "name": "Leffe",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   },
   {
     "id": "BRAND-BEERLAO",
     "name": "Beerlao",
-    "country": "VN"
+    "country": "VN",
+    "market_share_pct": null,
+    "segment": "nội",
+    "imported": false
   }
 ]

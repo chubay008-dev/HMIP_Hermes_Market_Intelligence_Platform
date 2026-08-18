@@ -274,6 +274,25 @@
   </div>
 </div>
 
+<!-- Thị trường Bia VN -->
+<div class="card" style="margin-top:14px">
+  <h3>📈 <span data-i18n="mktTitle">Thị trường Bia Việt Nam</span></h3>
+  <div class="note" data-i18n="mktSub">Thị phần & xu hướng bia VN (data research web thực tế, 2024-2026).</div>
+  <div class="row-actions" style="margin:10px 0">
+    <div id="mktShareChart" style="height:280px"></div>
+    <div id="mktSegChart" style="height:240px;margin-top:8px"></div>
+  </div>
+  <div class="tbl-wrap" style="margin-top:8px">
+    <table id="mktBrandTable">
+      <thead><tr><th>Thương hiệu</th><th>Thị phần</th><th>Nước</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <h4 style="margin-top:14px">🔥 Xu hướng bia mới</h4>
+  <div id="mktTrends" class="row-actions" style="flex-direction:column;gap:8px;align-items:stretch"></div>
+  <div id="mktFacts" style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6"></div>
+</div>
+
 <script>
 const API = "";
 let state = { filters:{}, trendSeries:["market_avg","regular_price","promotion_price"] };
@@ -538,6 +557,7 @@ async function loadAll(){
   // Channel Comparison (giá thật đa kênh)
   safe(()=>renderRealChannels());
   safe(()=>renderRealChannelsChart());
+  safe(()=>renderMarketOverview());
   // Lưu dữ liệu positioning để re-render khi resize (mobile xoay ngang/dọc).
   _lastPositioning = ws.positioning;
 }
@@ -638,6 +658,48 @@ async function renderRealChannelsChart(){
   $('#realChStatInfo').textContent = sel
     ? `SKU: ${(data.products.find(p=>p.product_id===sel)||{}).name} · rẻ nhất: ${cheap?cheap.toUpperCase():'?'} (${fmt(minAvg)}) · cao nhất: ${exp?exp.toUpperCase():'?'} (${fmt(maxAvg)})`
     : `Kênh rẻ nhất: ${cheap?cheap.toUpperCase():'?'} (${fmt(minAvg)}) · Cao nhất: ${exp?exp.toUpperCase():'?'} (${fmt(maxAvg)})`;
+}
+
+// ---- Thị trường Bia VN (thị phần + xu hướng) ----
+async function renderMarketOverview(){
+  const d = await api('/api/market-overview');
+  // Pie: thị phần theo brand
+  const bd = (d.by_brand||[]).filter(b=>b.share_pct>0);
+  if(window.ApexCharts && bd.length){
+    new ApexCharts($('#mktShareChart'), {
+      chart:{ type:'donut', height:280, background:'transparent' },
+      theme:{ mode: document.documentElement.getAttribute('data-theme')==='light'?'light':'dark' },
+      series: bd.map(b=>b.share_pct),
+      labels: bd.map(b=>b.brand),
+      legend:{ position:'bottom', labels:{colors:'#8b98a5'} },
+      colors:['#4f9cff','#7c5cff','#2ea043','#db8b1a','#f85149','#888'],
+      dataLabels:{ formatter:(v)=>v.toFixed(1)+'%' },
+    }).render();
+    const sg = (d.by_segment||[]);
+    if(sg.length){
+      new ApexCharts($('#mktSegChart'), {
+        chart:{ type:'bar', height:240, background:'transparent' },
+        theme:{ mode: document.documentElement.getAttribute('data-theme')==='light'?'light':'dark' },
+        series:[{ name:'Thị phần', data: sg.map(s=>s.share_pct) }],
+        xaxis:{ categories: sg.map(s=>s.segment.replace(' (Sabeco/Habeco/ThaiBev nội địa)','').replace(' (Heineken/Carlsberg + ngoại)','')), labels:{style:{colors:'#8b98a5'}} },
+        yaxis:{ labels:{ formatter:v=>v+'%', style:{colors:'#8b98a5'} } },
+        plotOptions:{ bar:{ horizontal:true, borderRadius:4, distributed:true } },
+        colors:['#2ea043','#4f9cff'], legend:{show:false},
+        dataLabels:{ enabled:true, formatter:v=>v+'%', style:{colors:['#fff']} },
+      }).render();
+    }
+  }
+  // Bảng brand
+  $('#mktBrandTable tbody').innerHTML = bd.map(b=>
+    `<tr><td>${esc(b.brand)}</td><td>${b.share_pct}%</td><td>${b.country}</td></tr>`).join('');
+  // Xu hướng
+  $('#mktTrends').innerHTML = (d.trends||[]).map(t=>
+    `<div class="card" style="padding:8px 10px;margin:0">
+       <div style="font-weight:600">${esc(t.name)} ${t.cagr_pct?`<span class="pill" style="border-color:var(--good);color:var(--good)">CAGR ${t.cagr_pct}%</span>`:''}</div>
+       <div style="font-size:12px;color:var(--muted)">${esc(t.note||'')}</div>
+     </div>`).join('');
+  // Facts
+  $('#mktFacts').innerHTML = (d.key_facts||[]).map(f=>'• '+esc(f)).join('<br>');
 }
 function qs(f){ return new URLSearchParams(f).toString(); }
 
