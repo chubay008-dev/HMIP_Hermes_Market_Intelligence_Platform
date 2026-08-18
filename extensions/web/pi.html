@@ -69,9 +69,11 @@
   .mono { font-variant-numeric: tabular-nums; }
   /* charts */
   .chart-svg { width:100%; height:260px; }
-  /* Positioning Matrix: SVG lấp đầy khung card (gần bằng kích thước viewBox 1320×640) */
-  #posChart { width:100%; height:680px; }
-  #posChart .chart-svg { width:100%; height:640px; display:block; }
+  /* Positioning Matrix: wrapper chứa posSvgWrap (aspect 4:3) + legend.
+     aspect-ratio nằm trong posSvgWrap để SVG fill đầy, legend không làm lệch. */
+  #posChart { width:100%; }
+  #posChart .chart-svg, #posSvgWrap { width:100%; height:100%; display:block; }
+  #posSvgWrap { aspect-ratio:4/3; }
   .legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:6px; font-size:12px; color:var(--muted); }
   .legend span { display:inline-flex; align-items:center; gap:5px; }
   .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
@@ -115,8 +117,8 @@
     .tbl-wrap table { min-width:340px; }
     /* positioning/line chart: giữ tỉ lệ, không méo */
     .chart-svg { width:100%; height:240px; }
-    #posChart { height:520px; }
-    #posChart .chart-svg { height:480px; display:block; }
+    #posSvgWrap { aspect-ratio:4/3; }
+    #posChart .chart-svg { height:100%; display:block; }
   }
   /* Tap target tối thiểu 40px */
   @media(max-width:640px){ .btn, .toggle { min-height:40px; } }
@@ -204,7 +206,7 @@
   <!-- Positioning Matrix (full-width, mở lớn để nhìn rõ) -->
   <div class="card" style="margin-top:14px">
     <h3 data-i18n="positioning">🎯 Price Positioning Matrix</h3>
-    <div id="posChart" style="height:680px"></div>
+    <div id="posChart"></div>
   </div>
 
   <!-- Price Events -->
@@ -534,7 +536,19 @@ async function loadAll(){
   // Channel Comparison (giá thật đa kênh)
   safe(()=>renderRealChannels());
   safe(()=>renderRealChannelsChart());
+  // Lưu dữ liệu positioning để re-render khi resize (mobile xoay ngang/dọc).
+  _lastPositioning = ws.positioning;
 }
+let _lastPositioning = null;
+/* Re-render Positioning Matrix khi kích thước cửa sổ đổi (xoay điện thoại,
+ * thay đổi zoom) — debounce 250ms tránh render liên tục. */
+let _posResizeT = null;
+window.addEventListener('resize', () => {
+  if(_posResizeT) clearTimeout(_posResizeT);
+  _posResizeT = setTimeout(() => {
+    if(_lastPositioning){ try{ renderPositioning(_lastPositioning); }catch(e){} }
+  }, 250);
+});
 
 // ---- Channel Comparison (giá thật đa kênh) ----
 async function renderRealChannels(){
@@ -837,8 +851,14 @@ function sevOf(t){ if(t.includes('INCREASE')||t.includes('DECREASE'))return 'hig
 // tham chiếu index=100. Đáp ứng responsive qua viewBox.
 function renderPositioning(p){
   const pts=(p&&p.points)||[];
-  // Kích thước canvas lớn hơn để sơ đồ mở rộng, nhìn rõ: 1320×640 (full-width).
-  const W=1320,H=640, padL=70, padR=40, padT=40, padB=64;
+  // Kích thước canvas ADAPTIVE theo container thật: W = chiều rộng card,
+  // H = W * 3/4 (ratio 4:3, khớp với CSS aspect-ratio:4/3). Nhờ vậy viewBox
+  // khớp pixel container → SVG luôn fill đầy khung trên mọi màn (desktop/
+  // mobile), không bị preserveAspectRatio scale thu nhỏ (lỗi "sơ đồ quá
+  // nhỏ" trên mobile do viewBox quá wide).
+  const host=$('#posChart');
+  const cw = host ? Math.max(280, host.clientWidth) : 1100;
+  const W=cw, H=Math.round(cw*3/4), padL=70, padR=40, padT=40, padB=64;
   const iW=W-padL-padR, iH=H-padT-padB;
   const isLight=document.documentElement.getAttribute('data-theme')==='light';
   const grid=isLight?'#e5e7eb':'#2c3744', axisT=isLight?'#5a6675':'#8b98a5';
@@ -913,8 +933,8 @@ function renderPositioning(p){
     <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:50%;background:#f85149;display:inline-block"></span>${t('posPremium')||'Premium (≥110)'}</span>
     <span style="color:${muted}">${t('positioningHint')||'Di chuột qua chấm để xem chi tiết · kích thước chấm = độ phủ kênh'}</span>
   </div>`;
-  $('#posChart').innerHTML=svg;
-  // Append legend after the svg container.
+  $('#posChart').innerHTML='<div id="posSvgWrap" style="width:100%;aspect-ratio:4/3">'+svg+'</div>';
+  // Append legend after the svg container (ngoài aspect-box để không làm lệch ratio).
   const wrap=$('#posChart'); if(wrap){ wrap.insertAdjacentHTML('beforeend', legend); }
 }
 
