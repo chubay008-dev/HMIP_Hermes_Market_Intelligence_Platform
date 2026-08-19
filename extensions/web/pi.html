@@ -1191,6 +1191,16 @@ async function initClerk(){
 document.getElementById('clerkBtn').onclick = async () => {
   if(!CLERK){ alert('Đang tải Clerk…'); return; }
   try{
+    // Nếu đã signed in -> lấy token thẳng (tránh conflict cannot_render_single_session)
+    if(CLERK.session && CLERK.user){
+      let tok = await CLERK.session.getToken();
+      if(tok){
+        localStorage.setItem('hmip_token', tok);
+        try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }); return; }
+        catch(_){ tok = await CLERK.session.getToken({ skipCache: true }); localStorage.setItem('hmip_token', tok);
+          try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }); return; }catch(__){} }
+      }
+    }
     await CLERK.openSignIn();
     const check = async () => {
       try{

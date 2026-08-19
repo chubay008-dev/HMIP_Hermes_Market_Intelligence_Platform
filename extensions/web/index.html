@@ -994,6 +994,16 @@ async function initClerk(){
 document.getElementById('clerkBtn').onclick = async () => {
   if(!CLERK){ toast('Đang tải Clerk…'); return; }
   try{
+    // Nếu đã signed in (session tồn tại) -> lấy token thẳng, không mở modal (tránh conflict)
+    if(CLERK.session && CLERK.user){
+      let tok = await CLERK.session.getToken();
+      if(tok){
+        localStorage.setItem(TOK_KEY, tok);
+        try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
+        catch(_){ tok = await CLERK.session.getToken({ skipCache: true }); localStorage.setItem(TOK_KEY, tok);
+          try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }catch(__){} }
+      }
+    }
     await CLERK.openSignIn();   // modal: email/pass + "Quên mật khẩu" (reset email)
     const check = async () => {
       try{
