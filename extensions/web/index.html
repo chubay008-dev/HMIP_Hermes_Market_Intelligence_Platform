@@ -148,7 +148,7 @@
   <div class="box">
     <h3>🔐 HMIP — <span data-i18n="loginTitle">Đăng nhập</span></h3>
     <p data-i18n="loginText">Chào mừng đến HMIP. Đăng nhập bằng tài khoản của bạn.</p>
-    <button class="btn primary" id="clerkBtn" style="display:none;width:100%;text-align:center;padding:12px;font-size:15px">🔑 <span data-i18n="clerkLogin">Đăng nhập bằng tài khoản (email/tin nhắn)</span></button>
+    <button class="btn primary" id="clerkBtn" style="width:100%;text-align:center;padding:12px;font-size:15px">width:100%;text-align:center;padding:12px;font-size:15px">🔑 <span data-i18n="clerkLogin">Đăng nhập bằng tài khoản (email/tin nhắn)</span></button>
     <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--dim)" id="clerkHint"></div>
     <div style="margin:16px 0 6px;text-align:center;font-size:11px;color:var(--muted)">— hoặc —</div>
     <details>
@@ -940,15 +940,19 @@ let CLERK = null;          // Clerk client instance
 let CLERK_KEY = "";
 
 async function initClerk(){
+  const btn = document.getElementById('clerkBtn');
+  const hint = document.getElementById('clerkHint');
   try{
     const r = await fetch('/api/auth/clerk-config');
     const cfg = await r.json();
-    if(!cfg.enabled || !cfg.publishable_key){ return; }   // Clerk chưa bật -> ẩn nút
+    if(!cfg.enabled || !cfg.publishable_key){
+      // Clerk chưa bật -> ẩn nút, giữ chỉ token
+      if(btn){ btn.style.display='none'; }
+      return;
+    }
     CLERK_KEY = cfg.publishable_key;
-    // Hiện nút ngay (không đợi JS load) để user luôn thấy
-    const btn = document.getElementById('clerkBtn');
+    // Hiện nút (đã hiện mặc định, đảm bảo)
     if(btn){ btn.style.display=''; }
-    const hint = document.getElementById('clerkHint');
     if(hint){ hint.textContent = 'Quên mật khẩu? Bấm "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
     // Nạp Clerk JS — thử nhiều CDN phòng bị chặn
     const CDNS = [
@@ -966,7 +970,7 @@ async function initClerk(){
         loaded = true; break;
       }catch(e){ lastErr = e; }
     }
-    if(!loaded || !window.Clerk){ console.warn('Clerk JS không load được:', lastErr); return; }
+    if(!loaded || !window.Clerk){ console.warn('[HMIP] Clerk JS không load được:', lastErr); return; }
     CLERK = window.Clerk;
     await CLERK.load({ publishableKey: CLERK_KEY });
     // Nếu Clerk đã có session sẵn -> lấy token, vào thẳng dashboard
@@ -976,7 +980,11 @@ async function initClerk(){
         try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
         catch(_){} }
     }
-  }catch(e){ console.warn('Clerk init lỗi (bỏ qua):', e); }
+  }catch(e){
+    console.warn('[HMIP] Clerk init lỗi (giữ nút token):', e);
+    // Lỗi -> ẩn nút Clerk, user dùng token
+    if(btn){ btn.style.display='none'; }
+  }
 }
 
 document.getElementById('clerkBtn').onclick = async () => {
