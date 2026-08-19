@@ -1161,20 +1161,23 @@ async function initClerk(){
     if(hint){ hint.textContent = 'Quên mật khẩu? Bấm "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
     const CDNS = [
       'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js',
-      'https://unpkg.com/@clerk/clerk-js@5/dist/clerk.browser.js'
+      'https://unpkg.com/@clerk/clerk-js@5/dist/clerk.browser.js',
+      'https://esm.sh/@clerk/clerk-js@5/dist/clerk.browser.js'
     ];
     let loaded=false, lastErr=null;
     for(const src of CDNS){
       try{
         await new Promise((res, rej)=>{
           const s=document.createElement('script');
-          s.src=src; s.async=true; s.onload=res; s.onerror=()=>rej(new Error('load fail '+src));
+          s.src=src; s.async=true;
+          s.setAttribute('data-clerk-publishable-key', cfg.publishable_key);
+          s.onload=res; s.onerror=()=>rej(new Error('load fail '+src));
           document.head.appendChild(s);
         });
         loaded=true; break;
       }catch(e){ lastErr=e; }
     }
-    if(!loaded || !window.Clerk){ console.warn('Clerk JS không load được:', lastErr); return; }
+    if(!loaded || !window.Clerk){ console.warn('[HMIP] Clerk JS không load được:', lastErr); return; }
     CLERK = window.Clerk;
     await CLERK.load({ publishableKey: cfg.publishable_key });
     if(CLERK.user && CLERK.session){
@@ -1190,10 +1193,25 @@ document.getElementById('clerkBtn').onclick = async () => {
   try{
     await CLERK.openSignIn();
     const check = async () => {
-      if(CLERK.session && CLERK.user){
-        const tok = await CLERK.session.getToken();
-        if(tok){ localStorage.setItem('hmip_token', tok); hideLogin(); $('#logoutBtn').style.display=''; location.reload(); return; }
-      }
+      try{
+        if(CLERK.session && CLERK.user){
+          let tok = await CLERK.session.getToken();
+          if(tok){
+            localStorage.setItem('hmip_token', tok);
+            try{
+              await api('/api/price-intelligence/status');
+              hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }); return;
+            }catch(e){
+              try{
+                tok = await CLERK.session.getToken({ skipCache: true });
+                localStorage.setItem('hmip_token', tok);
+                await api('/api/price-intelligence/status');
+                hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }); return;
+              }catch(_){}
+            }
+          }
+        }
+      }catch(_){}
       setTimeout(check, 800);
     };
     check();
