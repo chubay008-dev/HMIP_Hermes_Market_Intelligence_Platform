@@ -126,11 +126,33 @@
   .skip-link{position:absolute;left:-9999px;top:0;z-index:9999;padding:8px 14px;background:var(--cyan);color:#000;border-radius:0 0 6px 0;font-weight:600}
   .skip-link:focus{left:0}
   :focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:3px}
+
+  /* ---------- login overlay (Clerk + token fallback) ---------- */
+  #login{position:fixed;inset:0;background:rgba(8,12,17,.97);display:flex;align-items:center;justify-content:center;z-index:80}
+  #login .box{background:var(--panel);border:1px solid var(--accent);border-radius:11px;padding:30px 32px;width:340px;max-width:92vw}
+  #login h3{color:var(--accent);font-size:16px;margin-bottom:6px}
+  #login p{color:var(--muted);font-size:12px;margin-bottom:16px}
+  #login input{width:100%;padding:11px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:4px}
+  #login .err{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px}
+  #login .btn{width:100%;text-align:center}
 </style>
 <!-- ApexCharts (local bundle — không phụ thuộc CDN ngoài, an toàn khi Render/network chặn) -->
 <script src="/static/vendor/apexcharts.min.js"></script>
 </head>
 <body>
+
+<div id="login">
+  <div class="box">
+    <h3>🔐 HMIP — <span data-i18n="loginTitle">Đăng nhập</span></h3>
+    <p data-i18n="loginText">Workspace được bảo vệ. Đăng nhập bằng tài khoản, hoặc nhập token truy cập cũ.</p>
+    <input id="tok" type="password" placeholder="API token (tùy chọn)" autofocus>
+    <div class="err" id="loginErr"></div>
+    <button class="btn primary" id="clerkBtn"><span data-i18n="clerkLogin">🔑 Đăng nhập bằng tài khoản</span></button>
+    <button class="btn" id="loginBtn" style="margin-top:10px" data-i18n="loginBtn">Hoặc dùng token</button>
+    <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--muted)" id="clerkHint"></div>
+  </div>
+</div>
+
 <a href="#main" class="skip-link" data-i18n="skipLink">Bỏ qua tới nội dung</a>
 <header>
   <h1>📊 <span data-i18n="app">HMIP Price Intelligence</span></h1>
@@ -142,6 +164,7 @@
   <button class="btn" id="tokBtn" data-i18n-title="tokTitle" title="Nhập mã truy cập (dùng chung với Monitor cũ)"><span data-i18n="tokBtn">🔐 Token</span></button>
   <button class="btn" id="seedBtn" data-i18n-title="seedTitle" title="Tạo dữ liệu thị trường mẫu"><span data-i18n="seedBtn">⟳ Seed dữ liệu</span></button>
   <button class="btn" id="themeBtn"><span data-i18n="themeBtn">🌓 Theme</span></button>
+    <button class="btn" id="logoutBtn" style="display:none" data-i18n="logout">Đăng xuất</button>
   <a class="btn" href="/" style="text-decoration:none"><span data-i18n="home">🏠 Trang Chủ</span></a>
 </header>
 
@@ -304,7 +327,7 @@ const esc = s => (s??"").toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;'
 // ---- i18n (VI / EN / ZH) ----
 const I18N = {
   vi: {
-    app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven",
+    app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven", loginTitle:"Đăng nhập", loginText:"Workspace được bảo vệ. Đăng nhập bằng tài khoản, hoặc nhập token truy cập cũ.", clerkLogin:"🔑 Đăng nhập bằng tài khoản", logout:"Đăng xuất",
     tokBtn:"🔐 Token", tokTitle:"Nhập mã truy cập (dùng chung với Monitor cũ)",
     seedBtn:"⟳ Seed dữ liệu", seedTitle:"Tạo dữ liệu thị trường mẫu",
     themeBtn:"🌓 Theme", oldMonitor:"← Monitor cũ", language:"🌐 Ngôn ngữ", home:"🏠 Trang Chủ",
@@ -338,7 +361,7 @@ const I18N = {
     noData:"Chưa có dữ liệu. Bấm 'Seed dữ liệu' để tạo market data.",
   },
   en: {
-    app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven",
+    app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven", loginTitle:"Sign in", loginText:"Workspace is protected. Sign in with your account, or enter the legacy access token.", clerkLogin:"🔑 Sign in with account", logout:"Log out",
     tokBtn:"🔐 Token", tokTitle:"Enter access token (shared with Old Monitor)",
     seedBtn:"⟳ Seed data", seedTitle:"Generate sample market data",
     themeBtn:"🌓 Theme", oldMonitor:"← Old Monitor", language:"🌐 Language", home:"🏠 Home",
@@ -372,7 +395,7 @@ const I18N = {
     noData:"No data yet. Click 'Seed data' to generate market data.",
   },
   zh: {
-    app:"HMIP 价格情报", workspace:"Workspace v2.0 · Spec-driven",
+    app:"HMIP 价格情报", workspace:"Workspace v2.0 · Spec-driven", loginTitle:"登录", loginText:"Workspace 受保护。请用账户登录，或输入旧版访问令牌。", clerkLogin:"🔑 使用账户登录", logout:"退出",
     tokBtn:"🔐 令牌", tokTitle:"输入访问令牌（与旧监视器共用）",
     seedBtn:"⟳ 种子数据", seedTitle:"生成示例市场数据",
     themeBtn:"🌓 主题", oldMonitor:"← 旧监视器", language:"🌐 语言", home:"🏠 主页",
@@ -446,17 +469,24 @@ async function api(path, opts={}){
   return r.json();
 }
 
-// ---- Auth / token (shared with index.html via localStorage 'hmip_token') ----
+// ---- Auth: overlay login + Clerk (shared với index.html qua 'hmip_token') ----
 function showLogin(){
-  const cur = localStorage.getItem('hmip_token') || '';
-  const t = prompt('Nhập HMIP_API_TOKEN (mã truy cập do quản trị viên cung cấp):', cur);
-  if(t===null) return;
-  const v = t.trim();
-  if(!v){ localStorage.removeItem('hmip_token'); updateTokBadge(); return; }
-  localStorage.setItem('hmip_token', v);
-  updateTokBadge();
-  loadAll();
+  const ov = document.getElementById('login');
+  if(ov){ ov.style.display='flex'; }
 }
+function hideLogin(){ const ov=document.getElementById('login'); if(ov) ov.style.display='none'; }
+// Nút "dùng token": verify token cũ qua api
+document.getElementById('loginBtn').onclick = async () => {
+  const v = (document.getElementById('tok').value||'').trim();
+  if(!v){ document.getElementById('loginErr').textContent='*'; return; }
+  localStorage.setItem('hmip_token', v);
+  try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>loadAll()); }
+  catch(e){ localStorage.removeItem('hmip_token'); document.getElementById('loginErr').textContent='Sai token'; }
+};
+document.getElementById('logoutBtn').onclick = () => {
+  localStorage.removeItem('hmip_token'); updateTokBadge();
+  $('#logoutBtn').style.display='none'; showLogin();
+};
 function updateTokBadge(){
   const badge = document.getElementById('tokBadge');
   const tok = localStorage.getItem('hmip_token');
@@ -1112,8 +1142,57 @@ async function autoPiCollectIfStale(){
   }catch(e){ /* non-fatal */ }
 }
 
+
+/* ---------- Clerk auth (song song với token tĩnh) ---------- */
+let CLERK = null;
+async function initClerk(){
+  try{
+    const r = await fetch('/api/auth/clerk-config');
+    const cfg = await r.json();
+    if(!cfg.enabled || !cfg.publishable_key){ return; }
+    await new Promise((res, rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
+      s.async=true; s.onload=res; s.onerror=rej; document.head.appendChild(s);
+    });
+    CLERK = window.Clerk;
+    await CLERK.load({ publishableKey: cfg.publishable_key });
+    const hint = document.getElementById('clerkHint');
+    if(hint){ hint.textContent = 'Quên mật khẩu? "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
+    if(CLERK.user){
+      const tok = await CLERK.session.getToken();
+      if(tok){ localStorage.setItem('hmip_token', tok);
+        try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); return; }catch(_){}
+      }
+    }
+  }catch(e){ console.warn('Clerk init lỗi (bỏ qua):', e); }
+}
+document.getElementById('clerkBtn').onclick = async () => {
+  if(!CLERK){ alert('Đang tải Clerk…'); return; }
+  try{
+    await CLERK.openSignIn();
+    const check = async () => {
+      if(CLERK.session && CLERK.user){
+        const tok = await CLERK.session.getToken();
+        if(tok){ localStorage.setItem('hmip_token', tok); hideLogin(); $('#logoutBtn').style.display=''; location.reload(); return; }
+      }
+      setTimeout(check, 800);
+    };
+    check();
+  }catch(e){ alert('Lỗi đăng nhập Clerk: '+e.message); }
+};
+
 // ---- init ----
-loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }).catch(e=>{
+initClerk();
+const _tok = localStorage.getItem('hmip_token');
+if(!_tok){
+  showLogin();   // chưa login -> overlay (Clerk tự detect session nếu có)
+} else {
+  api('/api/price-intelligence/status')
+    .then(()=>{ hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }); })
+    .catch(()=>{ localStorage.removeItem('hmip_token'); showLogin(); });
+}
+loadCatalog().then(()=>{ if(!localStorage.getItem('hmip_token')) return; loadAll(); autoPiCollectIfStale(); }).catch(e=>{
   $('#kpis').innerHTML='<div class="err">'+t('noData')+'</div>';
   console.error(e);
 });

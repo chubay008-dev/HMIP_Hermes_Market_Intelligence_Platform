@@ -76,7 +76,22 @@ def _extract_token(request: Request) -> str | None:
 
 
 def _check(token: str | None) -> bool:
-    return bool(token) and token in ALLOWED_TOKENS
+    """Chấp nhận token tĩnh HOẶC Clerk session token (song song).
+
+    - Token tĩnh (HMIP_API_TOKENS / HMIP_API_TOKEN) → cron + dev mode.
+    - Clerk session token (JWT __session_) → người mở web login qua Clerk.
+    """
+    if token and token in ALLOWED_TOKENS:
+        return True
+    # Clerk chỉ chạy nếu admin cấu hình CLERK_SECRET_KEY.
+    try:
+        from extensions.clerk_auth import is_enabled as clerk_on, verify_clerk_token
+        if clerk_on():
+            ok, _uid = verify_clerk_token(token)
+            return ok
+    except Exception:  # noqa: BLE001  - Clerk chưa cài/import lỗi -> bỏ qua
+        pass
+    return False
 
 
 async def require_token(request: Request) -> None:
@@ -94,7 +109,9 @@ async def require_token(request: Request) -> None:
 
 # Các path không cần token. Dashboard '/' chỉ exempt chính xác nó
 # (không dùng startswith('/') vì sẽ miễn trừ mọi route).
-_EXEMPT_EXACT = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static", "/", "/pi", "/workspace")
+# /api/auth/clerk-config PHẢI public — frontend gọi khi chưa login để
+# lấy publishable key + biết Clerk có bật không.
+_EXEMPT_EXACT = ("/api/health", "/api/auth/clerk-config", "/docs", "/openapi.json", "/redoc", "/static", "/", "/pi", "/workspace")
 _EXEMPT_PREFIX = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static")
 
 

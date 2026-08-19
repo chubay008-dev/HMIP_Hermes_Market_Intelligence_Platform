@@ -820,6 +820,21 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
 if _STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
+    @app.get("/api/auth/clerk-config")
+    def clerk_config() -> dict:
+        """Public (miễn trừ auth). Trả publishable key + trạng thái bật.
+
+        Frontend dùng để quyết định có hiển thị nút 'Đăng nhập bằng Clerk'
+        hay không. Không lộ secret key.
+        """
+        pk = (os.getenv("CLERK_PUBLISHABLE_KEY") or "").strip()
+        return {
+            "enabled": bool(pk),
+            "publishable_key": pk,
+            # Clerk cho phép reset qua email sẵn có; SMS/Telegram là premium.
+            "reset_via_email": True,
+        }
+
     @app.get("/")
     def index() -> FileResponse:
         return FileResponse(_STATIC_DIR / "index.html")

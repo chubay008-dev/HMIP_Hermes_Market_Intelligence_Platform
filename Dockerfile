@@ -21,7 +21,7 @@ COPY start.sh ./
 # Cài package ở editable mode + deps web (fastapi/uvicorn/apscheduler/httpx).
 RUN python -m pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e ".[dev]" && \
-    pip install --no-cache-dir "fastapi" "uvicorn[standard]" "apscheduler" "httpx" "requests" "crawl4ai" "psycopg2-binary"
+    pip install --no-cache-dir "fastapi" "uvicorn[standard]" "apscheduler" "httpx" "requests" "crawl4ai" "psycopg2-binary" "clerk-backend-api>=6"
 
 # Dữ liệu bền vực: volume gắn tại /app/data
 ENV HMIP_DB_PATH=/app/data/hmip.db
