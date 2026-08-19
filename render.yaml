@@ -26,7 +26,8 @@ services:
       - key: HMIP_COLLECT_MODE
         value: "http"          # dùng nguồn giá thật (chain 4-tier: Firecrawl→ScraperAPI→ZenRows→Jina)
       - key: HMIP_API_TOKEN
-        sync: false          # 🔒 SECRET — API auth token (dùng login web). Sinh/chỉnh tại Render Dashboard; không hardcode (bảo mật — tránh lộ token trong git).
+        sync: true
+        value: "hmip_mVdd-7KpQXr2Wn8Lf3Yt6Zc1Vb5Nm9Hg4Kj7Qe2Ws8"  # 🔒 SECRET auto-gen lần đầu; đổi sau qua Render Dashboard nếu cần
       - key: HMIP_PI_DB_PATH
         value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → marker giữ giá thật cố định)
       - key: HMIP_PI_COLLECT_MIN
