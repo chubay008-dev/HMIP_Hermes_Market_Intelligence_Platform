@@ -1,68 +1,83 @@
-"""clerk_auth.py — xác thực session Clerk (tùy chọn, song song với token tĩnh).
+"""clerk_auth.py - xác thực session Clerk (tùy chọn, song song với token tĩnh).
 
 Thiết kế:
-- CHỈ bật khi có env CLERK_SECRET_KEY. Nếu không → is_enabled()=False,
-  mọi hàm trả về "không xác thực được" một cách an toàn (không crash).
-- Không import clerk-backend-api ở top-level (tránh lỗi import nếu chưa pip
-  install). Import bên trong hàm -> graceful degradation trên Render free
-  nếu package chưa cài.
-- verify_clerk_token(token) trả về (ok: bool, user_id: str|None).
-  Token là Clerk session token (JWT __session_) gửi qua header
-  Authorization: Bearer <session_token>.
+- CHỈ bật khi có env CLERK_SECRET_KEY. Nếu không -> is_enabled()=False.
+- Token là Clerk session JWT (RS256, ký bởi Clerk). Verify qua JWKS public key
+  của instance (chuẩn Clerk: https://clerk.com/docs/backend/verify).
+- verify_clerk_token(token) trả (ok, user_id). Không bao giờ raise.
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import time
 
 log = logging.getLogger("hmip.clerk")
 
 _SECRET = (os.getenv("CLERK_SECRET_KEY") or "").strip()
+# Frontend API domain lấy từ publishable key (pk_test_<base64 domain>)
+_PUB = (os.getenv("CLERK_PUBLISHABLE_KEY") or "").strip()
 
 
 def is_enabled() -> bool:
-    """Clerk auth chỉ bật khi admin cấu hình CLERK_SECRET_KEY."""
     return bool(_SECRET)
 
 
-def _client():
-    """Trả về Clerk client hoặc None nếu chưa cài SDK / thiếu key."""
-    if not _SECRET:
-        return None
+def _jwks_url() -> str:
+    """Lấy JWKS URL từ publishable key hoặc mặc định api.clerk.com."""
+    global _PUB
+    if not _PUB:
+        # fallback: dùng domain mặc định của Clerk
+        return "https://api.clerk.com/v1/jwks"
     try:
-        from clerk_backend_api import Clerk  # type: ignore
-    except Exception as exc:  # noqa: BLE001
-        log.warning("clerk-backend-api chưa cài, bỏ qua Clerk auth: %s", exc)
-        return None
-    try:
-        # clerk-backend-api >= 6 dùng bearer_auth= thay vì api_key=
-        try:
-            return Clerk(bearer_auth=_SECRET)
-        except TypeError:
-            return Clerk(api_key=_SECRET)  # fallback bản cũ
-    except Exception as exc:  # noqa: BLE001
-        log.warning("Khởi tạo Clerk client lỗi: %s", exc)
-        return None
+        import base64, json
+        # pk_test_xxx  -> xxx là base64url của "instance_domain.clerk.accounts.dev"
+        raw = _PUB.split("_", 1)[-1]
+        raw += "=" * (-len(raw) % 4)
+        domain = json.loads(base64.urlsafe_b64decode(raw).decode()).strip()
+        return f"https://{domain}/.well-known/jwks.json"
+    except Exception:
+        return "https://api.clerk.com/v1/jwks"
+
+
+def _get_jwks():
+    import requests
+    url = _jwks_url()
+    # api.clerk.com cần Bearer, domain.clerk.accounts.dev thì public
+    headers = {}
+    if "api.clerk.com" in url and _SECRET:
+        headers["Authorization"] = f"Bearer {_SECRET}"
+    resp = requests.get(url, headers=headers, timeout=10)
+    resp.raise_for_status()
+    return resp.json()
 
 
 def verify_clerk_token(token: str | None) -> tuple[bool, str | None]:
-    """Xác thực Clerk session token.
-
-    Trả về (ok, user_id). Nếu Clerk không bật / SDK thiếu / token sai ->
-    (False, None). Không bao giờ raise.
-    """
-    if not token:
-        return False, None
-    client = _client()
-    if client is None:
+    """Xác thực Clerk session JWT qua JWKS (RS256). Trả (ok, user_id)."""
+    if not token or not _SECRET:
         return False, None
     try:
-        # verify trả về session object; session.user_id là định danh user.
-        session = client.sessions.verify(token)
-        if session and getattr(session, "is_valid", True):
-            uid = getattr(session, "user_id", None)
-            return True, (uid or "clerk-user")
+        import jwt
+        from jwt.algorithms import RSAAlgorithm
+
+        jwks = _get_jwks()
+        kid = jwt.get_unverified_header(token).get("kid")
+        key = None
+        for k in jwks.get("keys", []):
+            if k.get("kid") == kid:
+                key = RSAAlgorithm.from_jwk(__import__("json").dumps(k))
+                break
+        if key is None:
+            return False, None
+        # Clerk session token: verify chữ ký RS256; bỏ qua aud (satellite domain)
+        payload = jwt.decode(
+            token, key,
+            algorithms=["RS256"],
+            options={"verify_aud": False, "verify_exp": True},
+        )
+        uid = payload.get("sub") or payload.get("user_id")
+        return True, (uid or "clerk-user")
     except Exception as exc:  # noqa: BLE001
         log.debug("Clerk verify fail: %s", exc)
     return False, None
