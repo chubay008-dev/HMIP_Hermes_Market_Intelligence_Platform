@@ -146,13 +146,17 @@
 
 <div id="login">
   <div class="box">
-    <h3>🔐 HMIP — <span data-i18n="loginTitle">Nhập mã truy cập</span></h3>
-    <p data-i18n="loginText">Ứng dụng được bảo vệ. Nhập HMIP_API_TOKEN do quản trị viên cung cấp.</p>
-    <input id="tok" type="password" placeholder="API token" autofocus>
-    <div class="err" id="loginErr"></div>
-    <button class="btn" id="loginBtn" data-i18n="loginBtn">Vào dashboard</button>
-    <button class="btn alt" id="clerkBtn" style="display:none;margin-top:10px">🔑 <span data-i18n="clerkLogin">Đăng nhập bằng tài khoản</span></button>
-    <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--dim)" id="clerkHint"></div>
+    <h3>🔐 HMIP — <span data-i18n="loginTitle">Đăng nhập</span></h3>
+    <p data-i18n="loginText">Chào mừng đến HMIP. Đăng nhập bằng tài khoản của bạn.</p>
+    <button class="btn primary" id="clerkBtn" style="display:none;width:100%;text-align:center;padding:12px;font-size:15px">🔑 <span data-i18n="clerkLogin">Đăng nhập bằng tài khoản (email/tin nhắn)</span></button>
+    <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--dim)" id="clerkHint"></div>
+    <div style="margin:16px 0 6px;text-align:center;font-size:11px;color:var(--muted)">— hoặc —</div>
+    <details>
+      <summary style="cursor:pointer;font-size:12px;color:var(--muted);text-align:center">Dùng API token (dành cho cron/API)</summary>
+      <input id="tok" type="password" placeholder="API token" style="margin-top:8px">
+      <div class="err" id="loginErr"></div>
+      <button class="btn" id="loginBtn" data-i18n="loginBtn" style="width:100%;text-align:center">Vào dashboard</button>
+    </details>
   </div>
 </div>
 

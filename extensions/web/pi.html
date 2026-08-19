@@ -144,12 +144,16 @@
 <div id="login">
   <div class="box">
     <h3>🔐 HMIP — <span data-i18n="loginTitle">Đăng nhập</span></h3>
-    <p data-i18n="loginText">Workspace được bảo vệ. Đăng nhập bằng tài khoản, hoặc nhập token truy cập cũ.</p>
-    <input id="tok" type="password" placeholder="API token (tùy chọn)" autofocus>
-    <div class="err" id="loginErr"></div>
-    <button class="btn primary" id="clerkBtn"><span data-i18n="clerkLogin">🔑 Đăng nhập bằng tài khoản</span></button>
-    <button class="btn" id="loginBtn" style="margin-top:10px" data-i18n="loginBtn">Hoặc dùng token</button>
-    <div style="margin-top:12px;text-align:center;font-size:11px;color:var(--muted)" id="clerkHint"></div>
+    <p data-i18n="loginText">Chào mừng đến Workspace. Đăng nhập bằng tài khoản của bạn.</p>
+    <button class="btn primary" id="clerkBtn" style="width:100%;text-align:center;padding:12px;font-size:15px"><span data-i18n="clerkLogin">🔑 Đăng nhập bằng tài khoản (email/tin nhắn)</span></button>
+    <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--muted)" id="clerkHint"></div>
+    <div style="margin:16px 0 6px;text-align:center;font-size:11px;color:var(--muted)">— hoặc —</div>
+    <details>
+      <summary style="cursor:pointer;font-size:12px;color:var(--muted);text-align:center">Dùng API token (dành cho cron/API)</summary>
+      <input id="tok" type="password" placeholder="API token" style="margin-top:8px">
+      <div class="err" id="loginErr"></div>
+      <button class="btn" id="loginBtn" style="width:100%;text-align:center" data-i18n="loginBtn">Vào Workspace</button>
+    </details>
   </div>
 </div>
 
