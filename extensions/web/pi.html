@@ -1150,16 +1150,30 @@ async function initClerk(){
     const r = await fetch('/api/auth/clerk-config');
     const cfg = await r.json();
     if(!cfg.enabled || !cfg.publishable_key){ return; }
-    await new Promise((res, rej)=>{
-      const s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
-      s.async=true; s.onload=res; s.onerror=rej; document.head.appendChild(s);
-    });
+    // Hiện nút ngay (không đợi JS)
+    const btn = document.getElementById('clerkBtn');
+    if(btn){ btn.style.display=''; }
+    const hint = document.getElementById('clerkHint');
+    if(hint){ hint.textContent = 'Quên mật khẩu? Bấm "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
+    const CDNS = [
+      'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js',
+      'https://unpkg.com/@clerk/clerk-js@5/dist/clerk.browser.js'
+    ];
+    let loaded=false, lastErr=null;
+    for(const src of CDNS){
+      try{
+        await new Promise((res, rej)=>{
+          const s=document.createElement('script');
+          s.src=src; s.async=true; s.onload=res; s.onerror=()=>rej(new Error('load fail '+src));
+          document.head.appendChild(s);
+        });
+        loaded=true; break;
+      }catch(e){ lastErr=e; }
+    }
+    if(!loaded || !window.Clerk){ console.warn('Clerk JS không load được:', lastErr); return; }
     CLERK = window.Clerk;
     await CLERK.load({ publishableKey: cfg.publishable_key });
-    const hint = document.getElementById('clerkHint');
-    if(hint){ hint.textContent = 'Quên mật khẩu? "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
-    if(CLERK.user){
+    if(CLERK.user && CLERK.session){
       const tok = await CLERK.session.getToken();
       if(tok){ localStorage.setItem('hmip_token', tok);
         try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); return; }catch(_){}

@@ -941,21 +941,32 @@ async function initClerk(){
     const cfg = await r.json();
     if(!cfg.enabled || !cfg.publishable_key){ return; }   // Clerk chưa bật -> ẩn nút
     CLERK_KEY = cfg.publishable_key;
-    // Nạp Clerk JS từ CDN
-    await new Promise((res, rej)=>{
-      const s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
-      s.async=true; s.onload=res; s.onerror=rej; document.head.appendChild(s);
-    });
-    CLERK = window.Clerk;
-    await CLERK.load({ publishableKey: CLERK_KEY });
-    // Hiện nút đăng nhập Clerk + hint reset
+    // Hiện nút ngay (không đợi JS load) để user luôn thấy
     const btn = document.getElementById('clerkBtn');
     if(btn){ btn.style.display=''; }
     const hint = document.getElementById('clerkHint');
-    if(hint){ hint.textContent = 'Quên mật khẩu? Dùng "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
+    if(hint){ hint.textContent = 'Quên mật khẩu? Bấm "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
+    // Nạp Clerk JS — thử nhiều CDN phòng bị chặn
+    const CDNS = [
+      'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js',
+      'https://unpkg.com/@clerk/clerk-js@5/dist/clerk.browser.js'
+    ];
+    let loaded = false, lastErr = null;
+    for(const src of CDNS){
+      try{
+        await new Promise((res, rej)=>{
+          const s=document.createElement('script');
+          s.src=src; s.async=true; s.onload=res; s.onerror=()=>rej(new Error('load fail '+src));
+          document.head.appendChild(s);
+        });
+        loaded = true; break;
+      }catch(e){ lastErr = e; }
+    }
+    if(!loaded || !window.Clerk){ console.warn('Clerk JS không load được:', lastErr); return; }
+    CLERK = window.Clerk;
+    await CLERK.load({ publishableKey: CLERK_KEY });
     // Nếu Clerk đã có session sẵn -> lấy token, vào thẳng dashboard
-    if(CLERK.user){
+    if(CLERK.user && CLERK.session){
       const tok = await CLERK.session.getToken();
       if(tok){ localStorage.setItem(TOK_KEY, tok);
         try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
