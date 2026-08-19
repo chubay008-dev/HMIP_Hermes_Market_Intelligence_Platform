@@ -981,7 +981,7 @@ async function initClerk(){
     if(CLERK.user && CLERK.session){
       const tok = await CLERK.session.getToken();
       if(tok){ localStorage.setItem(TOK_KEY, tok);
-        try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
+        try{ await api('/api/products'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
         catch(_){} }
     }
   }catch(e){
@@ -999,9 +999,9 @@ document.getElementById('clerkBtn').onclick = async () => {
       let tok = await CLERK.session.getToken();
       if(tok){
         localStorage.setItem(TOK_KEY, tok);
-        try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
+        try{ await api('/api/products'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
         catch(_){ tok = await CLERK.session.getToken({ skipCache: true }); localStorage.setItem(TOK_KEY, tok);
-          try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }catch(__){} }
+          try{ await api('/api/products'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }catch(__){} }
       }
     }
     await CLERK.openSignIn();   // modal: email/pass + "Quên mật khẩu" (reset email)
@@ -1023,7 +1023,7 @@ document.getElementById('clerkBtn').onclick = async () => {
               try{
                 tok = await CLERK.session.getToken({ skipCache: true });
                 localStorage.setItem(TOK_KEY, tok);
-                await api('/api/health');
+                await api('/api/products');
                 $('#login').style.display='none';
                 load(); syncAuto(); autoScanIfStale();
                 return;
@@ -1044,8 +1044,8 @@ async function init(){
   $('#aiChat').innerHTML = `<div class="ai-msg ai-a">${t('aiGreeting')}</div>`;
   const tok = localStorage.getItem(TOK_KEY);
   if(tok){
-    // Đã có token → verify rồi vào dashboard
-    try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
+    // Đã có token → verify bằng API CÓ auth (không dùng /api/health vì nó miễn trừ)
+    try{ await api('/api/products'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
     catch(e){ /* token sai → xoá + hiện overlay */ localStorage.removeItem(TOK_KEY); }
   }
   // KHÔNG có token: luôn hiện overlay login (không tự vào dashboard)
