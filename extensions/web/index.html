@@ -995,18 +995,33 @@ document.getElementById('clerkBtn').onclick = async () => {
   if(!CLERK){ toast('Đang tải Clerk…'); return; }
   try{
     await CLERK.openSignIn();   // modal: email/pass + "Quên mật khẩu" (reset email)
-    // openSignIn resolve sau khi user đóng modal; kiểm tra session
     const check = async () => {
-      if(CLERK.session && CLERK.user){
-        const tok = await CLERK.session.getToken();
-        if(tok){
-          localStorage.setItem(TOK_KEY, tok);
-          $('#login').style.display='none';
-          // reload để Clerk JS đồng bộ trạng thái UI (user menu...)
-          location.reload();
-          return;
+      try{
+        if(CLERK.session && CLERK.user){
+          let tok = await CLERK.session.getToken();
+          if(tok){
+            localStorage.setItem(TOK_KEY, tok);
+            // Verify với backend TRƯỚC khi vào dashboard (tránh kẹt login)
+            try{
+              await api('/api/health');
+              $('#login').style.display='none';
+              CLERK.closeSignIn?.();
+              load(); syncAuto(); autoScanIfStale();
+              return;
+            }catch(e){
+              // Token hết hạn? thử lấy mới rồi verify lại 1 lần
+              try{
+                tok = await CLERK.session.getToken({ skipCache: true });
+                localStorage.setItem(TOK_KEY, tok);
+                await api('/api/health');
+                $('#login').style.display='none';
+                load(); syncAuto(); autoScanIfStale();
+                return;
+              }catch(_){ /* thật sự sai → giữ login */ }
+            }
+          }
         }
-      }
+      }catch(_){ /* chưa sẵn sàng, thử lại */ }
       setTimeout(check, 800);
     };
     check();
@@ -1023,15 +1038,7 @@ async function init(){
     try{ await api('/api/health'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
     catch(e){ /* token sai → xoá + hiện overlay */ localStorage.removeItem(TOK_KEY); }
   }
-  // Chưa có token: kiểm tra xem auth có bật không (gọi health KHÔNG kèm token)
-  try{
-    const r = await fetch('/api/health');
-    if(r.ok){
-      // Auth TẮT → vào dashboard luôn, không cần token
-      $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return;
-    }
-  }catch(_){}
-  // Auth BẬT (401) → giữ overlay, focus ô token
+  // KHÔNG có token: luôn hiện overlay login (không tự vào dashboard)
   $('#tok').focus();
 }
 
