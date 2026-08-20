@@ -1,3 +1,12 @@
+from __future__ import annotations
+
+from extensions.state.pi_notifier_state import PINotifierState
+from extensions.state.discord_cache import DiscordChannelCache
+
+# Initialize PI notifier state
+_pi_notifier_state = PINotifierState()
+_discord_cache = DiscordChannelCache()
+
 """notifier.py — Đẩy alert giá sang kênh ngoài (Discord + Telegram).
 
 Thiết kế:
@@ -8,8 +17,6 @@ Thiết kế:
 - Chỉ gửi CRITICAL alert (tránh spam). Gọi từ events.detect_and_alert.
 - Không sửa core/domains.
 """
-
-from __future__ import annotations
 
 import logging
 import os
@@ -35,25 +42,22 @@ _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 # ngủ/restart → cache in-memory mất → đọc lại từ DB → cooldown vẫn sống
 # (tránh re-notify toàn bộ alert mỗi lần restart). Cache in-memory chỉ
 # dùng để tránh round-trip DB cho mỗi alert trong cùng process dài.
-_notify_state: dict[str, float] = {}
+# State in-memory được quản lý qua _pi_notifier_state (extensions/state/pi_notifier_state.py).
 # Per-sku cooldown state: key = sku_id|region_id (KHÔNG channel). Khi bật
 # multi-channel (Tiki+Shopee+Lazada), nếu 1 SP đổi giá trên cả 3 kênh cùng
 # lúc, chỉ kênh đầu notify; 2 kênh còn lại skip trong cửa sổ per-sku ngắn
 # (HMIP_NOTIFY_SKU_COOLDOWN_MIN, mặc định 30') → chống spam gấp 3.
-_sku_notify_state: dict[str, float] = {}
 # path PI DB để ghi state bền vững. Khởi tạo lazy khi cần (tránh import
 # cycle + cho phép test override path qua _set_state_db_path).
-_state_db_path: str | None = None
 
 
 def _set_state_db_path(path: str | None) -> None:
     """Override PI DB path cho state notify (test)."""
-    global _state_db_path
-    _state_db_path = path
+    _pi_notifier_state.set_state_db_path(path)
 
 
 def _state_path() -> str | None:
-    return _state_db_path or os.getenv("HMIP_PI_DB_PATH") or None
+    return _pi_notifier_state.get_state_db_path() or os.getenv("HMIP_PI_DB_PATH") or None
 
 
 def _cooldown_seconds() -> float:
@@ -136,7 +140,7 @@ def _product_cooldown_seconds() -> float:
 
 def _load_sku_last_sent(key: str) -> float | None:
     """Đọc mốc notify cuối cho SP (per-sku, scope='pi-sku'). Cache first, then DB."""
-    last = _sku_notify_state.get(key)
+    last = _pi_notifier_state.get_sku_notify_state().get(key)
     if last is not None:
         return last
     try:
@@ -146,7 +150,7 @@ def _load_sku_last_sent(key: str) -> float | None:
             import datetime as _dt
             try:
                 ts = _dt.datetime.fromisoformat(rec["last_sent_at"]).timestamp()
-                _sku_notify_state[key] = ts
+                _pi_notifier_state.get_sku_notify_state()[key] = ts
                 return ts
             except (ValueError, TypeError):
                 return None
@@ -189,7 +193,7 @@ def _load_last_sent(key: str) -> float | None:
     Khi process restart (cache rỗng), đọc lại từ DB để cooldown sống qua
     restart (Render free tier ngủ 15' rồi spin-up lại).
     """
-    last = _notify_state.get(key)
+    last = _pi_notifier_state.get_notify_state().get(key)
     if last is not None:
         return last
     # Cache miss → đọc DB (bền vững qua restart).
@@ -200,7 +204,7 @@ def _load_last_sent(key: str) -> float | None:
             import datetime as _dt
             try:
                 ts = _dt.datetime.fromisoformat(rec["last_sent_at"]).timestamp()
-                _notify_state[key] = ts  # populate cache
+                _pi_notifier_state.get_notify_state()[key] = ts  # populate cache
                 return ts
             except (ValueError, TypeError):
                 return None
@@ -282,7 +286,7 @@ def _record_notify_sent(alert: dict) -> None:
     if not key.strip("|"):
         return
     now = time.time()
-    _notify_state[key] = now
+    _pi_notifier_state.get_notify_state()[key] = now
     # Ghi DB (bền vững qua restart). best-effort — không block notify.
     try:
         from . import pi_store
@@ -314,7 +318,7 @@ def _record_notify_sent(alert: dict) -> None:
                 continue
             if skey.startswith("sku:") and sku_window <= 0:
                 continue  # per-sku tắt → không ghi sku key
-            _sku_notify_state[skey] = now
+            _pi_notifier_state.get_sku_notify_state()[skey] = now
             is_prod = skey.startswith("prod:")
             try:
                 from . import pi_store
@@ -342,8 +346,8 @@ def reset_notify_state() -> None:
     Xoá cache in-memory luôn. Chỉ xoá bảng DB khi đã set state path
     (tránh tạo file hmip_pi.db rác trong cwd khi test chưa cấu hình path).
     """
-    _notify_state.clear()
-    _sku_notify_state.clear()
+    _pi_notifier_state.get_notify_state().clear()
+    _pi_notifier_state.get_sku_notify_state().clear()
     p = _state_path()
     if not p:
         return
@@ -383,18 +387,17 @@ def _discord_configured() -> bool:
 
 
 # Cache DM channel id để tránh tạo lại mỗi lần gửi (Discord trả cùng id cho 1 cặp).
-_dm_channel_cache: str | None = None
+# Dùng chung DiscordChannelCache từ extensions.state.discord_cache.
 
 
 def _resolve_discord_channel() -> str | None:
     """Trả channel_id để post. Ưu tiên DISCORD_HOME_CHANNEL; nếu không có,
     tạo DM channel với DISCORD_DM_USER_ID (bot phải share server với user)."""
-    global _dm_channel_cache
     direct = os.getenv("DISCORD_HOME_CHANNEL")
     if direct:
         return direct
-    if _dm_channel_cache:
-        return _dm_channel_cache
+    if _discord_cache.get_dm_channel():
+        return _discord_cache.get_dm_channel()
     user_id = os.getenv("DISCORD_DM_USER_ID")
     if not user_id:
         return None
@@ -407,8 +410,8 @@ def _resolve_discord_channel() -> str | None:
             timeout=15,
         )
         if r.status_code in (200, 201):
-            _dm_channel_cache = r.json().get("id")
-            return _dm_channel_cache
+            _discord_cache.set_dm_channel(r.json().get("id"))
+            return _discord_cache.get_dm_channel()
         log.warning("Discord DM create fail HTTP %s: %s", r.status_code, r.text[:200])
     except Exception as exc:
         log.warning("Discord DM create error: %s", exc)

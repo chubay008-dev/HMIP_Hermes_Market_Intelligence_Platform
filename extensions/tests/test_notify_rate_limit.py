@@ -98,7 +98,7 @@ def test_notify_alert_no_record_on_send_failure(monkeypatch):
     first = notifier.notify_alert(_alert(change_pct=10.0))
     # Vì fail → state không ghi → không bị cooldown.
     assert first == {"discord": False, "telegram": False}
-    assert notifier._notify_state == {}
+    assert notifier._pi_notifier_state.get_notify_state() == {}
 
 
 def test_notify_alert_respects_custom_min_pct_env(monkeypatch):
@@ -142,7 +142,7 @@ def test_notify_alert_cooldown_persists_across_cache_clear(tmp_path, monkeypatch
 
     first = notifier.notify_alert(_alert(change_pct=10.0))
     # Giả lập restart: xoá cache in-memory.
-    notifier._notify_state.clear()
+    notifier._pi_notifier_state.get_notify_state().clear()
     # Cùng (sku,channel,region) trong cooldown → skip (đọc từ DB).
     second = notifier.notify_alert(_alert(change_pct=12.0))
 
@@ -252,8 +252,8 @@ def test_per_sku_cooldown_persists_across_cache_clear(tmp_path, monkeypatch):
 
     notifier.notify_alert(_alert(sku="SKU-P", channel="TIKI", change_pct=10.0))
     # Giả restart: xoá cache in-memory (DB vẫn còn).
-    notifier._sku_notify_state.clear()
-    notifier._notify_state.clear()
+    notifier._pi_notifier_state.get_sku_notify_state().clear()
+    notifier._pi_notifier_state.get_notify_state().clear()
     r_shopee = notifier.notify_alert(_alert(sku="SKU-P", channel="SHOPEE", change_pct=10.0))
 
     assert r_shopee == {"discord": False, "telegram": False}

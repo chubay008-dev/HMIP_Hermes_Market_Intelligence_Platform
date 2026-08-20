@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+from extensions.state.discord_cache import DiscordChannelCache
+
+# Initialize Discord cache
+_discord_cache = DiscordChannelCache()
+
 """notifiers/discord.py — bọc gửi cảnh báo Discord (channel hoặc DM).
 
 Thiết kế:
@@ -9,8 +16,6 @@ Thiết kế:
   Bot phải share server với user để DM hoạt động.
 - allowed_mentions parse:[] để tránh ping @everyone/roles.
 """
-
-from __future__ import annotations
 
 import logging
 import os
@@ -28,7 +33,7 @@ HOME_CHANNEL = os.getenv("DISCORD_HOME_CHANNEL", "")
 DM_USER_ID = os.getenv("DISCORD_DM_USER_ID", "")
 
 # Cache DM channel id (Discord trả cùng id cho 1 cặp bot-user).
-_dm_channel_cache: str | None = None
+_discord_cache = DiscordChannelCache()
 
 
 def is_configured() -> bool:
@@ -70,11 +75,12 @@ def _format(
 
 def _resolve_channel() -> str | None:
     """Trả channel_id để post. Ưu tiên HOME_CHANNEL; nếu không, tạo DM."""
-    global _dm_channel_cache
+    # global _dm_channel_cache
+    # Replaced with _discord_cache.get_dm_channel()
     if HOME_CHANNEL:
         return HOME_CHANNEL
-    if _dm_channel_cache:
-        return _dm_channel_cache
+    if _discord_cache.get_dm_channel():
+        return _discord_cache.get_dm_channel()
     if not DM_USER_ID:
         return None
     try:
@@ -85,8 +91,8 @@ def _resolve_channel() -> str | None:
             timeout=15.0,
         )
         if resp.status_code in (200, 201):
-            _dm_channel_cache = resp.json().get("id")
-            return _dm_channel_cache
+            _discord_cache.set_dm_channel(resp.json().get("id"))
+            return _discord_cache.get_dm_channel()
         log.warning("Discord DM create fail HTTP %s: %s", resp.status_code, resp.text[:200])
     except Exception as exc:
         log.warning("Discord DM create error: %s", exc)

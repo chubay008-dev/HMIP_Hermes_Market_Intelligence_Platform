@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+from extensions.state.api_state import APIState
+
+# Initialize API state
+_api_state = APIState()
+
 """api.py — FastAPI web layer cho HMIP.
 
 Bọc kernel HMIP (chạy-rồi-thoát) bằng một lớp HTTP, KHÔNG biến kernel
@@ -11,8 +18,6 @@ gửi cảnh báo đẩy (Telegram hoặc log fallback).
 Chạy:
     uvicorn extensions.api:app --reload --port 8000
 """
-
-from __future__ import annotations
 
 # In-memory cache cho chart endpoint (giảm tải DB trên Render free)
 _chart_cache: dict[str, tuple[float, dict]] = {}
@@ -679,8 +684,8 @@ def pi_collect(channel: str = "TIKI", limit: int | None = None) -> dict[str, Any
 # Tránh quét lại nếu dữ liệu còn mới (user refresh liên tục). Flag in-memory
 # chống trigger trùng (2 tab cùng vào) — reset khi scan xong.
 
-_AUTO_SCAN_IN_PROGRESS = False
-_AUTO_PI_COLLECT_IN_PROGRESS = False
+_api_state.set_auto_scan_in_progress(False)
+_api_state.set_auto_pi_collect_in_progress(False)
 
 
 def _stale_minutes() -> float:
@@ -736,7 +741,6 @@ def scan_if_stale() -> dict[str, Any]:
     ``/api/latest`` để xem dữ liệu mới). Trả ``triggered=false`` nếu dữ liệu
     còn fresh (không quét lại — tránh spam Render/credit khi refresh).
     """
-    global _AUTO_SCAN_IN_PROGRESS
     stale_min = _stale_minutes()
     last = _latest_scan_ts()
     now = datetime.now(UTC)
@@ -748,14 +752,13 @@ def scan_if_stale() -> dict[str, Any]:
     if not is_stale:
         return {"triggered": False, "reason": "fresh",
                 "last_scan": (last.isoformat() if last else None)}
-    if _AUTO_SCAN_IN_PROGRESS:
+    if _api_state.is_auto_scan_in_progress():
         return {"triggered": False, "reason": "already-scanning",
                 "last_scan": (last.isoformat() if last else None)}
 
     import threading
 
     def _bg_run_all() -> None:
-        global _AUTO_SCAN_IN_PROGRESS
         try:
             for pid, meta in _DEMO_CATALOG.items():
                 db.add_product(pid, meta.get("product_name", pid),
@@ -771,9 +774,9 @@ def scan_if_stale() -> dict[str, Any]:
         except Exception as exc:  # noqa: BLE001
             log.exception("Auto-scan-if-stale lỗi: %s", exc)
         finally:
-            _AUTO_SCAN_IN_PROGRESS = False
+            _api_state.set_auto_scan_in_progress(False)
 
-    _AUTO_SCAN_IN_PROGRESS = True
+    _api_state.set_auto_scan_in_progress(True)
     threading.Thread(target=_bg_run_all, daemon=True).start()
     return {"triggered": True, "reason": "stale" if last else "empty",
             "last_scan": (last.isoformat() if last else None),
@@ -787,7 +790,6 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
     Trả ``triggered=true`` nếu đã kick collect background (poll
     ``/api/price-intelligence/overview``). Trả ``triggered=false`` nếu fresh.
     """
-    global _AUTO_PI_COLLECT_IN_PROGRESS
     stale_min = _stale_minutes()
     last = _latest_pi_obs_ts()
     now = datetime.now(UTC)
@@ -799,7 +801,7 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
     if not is_stale:
         return {"triggered": False, "reason": "fresh",
                 "last_scan": (last.isoformat() if last else None)}
-    if _AUTO_PI_COLLECT_IN_PROGRESS:
+    if _api_state.is_auto_pi_collect_in_progress():
         return {"triggered": False, "reason": "already-collecting",
                 "last_scan": (last.isoformat() if last else None)}
 
@@ -810,7 +812,6 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
     from extensions.pi import events as _ev
 
     def _bg() -> None:
-        global _AUTO_PI_COLLECT_IN_PROGRESS
         try:
             r = _col.collect_realtime_smart(limit=limit, path=_path)
             log.info("PI collect-if-stale xong: %s", r)
@@ -818,9 +819,9 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
         except Exception as exc:  # noqa: BLE001
             log.exception("PI collect-if-stale lỗi: %s", exc)
         finally:
-            _AUTO_PI_COLLECT_IN_PROGRESS = False
+            _api_state.set_auto_pi_collect_in_progress(False)
 
-    _AUTO_PI_COLLECT_IN_PROGRESS = True
+    _api_state.set_auto_pi_collect_in_progress(True)
     threading.Thread(target=_bg, daemon=True).start()
     return {"triggered": True, "reason": "stale" if last else "empty",
             "last_scan": (last.isoformat() if last else None),

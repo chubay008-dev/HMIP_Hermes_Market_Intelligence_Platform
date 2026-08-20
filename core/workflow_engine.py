@@ -253,7 +253,11 @@ class WorkflowEngine:
                     model_info=f"compensation:{task_id}",
                 )
             except Exception:  # noqa: BLE001 - best-effort audit trail only
-                pass
+                # Best-effort lineage recording - log warning if failed
+                import logging
+                logging.warning(
+                    "Failed to record lineage trace for rollback step", exc_info=True
+                )
 
         return {"triggered": True, "completed": not errors, "errors": errors}
 

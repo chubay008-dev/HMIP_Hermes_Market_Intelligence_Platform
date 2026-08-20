@@ -62,7 +62,8 @@ def scrape_prices_fast():
     Chỉ trả SKU có trên Tiki. Dùng cho chu trình 30p."""
     products = json.loads((MASTER / "products.json").read_text(encoding="utf-8"))
     result = {}
-    ctx = __import__("ssl").create_default_context()
+    import ssl
+    ctx = ssl.create_default_context()
     for p in products:
         pid, name = p["id"], p["name"]
         q = re.sub(r"\d+\s*ml", "", name, flags=re.I)

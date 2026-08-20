@@ -162,9 +162,11 @@ def test_api_endpoints(temp_db, monkeypatch):
 
     assert client.get("/api/health").json()["status"] == "ok"
 
+    import extensions.default_products
+
     catalog = client.get("/api/catalog").json()
     assert {c["product_id"] for c in catalog} == set(
-        ["P123", "P456"] + list(__import__("extensions.default_products", fromlist=["DEFAULT_PRODUCTS"]).DEFAULT_PRODUCTS.keys())
+        ["P123", "P456"] + list(extensions.default_products.DEFAULT_PRODUCTS.keys())
     )
 
     run = client.post("/api/run", json={"product_id": "P123", "source": "api-test"})
@@ -211,7 +213,7 @@ def test_scan_if_stale_triggers_when_empty(temp_db, monkeypatch):
 
     from extensions import api as api_mod
     from extensions.api import app
-    api_mod._AUTO_SCAN_IN_PROGRESS = False
+    api_mod._api_state.set_auto_scan_in_progress(False)
     client = TestClient(app)
     body = client.post("/api/scan-if-stale").json()
     assert body["triggered"] is True
@@ -230,7 +232,7 @@ def test_scan_if_stale_fresh_after_scan(temp_db, monkeypatch):
 
     from extensions import api as api_mod
     from extensions.api import app
-    api_mod._AUTO_SCAN_IN_PROGRESS = False
+    api_mod._api_state.set_auto_scan_in_progress(False)
     client = TestClient(app)
     # Seed 1 observation qua /api/run
     client.post("/api/run", json={"product_id": "P123", "source": "test"})

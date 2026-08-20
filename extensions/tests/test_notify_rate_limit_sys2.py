@@ -92,7 +92,7 @@ def test_mark_sent_not_called_on_skip(monkeypatch):
     res = notify_pkg.notify_all("ALERT", "Bia A", 110.0, 10.0, 100.0)
     assert res == {"telegram": False, "discord": False}
     # State rỗng (chưa mark_sent)
-    assert "Bia A" not in rate_limit._state
+    assert "Bia A" not in rate_limit._rate_limit_state.get_state()
 
 
 def test_mark_sent_called_on_success(monkeypatch):
@@ -102,7 +102,7 @@ def test_mark_sent_called_on_success(monkeypatch):
     monkeypatch.setattr(notify_pkg._telegram, "notify", lambda *a, **k: True)
     monkeypatch.setattr(notify_pkg._discord, "notify", lambda *a, **k: True)
     notify_pkg.notify_all("ESCALATE", "Bia A", 400000.0, 2000.0, 18000.0)
-    assert "Bia A" in rate_limit._state
+    assert "Bia A" in rate_limit._rate_limit_state.get_state()
 
 
 def test_no_mark_sent_when_both_fail(monkeypatch):
@@ -112,7 +112,7 @@ def test_no_mark_sent_when_both_fail(monkeypatch):
     monkeypatch.setattr(notify_pkg._telegram, "notify", lambda *a, **k: False)
     monkeypatch.setattr(notify_pkg._discord, "notify", lambda *a, **k: False)
     notify_pkg.notify_all("ESCALATE", "Bia A", 400000.0, 2000.0, 18000.0)
-    assert "Bia A" not in rate_limit._state
+    assert "Bia A" not in rate_limit._rate_limit_state.get_state()
 
 
 def test_cooldown_persists_across_cache_clear(tmp_path):
@@ -123,7 +123,7 @@ def test_cooldown_persists_across_cache_clear(tmp_path):
     rate_limit._set_state_db_path(str(tmp_path / "scan_state.db"))
     rate_limit.mark_sent("Bia A", "ESCALATE", 400000.0)
     # Giả lập restart: xoá cache in-memory.
-    rate_limit._state.clear()
+    rate_limit._rate_limit_state.get_state().clear()
     # Cùng giá, cùng decision ngay sau → skip (cooldown đọc từ DB).
     assert rate_limit.allow("Bia A", "ESCALATE", 400000.0, 2000.0) is False
     rate_limit._set_state_db_path(None)
@@ -134,7 +134,7 @@ def test_cooldown_after_restart_allows_significant_change(tmp_path):
     rate_limit.reset()
     rate_limit._set_state_db_path(str(tmp_path / "scan_state2.db"))
     rate_limit.mark_sent("Bia A", "ESCALATE", 400000.0)
-    rate_limit._state.clear()
+    rate_limit._rate_limit_state.get_state().clear()
     # Giá đổi 50% → đáng báo dù cooldown.
     assert rate_limit.allow("Bia A", "ESCALATE", 600000.0, 3000.0) is True
     rate_limit._set_state_db_path(None)
@@ -231,7 +231,7 @@ def test_cross_scope_allows_when_window_expired(tmp_path, monkeypatch):
             "UPDATE pi_notify_state SET last_sent_at=? WHERE state_key=?",
             [old, "prod:Bia Larue"],
         )
-    notifier._sku_notify_state.clear()
+    notifier._pi_notifier_state.get_sku_notify_state().clear()
 
     # Cửa sổ cross-hệ (mặc định 120'=2h) đã hết (mốc 3h trước) → Hệ 2 cho phép.
     r2 = rate_limit.allow("Bia Larue", "ESCALATE", price=19800, delta_percent=10.0)

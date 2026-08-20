@@ -66,7 +66,8 @@ def verify_clerk_token(token: str | None) -> tuple[bool, str | None]:
         key = None
         for k in jwks.get("keys", []):
             if k.get("kid") == kid:
-                key = RSAAlgorithm.from_jwk(__import__("json").dumps(k))
+                import json
+                key = RSAAlgorithm.from_jwk(json.dumps(k))
                 break
         if key is None:
             return False, None

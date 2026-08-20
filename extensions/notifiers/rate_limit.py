@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+from extensions.state.rate_limit_state import RateLimitState
+
+# Initialize rate limit state
+_rate_limit_state = RateLimitState()
+
 """rate_limit.py — chống spam notify cho hệ thống PRC-001 scheduler.
 
 Hệ thống notify thứ 2 (scheduler scan_once → run_prc_001 → notify_all) gửi
@@ -26,8 +33,6 @@ Env:
     HMIP_SCAN_NOTIFY_MIN_PCT      — % delta tối thiểu (mặc định 10).
 """
 
-from __future__ import annotations
-
 import logging
 import os
 import time
@@ -35,18 +40,14 @@ import time
 log = logging.getLogger("hmip.notify.rate_limit")
 
 # (product_name) -> {"ts": float, "price": float|None, "decision": str}
-_state: dict[str, dict] = {}
-_state_db_path: str | None = None
-
-
+# State in-memory được quản lý qua _rate_limit_state (extensions/state/rate_limit_state.py).
 def _set_state_db_path(path: str | None) -> None:
     """Override PI DB path cho state (test)."""
-    global _state_db_path
-    _state_db_path = path
+    _rate_limit_state.set_state_db_path(path)
 
 
 def _state_path() -> str | None:
-    return _state_db_path or os.getenv("HMIP_PI_DB_PATH") or None
+    return _rate_limit_state.get_state_db_path() or os.getenv("HMIP_PI_DB_PATH") or None
 
 
 def _cooldown_secs() -> float:
@@ -80,7 +81,7 @@ def _cross_cooldown_secs() -> float:
 def reset() -> None:
     """Xoá state (dùng trong test). Xoá cache in-memory luôn; chỉ xoá bảng
     DB khi đã set state path (tránh tạo file hmip_pi.db rác trong cwd)."""
-    _state.clear()
+    _rate_limit_state.get_state().clear()
     p = _state_path()
     if not p:
         return
@@ -93,7 +94,7 @@ def reset() -> None:
 
 def _load_prev(product_name: str) -> dict | None:
     """Đọc mốc notify cuối cho product_name: cache first, rồi DB (restart)."""
-    prev = _state.get(product_name)
+    prev = _rate_limit_state.get_state().get(product_name)
     if prev is not None:
         return prev
     try:
@@ -110,7 +111,7 @@ def _load_prev(product_name: str) -> dict | None:
                 "price": rec.get("last_price"),
                 "decision": rec.get("last_decision"),
             }
-            _state[product_name] = prev  # populate cache
+            _rate_limit_state.get_state()[product_name] = prev  # populate cache
             return prev
     except Exception:
         pass
@@ -210,7 +211,7 @@ def mark_sent(product_name: str, decision: str, price=None) -> None:
         p = float(price) if price is not None else None
     except (TypeError, ValueError):
         p = None
-    _state[product_name] = {
+    _rate_limit_state.get_state()[product_name] = {
         "ts": time.time(),
         "price": p,
         "decision": decision,
