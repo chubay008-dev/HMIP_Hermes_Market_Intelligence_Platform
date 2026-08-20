@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Adapter Apify -> Shopee.vn qua actor scraper của Apify.
-Cần env APIFY_TOKEN (secret trong workflow). Dùng actor công khai phổ biến
-'happyshoppers~shopee-scraper' chạy theo keyword.
+"""Adapter Apify -> Shopee.vn qua actor 'xtracto~shopee-search' (trả VND thật).
 
-Thiếu token -> SKIP, không fail pipeline.
+Cần env APIFY_TOKEN (secret). Thiếu token -> SKIP, không fail pipeline.
+Input actor: {"keyword": ..., "country": "vn", "maxItems": N, "sortType": 2}
 
 Chạy:  APIFY_TOKEN=xxx python3 -m scripts.sources.apify_shopee
 """
@@ -12,93 +11,72 @@ import json
 import os
 import re
 import time
-import urllib.parse
 import urllib.request
 
-from .common import UA, load_products, save_raw
+from .common import load_products, name_tokens, norm, save_raw
 
 SOURCE = "shopee"
-# actor Shopee scraper phổ biến trên Apify Store; thay bằng actor khác nếu cần
-ACTOR = "happyshoppers~shopee-scraper"
-API = "https://api.apify.com/v2"
+ACTOR = "xtracto~shopee-search"
+RUN_SYNC = f"https://api.apify.com/v2/acts/{ACTOR}/run-sync-get-dataset-items"
 
 
-def run_actor(products: list[dict], token: str) -> list[dict]:
-    kws = [re.sub(r"\s*\(.*?\)", "", p["name"]) + " bia" for p in products]
-    body = {
-        "keyword": kws[0],           # chạy từng keyword (kws[0]) để giữ quota; có thể mở rộng
-        "maxItems": 20,
-        "sortType": 2,               # theo giá tăng dần -> lấy min thật
-        "countryCode": "VN",
-    }
-    results = []
-    for kw in kws:
-        b = dict(body, keyword=kw)
-        req = urllib.request.Request(
-            f"{API}/acts/{ACTOR}/runs?token={token}",
-            data=json.dumps(b).encode(), method="POST",
-            headers={"Content-Type": "application/json"})
-        try:
-            run = json.loads(urllib.request.urlopen(req, timeout=60).read())
-            run_id = run["data"]["id"]
-            for _ in range(24):  # poll tối đa ~4 phút
-                time.sleep(10)
-                st = json.loads(urllib.request.urlopen(
-                    f"{API}/actor-runs/{run_id}?token={token}", timeout=30).read())
-                if st["data"]["status"] in ("SUCCEEDED", "FAILED", "ABORTED"):
-                    break
-            if st["data"]["status"] != "SUCCEEDED":
-                continue
-            items = json.loads(urllib.request.urlopen(
-                f"{API}/datasets/{st['data']['defaultDatasetId']}/items?token={token}",
-                timeout=60).read())
-            results.append({"keyword": kw, "items": items})
-        except Exception as e:
-            print(f"  apify/shopee lỗi [{kw}]: {e}")
-    return results
+def search(keyword: str, token: str, max_items: int = 15) -> list[dict]:
+    body = {"keyword": keyword, "country": "vn", "maxItems": max_items,
+            "sortType": 2}  # 2 = theo giá tăng dần -> lấy min thật
+    req = urllib.request.Request(f"{RUN_SYNC}?token={token}",
+        data=json.dumps(body).encode(), method="POST",
+        headers={"Content-Type": "application/json"})
+    try:
+        d = json.loads(urllib.request.urlopen(req, timeout=300).read())
+        return d if isinstance(d, list) else []
+    except Exception as e:
+        print(f"  apify/shopee lỗi [{keyword}]: {e}")
+        return []
 
 
-def map_to_products(results: list[dict], products: list[dict]) -> list[dict]:
-    from .common import name_tokens, norm
+def collect() -> list[dict]:
+    token = os.environ.get("APIFY_TOKEN")
+    if not token:
+        print("SKIP: thiếu APIFY_TOKEN — bỏ qua Shopee.")
+        return []
+    products = load_products()
+    # Giới hạn số keyword mỗi lần để bảo vệ quota; ưu tiên SKU phổ biến.
     out = []
-    by_pid = {p["id"]: p for p in products}
-    for block in results:
-        best_pid, best_price = None, None
-        for it in block["items"]:
-            name = norm(it.get("name") or it.get("productName") or "")
-            price = it.get("price") or it.get("priceMin")
-            if not price:
+    for p in products[:10]:
+        pid, name = p["id"], p["name"]
+        q = re.sub(r"\s*\(.*?\)", "", name) + " bia"
+        case = single = None
+        for it in search(q, token):
+            nm = norm(it.get("name") or "")
+            price = it.get("price")
+            if not isinstance(price, (int, float)) or price <= 0:
                 continue
-            for pid, prod in by_pid.items():
-                toks = name_tokens(prod["name"])
-                if toks and sum(1 for t in toks if t in name) >= max(1, len(toks) - 1):
-                    pr = int(float(price))
-                    is_case = "thùng" in name
-                    if best_pid is None or best_pid == pid:
-                        best_pid = pid
-                        best_price = min(best_price, pr) if best_price else pr
-                        if best_price not in [x.get("price_case_vnd") for x in out] or not is_case:
-                            pass
-                    if not any(x["product_id"] == pid for x in out):
-                        out.append({
-                            "product_id": pid, "name": prod["name"],
-                            "price_case_vnd": pr if is_case else None,
-                            "price_single_vnd": None if is_case else pr,
-                            "source": SOURCE, "confidence": "medium",
-                            "url": it.get("item_url") or it.get("url"),
-                        })
-                    break
+            toks = name_tokens(name)
+            if toks and sum(1 for t in toks if t in nm) < max(1, len(toks) - 1):
+                continue
+            pr = int(price)
+            # Giá >=150k mới coi là THÙNG (tránh nhầm "thùng" trong title combo với giá lẻ)
+            is_case = ("thùng" in nm or "24 lon" in nm or "24 chai" in nm) and pr >= 150000
+            if is_case:
+                case = min(case, pr) if case else pr
+            elif ("lon" in nm or "chai" in nm) and 6000 <= pr < 70000:
+                single = min(single, pr) if single else pr
+        if case or single:
+            out.append({
+                "product_id": pid, "name": name,
+                "price_case_vnd": case,
+                "price_single_vnd": single or (round(case/24/1000)*1000 if case else None),
+                "source": SOURCE, "confidence": "low",   # giá shopee nhiễu sale
+                "url": f"https://shopee.vn/search?keyword={re.sub(' ', '%20', q)}",
+            })
+        time.sleep(1.0)
     return out
 
 
 def main():
-    token = os.environ.get("APIFY_TOKEN")
-    if not token:
-        print("SKIP: thiếu APIFY_TOKEN — bỏ qua Shopee.")
+    items = collect()
+    if not items and not os.environ.get("APIFY_TOKEN"):
         return
-    products = load_products()
-    results = run_actor(products[:8], token)  # tránh cháy quota — bắt đầu với SKU phổ biến
-    items = map_to_products(results, products)
     p = save_raw(SOURCE, items)
     print(f"apify/shopee: {len(items)} SKU -> {p}")
 
