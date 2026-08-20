@@ -29,11 +29,11 @@
   },
   "bhx_budweiser": {
     "url": "https://www.bachhoaxanh.com/bia/bia-budweiser",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   },
   "bhx_carlsberg": {
     "url": "https://www.bachhoaxanh.com/bia/bia-carlsberg",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   },
   "bhx_sanmiguel": {
     "url": "https://www.bachhoaxanh.com/bia/bia-san-miguel",
