@@ -668,7 +668,7 @@
       "pack_case": "24x330ml",
       "price_case_vnd": 350000,
       "price_single_vnd": 20000,
-      "source": "aeon+bachhoaxanh+beer_scan/tgd+circlek+coopmart+emart+go+gs25+mmmega+seveneleven+shopee+tiki+websosanh+winmart+winmart_plus",
+      "source": "aeon+bachhoaxanh+beer_scan/tgd+circlek+coopmart+emart+go+gs25+mmmega+seveneleven+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "auto-tiki",
       "captured_date": "2026-08-20",
@@ -1294,10 +1294,7 @@
           "captured_date": "2026-08-20"
         }
       },
-      "best_channel": "lotte",
-      "flags": [
-        "anomaly"
-      ]
+      "best_channel": "lotte"
     },
     {
       "product_id": "PCAR",
@@ -1658,10 +1655,7 @@
           "captured_date": "2026-08-20"
         }
       },
-      "best_channel": "bachhoaxanh",
-      "flags": [
-        "anomaly"
-      ]
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PCN_OB",
@@ -1735,10 +1729,7 @@
           "captured_date": "2026-08-20"
         }
       },
-      "best_channel": "bachhoaxanh",
-      "flags": [
-        "anomaly"
-      ]
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PCN_PD",
@@ -1805,9 +1796,9 @@
       "product_id": "PCN_TL",
       "name": "Tsingtao Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 431000,
+      "price_case_vnd": 650000,
       "price_single_vnd": 13700,
-      "source": "emart+lotte+websosanh",
+      "source": "bachhoaxanh+beer_scan/bnk+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
       "captured_date": "2026-08-20",
@@ -1846,7 +1837,8 @@
       "best_channel": "bachhoaxanh",
       "flags": [
         "anomaly",
-        "conflict"
+        "conflict",
+        "fresh_override"
       ]
     },
     {
@@ -2746,7 +2738,7 @@
       "pack_case": "24x330ml",
       "price_case_vnd": 250000,
       "price_single_vnd": 45000,
-      "source": "beer_scan/bnk+emart+lazada+lotte+shopee+tiktok+websosanh",
+      "source": "bachhoaxanh+beer_scan/bnk+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
       "captured_date": "2026-08-20",
@@ -2802,6 +2794,7 @@
       },
       "best_channel": "emart",
       "flags": [
+        "conflict",
         "fresh_override"
       ]
     },
@@ -3408,10 +3401,10 @@
       "product_id": "PSG_GD",
       "name": "Bia Sài Gòn Gold 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 355000,
-      "price_single_vnd": 21000,
-      "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+websosanh",
-      "confidence": "medium",
+      "price_case_vnd": 340000,
+      "price_single_vnd": 22000,
+      "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+tgd+websosanh",
+      "confidence": "high",
       "note": "deep-scan-live",
       "captured_date": "2026-08-20",
       "channels": {
@@ -3446,20 +3439,15 @@
           "captured_date": "2026-08-20"
         }
       },
-      "best_channel": "bachhoaxanh",
-      "flags": [
-        "anomaly",
-        "conflict",
-        "fresh_override"
-      ]
+      "best_channel": "bachhoaxanh"
     },
     {
       "product_id": "PSG_LG",
       "name": "Bia Sài Gòn Lager 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 265000,
+      "price_case_vnd": 268000,
       "price_single_vnd": 10000,
-      "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+websosanh",
+      "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+tgd+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
       "captured_date": "2026-08-20",
@@ -3545,7 +3533,7 @@
       "product_id": "PTB",
       "name": "Bia Trúc Bạch 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 458000,
+      "price_case_vnd": 465000,
       "price_single_vnd": 19000,
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "high",
@@ -3579,17 +3567,18 @@
       },
       "best_channel": "bachhoaxanh",
       "flags": [
-        "anomaly"
+        "anomaly",
+        "conflict"
       ]
     },
     {
       "product_id": "PTBG",
       "name": "Tuborg 330ml",
       "pack_case": "24x330ml",
-      "price_case_vnd": 295000,
+      "price_case_vnd": 297000,
       "price_single_vnd": 14000,
-      "source": "bachhoaxanh+emart+lotte+shopee+websosanh",
-      "confidence": "medium",
+      "source": "bachhoaxanh+emart+lotte+websosanh",
+      "confidence": "high",
       "note": "deep-scan-live",
       "captured_date": "2026-08-20",
       "channels": {
@@ -3624,10 +3613,7 @@
           "captured_date": "2026-08-20"
         }
       },
-      "best_channel": "websosanh",
-      "flags": [
-        "conflict"
-      ]
+      "best_channel": "websosanh"
     },
     {
       "product_id": "PTBG_C",
@@ -3764,7 +3750,7 @@
       "pack_case": "24x330ml",
       "price_case_vnd": 350000,
       "price_single_vnd": 12000,
-      "source": "bachhoaxanh+beer_scan/tgd+emart+websosanh",
+      "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
       "captured_date": "2026-08-20",
@@ -4174,7 +4160,7 @@
       "name": "Heineken 0.0 330ml",
       "pack_case": "24x330ml",
       "price_case_vnd": 450000,
-      "price_single_vnd": 19000,
+      "price_single_vnd": 18000,
       "source": "bachhoaxanh+beer_scan/tgd+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
