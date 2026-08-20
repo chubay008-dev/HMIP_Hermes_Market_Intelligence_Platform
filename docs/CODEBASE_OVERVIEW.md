@@ -86,6 +86,12 @@ HMIP/
 │   ├── default_products.py     # Catalog bia hardcode (~48 SP)
 │   ├── fake_price_api.py      # Mock server cho chế độ http test
 │   ├── notifiers/telegram.py   # Cảnh báo Telegram (cho PRC-001)
+│   ├── state/                  # State wrappers — ĐÓNG GÓI module-level state (refactor 2026-08-20)
+│   │   ├── api_state.py        # APIState: _AUTO_SCAN_IN_PROGRESS, _AUTO_PI_COLLECT_IN_PROGRESS
+│   │   ├── discord_cache.py    # DiscordChannelCache: _dm_channel_cache (dùng chung discord.py + pi/notifier.py)
+│   │   ├── rate_limit_state.py # RateLimitState: _state, _state_db_path (notifiers/rate_limit.py)
+│   │   ├── pi_notifier_state.py# PINotifierState: _notify_state, _sku_notify_state, _state_db_path (pi/notifier.py)
+│   │   └── real_prices_cache.py# RealPricesCache: cache giá thật (chưa wire vào dùng)
 │   └── pi/                     # Price Intelligence module (Spec v2.0/v3.1)
 │       ├── service.py          # Orchestration + payload builder cho API
 │       ├── pi_store.py         # SQLite PI (schema đầy đủ: Product/Variant/SKU/Observation/...; cột metadata cho marker)
