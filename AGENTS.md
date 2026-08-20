@@ -185,3 +185,18 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 6. `05_Interface_Contract.md` — protocol/exception khóa
 7. `12_Data_Contract.md` — shape dữ liệu
 8. `APP_README.md` — hướng dẫn dùng app thực tế
+
+## Nguồn giá bia — kết quả probe (20/08/2026)
+
+**Chạy được hằng ngày trên GitHub Actions (miễn phí):**
+- beer-price-scan (Kamereo anchor, GO!, TGD, BNK, Thế giới đồ uống, Bia Nhập Khẩu, Đại Lộc, East West, Pasteur St, Heart of Darkness, 7 Bridges) → đồng bộ qua `sync_to_hmip.py` ở repo beer-price-scan, secret `HMIP_SYNC_PAT`
+- websosanh (adapter `scripts/sources/websosanh.py`, ~28 SKU), Shopee qua Apify `xtracto~shopee-search` (secret `APIFY_TOKEN`, input `country:"vn"`, chặn giá thùng >=150k tránh nhầm combo)
+- Reconcile: `scripts/reconcile_prices.py` — merge trung vị + IQR + SOURCE_TRUST + conflict/anomaly flags; SKU map thủ công `config/beer_scan_sku_map.json`. Workflow `.github/workflows/reconcile.yml` 09:00 VN.
+
+**KHÔNG cào được từ runner — đừng thử lại tốn thời gian:**
+- Tiki API (403), Sendo API (500), bachhoaxanh/lotte/emart (SPA/geo-block/SSL), tops.vn, kingfoodmart.vn (timeout), annam-gourmet.com, koolbeer.vn, dongson, beercraft.vn, belgo.vn, roosterbeers.com, biacraft, fuzzylogicbrewing.com (rỗng)
+- Các site SPA mở được nhưng HTML tĩnh không có giá: chai.vn, vuabia.com, bianhagau.vn, c-brewmaster.vn, tetebeer.com, thombrewery.vn, steersmanbrewery.com
+- TikTok Shop/Facebook/Zalo: không có cách hợp lệ cào giá
+- Skeleton `scripts/sources/tiki.py`, `retail_vn.py`, `sendo.py` giữ để mở lại khi có proxy/headless browser
+
+**Lưu ý:** `channels{}` trong prices_real.json là dữ liệu seed tĩnh, có giá rác (mmmega 752k, gs25 870k cho cùng Saigon Special) — reconcile lọc bằng IQR, không nên tin giá seed tuyệt đối.
