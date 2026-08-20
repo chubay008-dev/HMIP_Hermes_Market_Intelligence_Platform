@@ -777,6 +777,7 @@ function renderAll(){
 
 /* ---------- load ---------- */
 async function load(){
+  $('#chart').innerHTML = `<text x="400" y="160" fill="var(--dim)" font-size="13" text-anchor="middle">⏳ Đang tải biểu đồ…</text>`;
   try{
     const [latest, alerts, health, chart] = await Promise.all([
       api('/api/latest'), api('/api/alerts'), api('/api/health'), api('/api/chart?range='+CUR_RANGE)
@@ -831,6 +832,7 @@ $('#rangeBtns').addEventListener('click',e=>{
   CUR_RANGE=btn.dataset.range;
   document.querySelectorAll('#rangeBtns button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  $('#chart').innerHTML = `<text x="400" y="160" fill="var(--dim)" font-size="13" text-anchor="middle">⏳ Đang tải biểu đồ…</text>`;
   api('/api/chart?range='+CUR_RANGE).then(renderChart).catch(()=>{});
 });
 $('#grpQuick').addEventListener('click',e=>{
