@@ -41,3 +41,15 @@ jobs:
         run: |
           echo "### Reconcile $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
           cat knowledge/dynamic/last_reconcile.json >> $GITHUB_STEP_SUMMARY
+
+      - name: Thông báo Telegram & Discord
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+        run: |
+          SUMMARY=$(python3 -c "import json; d=json.load(open('knowledge/dynamic/last_reconcile.json')); print(f\"reconcile: {d['touched']} SKU, thay đổi {d['changed']}, conflict {d['conflicts']}, anomaly {d['anomalies']}\")" 2>/dev/null || echo "reconcile hoàn tất")
+          python3 scripts/notify_report.py --task "reconcile" --summary "$SUMMARY"
