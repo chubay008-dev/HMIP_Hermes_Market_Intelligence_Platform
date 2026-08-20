@@ -22,6 +22,9 @@ class Brand:
     id: str
     name: str
     country: str | None = None
+    market_share_pct: float | None = None
+    segment: str | None = None
+    imported: bool = False
 
     def __post_init__(self) -> None:
         if not self.id:

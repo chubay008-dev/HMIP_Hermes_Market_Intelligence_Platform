@@ -1,0 +1,134 @@
+{
+  "P123": {
+    "price_case_vnd": 365000,
+    "price_single_vnd": 17000
+  },
+  "P555": {
+    "price_case_vnd": 295000,
+    "price_single_vnd": 13000
+  },
+  "P888": {
+    "price_case_vnd": 455000,
+    "price_single_vnd": 19000
+  },
+  "PASP": {
+    "price_case_vnd": 600000,
+    "price_single_vnd": 25000
+  },
+  "PAT_ED": {
+    "price_case_vnd": 740000,
+    "price_single_vnd": 31000
+  },
+  "PBE_HG": {
+    "price_case_vnd": 620000,
+    "price_single_vnd": 26000
+  },
+  "PBE_LF": {
+    "price_case_vnd": 790000,
+    "price_single_vnd": 33000
+  },
+  "PCAR": {
+    "price_case_vnd": 460000,
+    "price_single_vnd": 19000
+  },
+  "PCN_19": {
+    "price_case_vnd": 799000,
+    "price_single_vnd": 33000
+  },
+  "PCN_19B": {
+    "price_case_vnd": 850000,
+    "price_single_vnd": 35000
+  },
+  "PCN_LM": {
+    "price_case_vnd": 480000,
+    "price_single_vnd": 20000
+  },
+  "PCN_OB": {
+    "price_case_vnd": 499000,
+    "price_single_vnd": 21000
+  },
+  "PCN_PD": {
+    "price_case_vnd": 297000,
+    "price_single_vnd": 13000
+  },
+  "PCN_SE": {
+    "price_case_vnd": 799000,
+    "price_single_vnd": 33000
+  },
+  "PCN_TL": {
+    "price_case_vnd": 504000,
+    "price_single_vnd": 21000
+  },
+  "PCN_TP": {
+    "price_case_vnd": 490000,
+    "price_single_vnd": 20000
+  },
+  "PCN_TP6": {
+    "price_case_vnd": 1300000,
+    "price_single_vnd": 54000
+  },
+  "PDE_PA": {
+    "price_case_vnd": 1350000,
+    "price_single_vnd": 56000
+  },
+  "PDE_WE": {
+    "price_case_vnd": 1392000,
+    "price_single_vnd": 58000
+  },
+  "PESP_ED": {
+    "price_case_vnd": 680000,
+    "price_single_vnd": 28000
+  },
+  "PESP_EG": {
+    "price_case_vnd": 330000,
+    "price_single_vnd": 14000
+  },
+  "PESP_SM": {
+    "price_case_vnd": 330000,
+    "price_single_vnd": 14000
+  },
+  "PHN_CH": {
+    "price_case_vnd": 495000,
+    "price_single_vnd": 21000
+  },
+  "PHUDA": {
+    "price_case_vnd": 290000,
+    "price_single_vnd": 12000
+  },
+  "PIRE_GD": {
+    "price_case_vnd": 2400000,
+    "price_single_vnd": 100000
+  },
+  "PIRE_GE": {
+    "price_case_vnd": 2160000,
+    "price_single_vnd": 90000
+  },
+  "PIRE_GF": {
+    "price_case_vnd": 2600000,
+    "price_single_vnd": 108000
+  },
+  "PITA_P": {
+    "price_case_vnd": 1175000,
+    "price_single_vnd": 49000
+  },
+  "PITA_PN": {
+    "price_case_vnd": 1175000,
+    "price_single_vnd": 49000
+  },
+  "PKIR": {
+    "price_case_vnd": 1450000,
+    "price_single_vnd": 60000
+  },
+  "PLA_GD": {
+    "price_case_vnd": 450000,
+    "price_single_vnd": 19000
+  },
+  "PLA_LG": {
+    "price_case_vnd": 450000,
+    "price_single_vnd": 19000
+  },
+  "PMEX_CO": {
+    "price_case_vnd": 936000,
+    "price_single_vnd": 39000
+  }
+}

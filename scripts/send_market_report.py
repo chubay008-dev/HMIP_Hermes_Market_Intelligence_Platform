@@ -25,10 +25,10 @@ MSG = (f"📈 *HMIP — Thị trường Bia Việt Nam*\n"
        f"*Điểm chính:*\n{fact_lines}\n\n"
        f"▶ Chi tiết: https://hmip.onrender.com/workspace (section Thị trường Bia VN)")
 
-r1 = subprocess.run(["hermes", "send", "--to", "telegram:8891619372", MSG],
+r1 = subprocess.run(["/home/kali/.local/bin/hermes", "send", "--to", "telegram:8891619372", MSG],
                     capture_output=True, text=True, timeout=30)
 print("TG:", r1.stdout.strip() or r1.stderr.strip())
-r2 = subprocess.run(["hermes", "send", "--to", "discord:1533881868678725696", MSG],
+r2 = subprocess.run(["/home/kali/.local/bin/hermes", "send", "--to", "discord:1533881868678725696", MSG],
                     capture_output=True, text=True, timeout=30)
 print("Discord:", r2.stdout.strip() or r2.stderr.strip())
 GB = MSG.replace("*", "").replace("_", "")

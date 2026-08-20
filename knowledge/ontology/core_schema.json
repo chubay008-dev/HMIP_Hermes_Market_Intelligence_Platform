@@ -11,7 +11,10 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "name": { "type": "string", "minLength": 1 },
-        "country": { "type": ["string", "null"] }
+        "country": { "type": ["string", "null"] },
+        "market_share_pct": { "type": ["number", "null"] },
+        "segment": { "type": ["string", "null"] },
+        "imported": { "type": "boolean" }
       },
       "additionalProperties": false
     },

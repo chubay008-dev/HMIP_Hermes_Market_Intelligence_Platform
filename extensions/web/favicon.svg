@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="12" fill="#0f172a"/>
+  <path d="M20 14h24l-3 10c8 4 11 10 11 18 0 8-6 12-15 12H27c-9 0-15-4-15-12 0-8 3-14 11-18L20 14z" fill="#f59e0b"/>
+  <rect x="22" y="40" width="20" height="14" rx="3" fill="#fbbf24"/>
+  <text x="32" y="52" font-size="11" font-family="Arial" font-weight="bold" fill="#0f172a" text-anchor="middle">HM</text>
+</svg>

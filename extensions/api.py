@@ -26,7 +26,7 @@ from typing import Any
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -831,6 +831,14 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
 
 if _STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+
+    @app.get("/favicon.ico")
+    def favicon():
+        """Trả favicon (SVG) để trình duyệt không báo 401 khi load icon."""
+        fp = _STATIC_DIR / "favicon.svg"
+        if fp.exists():
+            return FileResponse(fp, media_type="image/svg+xml")
+        return Response(status_code=204)
 
     @app.get("/api/auth/clerk-config")
     def clerk_config() -> dict:

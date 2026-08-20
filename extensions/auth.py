@@ -111,7 +111,7 @@ async def require_token(request: Request) -> None:
 # (không dùng startswith('/') vì sẽ miễn trừ mọi route).
 # /api/auth/clerk-config PHẢI public — frontend gọi khi chưa login để
 # lấy publishable key + biết Clerk có bật không.
-_EXEMPT_EXACT = ("/api/health", "/api/auth/clerk-config", "/docs", "/openapi.json", "/redoc", "/static", "/", "/pi", "/workspace")
+_EXEMPT_EXACT = ("/api/health", "/api/auth/clerk-config", "/docs", "/openapi.json", "/redoc", "/static", "/", "/pi", "/workspace", "/favicon.ico")
 _EXEMPT_PREFIX = ("/api/health", "/docs", "/openapi.json", "/redoc", "/static")
 
 

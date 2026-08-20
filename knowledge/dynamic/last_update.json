@@ -1,0 +1,29 @@
+{
+  "started": "2026-08-18T18:44:00.883353",
+  "steps": {
+    "prices": {
+      "scraped": 7,
+      "changed": 0,
+      "changed_list": []
+    },
+    "news": {
+      "count": 22,
+      "added": 2,
+      "errors": [
+        "CafeF: HTTP Error 404: Not Found"
+      ]
+    },
+    "validate": {
+      "brands": 40,
+      "products": 72,
+      "skus": 72
+    },
+    "git": {
+      "pushed": true,
+      "msg": "pushed"
+    },
+    "render": {
+      "deploy_id": "dep-da24c06417fc73c0eth0"
+    }
+  }
+}

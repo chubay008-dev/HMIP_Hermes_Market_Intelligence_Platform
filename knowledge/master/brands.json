@@ -318,5 +318,17 @@
     "market_share_pct": null,
     "segment": "nội",
     "imported": false
+  },
+  {
+    "id": "BRAND-PNEWB",
+    "name": "NewBrand"
+  },
+  {
+    "id": "BRAND-PTESTX",
+    "name": "TmpBrand"
+  },
+  {
+    "id": "BRAND-P999",
+    "name": "B"
   }
 ]
