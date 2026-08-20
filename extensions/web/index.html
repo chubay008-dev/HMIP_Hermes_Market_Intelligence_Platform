@@ -979,7 +979,7 @@ async function initClerk(){
     await CLERK.load({ publishableKey: CLERK_KEY });
     // Nếu Clerk đã có session sẵn -> lấy token, vào thẳng dashboard
     if(CLERK.user && CLERK.session){
-      const tok = await CLERK.session.getToken();
+      const tok = await CLERK.session.getToken({ template: 'hmip' });
       if(tok){ localStorage.setItem(TOK_KEY, tok);
         try{ await api('/api/products'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
         catch(_){} }
@@ -996,7 +996,7 @@ document.getElementById('clerkBtn').onclick = async () => {
   try{
     // Nếu đã signed in (session tồn tại) -> lấy token thẳng, không mở modal (tránh conflict)
     if(CLERK.session && CLERK.user){
-      let tok = await CLERK.session.getToken();
+      let tok = await CLERK.session.getToken({ template: 'hmip' });
       if(tok){
         localStorage.setItem(TOK_KEY, tok);
         try{ await api('/api/products'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }
@@ -1008,7 +1008,7 @@ document.getElementById('clerkBtn').onclick = async () => {
     const check = async () => {
       try{
         if(CLERK.session && CLERK.user){
-          let tok = await CLERK.session.getToken();
+          let tok = await CLERK.session.getToken({ template: 'hmip' });
           if(tok){
             localStorage.setItem(TOK_KEY, tok);
             // Verify với backend TRƯỚC khi vào dashboard (tránh kẹt login)

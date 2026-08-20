@@ -1181,7 +1181,7 @@ async function initClerk(){
     CLERK = window.Clerk;
     await CLERK.load({ publishableKey: cfg.publishable_key });
     if(CLERK.user && CLERK.session){
-      const tok = await CLERK.session.getToken();
+      const tok = await CLERK.session.getToken({ template: 'hmip' });
       if(tok){ localStorage.setItem('hmip_token', tok);
         try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); return; }catch(_){}
       }
@@ -1193,7 +1193,7 @@ document.getElementById('clerkBtn').onclick = async () => {
   try{
     // Nếu đã signed in -> lấy token thẳng (tránh conflict cannot_render_single_session)
     if(CLERK.session && CLERK.user){
-      let tok = await CLERK.session.getToken();
+      let tok = await CLERK.session.getToken({ template: 'hmip' });
       if(tok){
         localStorage.setItem('hmip_token', tok);
         try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>{ loadAll(); autoPiCollectIfStale(); }); return; }
@@ -1205,7 +1205,7 @@ document.getElementById('clerkBtn').onclick = async () => {
     const check = async () => {
       try{
         if(CLERK.session && CLERK.user){
-          let tok = await CLERK.session.getToken();
+          let tok = await CLERK.session.getToken({ template: 'hmip' });
           if(tok){
             localStorage.setItem('hmip_token', tok);
             try{
