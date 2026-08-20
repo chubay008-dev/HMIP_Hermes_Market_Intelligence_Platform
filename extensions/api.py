@@ -332,16 +332,16 @@ def chart(range: str = "all") -> dict[str, Any]:
         hours = {"1h": 1, "24h": 24, "7d": 168}[range]
         since = (datetime.now(UTC) - timedelta(hours=hours)).isoformat()
     raw = db.get_history_all(since=since, limit=2000)
+    meta = db.get_products()  # lấy 1 lần, tránh N+1 query trong loop
+    meta_by_id = {p["id"]: p for p in meta}
     products = {}
     for pid, rows in raw.items():
-        meta = db.get_products()
         name = pid
         brand = ""
-        for p in meta:
-            if p["id"] == pid:
-                name = p["name"]
-                brand = p["brand"] or ""
-                break
+        p = meta_by_id.get(pid)
+        if p:
+            name = p["name"]
+            brand = p["brand"] or ""
         points = [
             {
                 "t": r["captured_at"],

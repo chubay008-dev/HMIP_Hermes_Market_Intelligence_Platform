@@ -54,6 +54,7 @@ def init_db(path: str | None = None) -> None:
                 FOREIGN KEY (product_id) REFERENCES products(id)
             );
             CREATE INDEX IF NOT EXISTS idx_pp_product ON price_points(product_id);
+            CREATE INDEX IF NOT EXISTS idx_pp_captured ON price_points(captured_at);
             """
     if pg:
         schema = schema.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "BIGSERIAL PRIMARY KEY")
