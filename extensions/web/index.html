@@ -833,7 +833,7 @@ $('#rangeBtns').addEventListener('click',e=>{
   document.querySelectorAll('#rangeBtns button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   $('#chart').innerHTML = `<text x="400" y="160" fill="var(--dim)" font-size="13" text-anchor="middle">⏳ Đang tải biểu đồ…</text>`;
-  api('/api/chart?range='+CUR_RANGE).then(renderChart).catch(()=>{});
+  api('/api/chart?range='+CUR_RANGE).then(renderChart).catch(()=>{ $('#chart').innerHTML = `<text x="400" y="160" fill="var(--warn)" font-size="13" text-anchor="middle">⚠ Không tải được biểu đồ (thử Làm mới)</text>`; });
 });
 $('#grpQuick').addEventListener('click',e=>{
   const act=e.target.dataset.act; if(!act) return;

@@ -14,6 +14,9 @@ Chạy:
 
 from __future__ import annotations
 
+# In-memory cache cho chart endpoint (giảm tải DB trên Render free)
+_chart_cache: dict[str, tuple[float, dict]] = {}
+
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -327,6 +330,13 @@ def chart(range: str = "all") -> dict[str, Any]:
     `range`: '1h' | '24h' | '7d' | 'all'
     Trả về { range, products: {pid: {name, brand, points:[{t,price,delta,decision}]}} }
     """
+    # Cache đơn giản 60s để giảm tải (chart data ít thay đổi trong 1 phút)
+    import time as _t
+    cache_key = f"chart:{range}"
+    now = _t.time()
+    cached = _chart_cache.get(cache_key)
+    if cached and now - cached[0] < 60:
+        return cached[1]
     since = None
     if range in ("1h", "24h", "7d"):
         hours = {"1h": 1, "24h": 24, "7d": 168}[range]
@@ -352,7 +362,9 @@ def chart(range: str = "all") -> dict[str, Any]:
             for r in sorted(rows, key=lambda x: x["captured_at"])
         ]
         products[pid] = {"name": name, "brand": brand, "points": points}
-    return {"range": range, "since": since, "products": products}
+    result = {"range": range, "since": since, "products": products}
+    _chart_cache[cache_key] = (now, result)
+    return result
 
 
 @app.get("/api/alerts")
