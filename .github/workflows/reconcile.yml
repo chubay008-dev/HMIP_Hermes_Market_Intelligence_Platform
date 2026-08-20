@@ -1,0 +1,43 @@
+name: Reconcile giá đa nguồn
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # 09:00 VN (UTC+7) — chạy sau beer-price-scan (07:30)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Hướng A+B+C: thu thập raw từ các adapter (websosanh, sendo, apify/shopee).
+      # Adapter nào lỗi không chặn adapter khác; thiếu APIFY_TOKEN thì shopee SKIP.
+      - name: Collect raw sources (A/B/C)
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+        run: python3 scripts/collect_sources.py
+
+      # Hòa giải: raw + beer_scan + channels -> knowledge/master/prices_real.json
+      - name: Reconcile prices
+        run: python3 scripts/reconcile_prices.py
+
+      - name: Commit master update
+        run: |
+          git config user.name "hmip-reconcile[bot]"
+          git config user.email "hmip-reconcile[bot]@users.noreply.github.com"
+          git add knowledge/master/prices_real.json knowledge/dynamic/last_reconcile.json
+          git commit -m "data: reconcile giá $(date -u +%Y-%m-%d) từ đa nguồn" \
+            || echo "không có thay đổi master"
+          git push
+
+      - name: Báo kết quả reconcile
+        run: |
+          echo "### Reconcile $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
+          cat knowledge/dynamic/last_reconcile.json >> $GITHUB_STEP_SUMMARY
