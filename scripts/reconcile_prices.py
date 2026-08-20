@@ -33,6 +33,22 @@ CONFLICT_PCT = 0.20   # 2 cụm nguồn lệch >20% -> conflict
 ANOMALY_PCT = 0.30    # lệch >30% so giá cũ -> anomaly
 AGREE_PCT = 0.05      # nguồn độc lập lệch <5% -> đồng thuận -> high
 
+# Anchor: trọng số tin cậy từng nguồn (cao -> thấp). Dùng để chọn giá khi
+# nguồn đồng thuận & xếp hạng confidence. Kamereo (B2B wholesale) là chuẩn.
+SOURCE_TRUST = {
+    "kamereo": 5, "kam": 5,
+    "tiki": 4, "websosanh": 4,
+    "tgd": 4, "go": 3, "bnk": 3, "beer_scan": 3,
+    "sendo": 3, "shopee": 2, "lotte": 3, "emart": 3, "bachhoaxanh": 3,
+    "winmart": 3, "winmart_plus": 3, "coopmart": 3, "aeon": 3,
+    "gs25": 2, "circlek": 2, "seveneleven": 2, "mmmega": 1,
+    "lazada": 2, "tiktok": 1,
+}
+
+def trust(source: str) -> int:
+    s = source.lower().split("/")[-1]
+    return SOURCE_TRUST.get(s, 2)
+
 
 def filter_outliers(vals):
     """Loại giá rác (nhầm thùng/lẻ, giá hộp quà) bằng IQR trước khi so nguồn.
@@ -145,7 +161,10 @@ def decide(pid, cands, old):
         if lo and (hi - lo) / lo > CONFLICT_PCT:
             return None, None, [s for _, s in vals], True  # conflict
         agree = all(abs(v - med) / med <= AGREE_PCT for v in vs) if med else False
-        return int(round(med, -3)), ("high" if agree and len(vals) >= 2 else "medium"), [s for _, s in vals], False
+        # confidence: khi đồng thuận, nâng thêm nếu có nguồn anchor tin cậy (kamereo/tiki)
+        max_trust = max(trust(s) for _, s in vals)
+        conf = ("high" if agree and (len(vals) >= 2 or max_trust >= 4) else "medium")
+        return int(round(med, -3)), conf, [s for _, s in vals], False
 
     # Nguồn beer-scan (quét mới, đã map thủ công) tin cậy hơn channels lịch sử
     fresh_case = [(v, s) for v, s in case_vals if s.startswith("beer_scan/")]
