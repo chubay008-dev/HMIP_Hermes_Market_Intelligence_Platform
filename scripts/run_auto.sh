@@ -8,8 +8,10 @@ if [ ! -x "$VENV/bin/python" ]; then
   "$VENV/bin/pip" install -q jsonschema requests 2>/dev/null || true
 fi
 cd "$REPO"
-export HMIP_GITHUB_PAT="${HMIP_GITHUB_PAT:-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}"
-export RENDER_API_KEY="${RENDER_API_KEY:-rnd_sBLISFGwMEQX9spboququUXhOmX5}"
+# Secrets phải được cung cấp qua môi trường (cron/systemd) — KHÔNG hardcode trong repo.
+: "${HMIP_GITHUB_PAT:?Thiếu HMIP_GITHUB_PAT — export trước khi chạy cron}"
+: "${RENDER_API_KEY:?Thiếu RENDER_API_KEY — export trước khi chạy cron}"
+export HMIP_GITHUB_PAT RENDER_API_KEY
 # Notify dùng Hermes gateway (hermes send) -> không cần bot token ở đây
 export HMIP_TELEGRAM_CHAT_ID="8891619372"
 export DISCORD_DM_USER_ID="1533881868678725696"
