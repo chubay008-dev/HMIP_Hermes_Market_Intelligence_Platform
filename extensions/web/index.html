@@ -811,7 +811,12 @@ $('#scan').onclick = async () => {
   finally{ b.disabled=false; b.textContent=t('scanAll'); }
 };
 $('#refresh').onclick = load;
-$('#logout').onclick = () => { localStorage.removeItem(TOK_KEY); $('#login').style.display='flex'; };
+$('#logout').onclick = async () => {
+  localStorage.removeItem(TOK_KEY);
+  try{ if(CLERK && CLERK.signOut){ await CLERK.signOut(); } }catch(_){}
+  $('#login').style.display='flex';
+  location.reload();
+};
 
 $('#np_add').onclick = async () => {
   const pid=$('#np_id').value.trim(), name=$('#np_name').value.trim();
@@ -976,7 +981,7 @@ async function initClerk(){
     if(!loaded || !window.Clerk){ console.warn('[HMIP] Clerk JS không load được:', lastErr); return; }
     CLERK = window.Clerk;
     // publishableKey truyền vào cả script tag và load() để chắc chắn
-    await CLERK.load({ publishableKey: CLERK_KEY });
+    await CLERK.load({ publishableKey: CLERK_KEY, domain: 'hmip.onrender.com' });
     // Nếu Clerk đã có session sẵn -> lấy token, vào thẳng dashboard
     if(CLERK.user && CLERK.session){
       const tok = await CLERK.session.getToken({ template: 'hmip' });

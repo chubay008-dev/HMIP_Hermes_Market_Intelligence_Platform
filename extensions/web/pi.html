@@ -487,9 +487,11 @@ document.getElementById('loginBtn').onclick = async () => {
   try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>loadAll()); }
   catch(e){ localStorage.removeItem('hmip_token'); document.getElementById('loginErr').textContent='Sai token'; }
 };
-document.getElementById('logoutBtn').onclick = () => {
+document.getElementById('logoutBtn').onclick = async () => {
   localStorage.removeItem('hmip_token'); updateTokBadge();
+  try{ if(CLERK && CLERK.signOut){ await CLERK.signOut(); } }catch(_){}
   $('#logoutBtn').style.display='none'; showLogin();
+  location.reload();
 };
 function updateTokBadge(){
   const badge = document.getElementById('tokBadge');
@@ -1179,7 +1181,7 @@ async function initClerk(){
     }
     if(!loaded || !window.Clerk){ console.warn('[HMIP] Clerk JS không load được:', lastErr); return; }
     CLERK = window.Clerk;
-    await CLERK.load({ publishableKey: cfg.publishable_key });
+    await CLERK.load({ publishableKey: cfg.publishable_key, domain: 'hmip.onrender.com' });
     if(CLERK.user && CLERK.session){
       const tok = await CLERK.session.getToken({ template: 'hmip' });
       if(tok){ localStorage.setItem('hmip_token', tok);
