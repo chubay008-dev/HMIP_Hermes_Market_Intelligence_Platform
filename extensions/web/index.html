@@ -984,6 +984,14 @@ async function initClerk(){
     CLERK = window.Clerk;
     // publishableKey truyền vào cả script tag và load() để chắc chắn
     await CLERK.load({ publishableKey: CLERK_KEY, domain: 'hmip.onrender.com' });
+    // Force ẩn nút Google (nếu Clerk dev mode vẫn tự show) - backend đã tắt nhưng JS có thể cache
+    try{
+      const hideGoogle = () => {
+        document.querySelectorAll('[data-provider="google"], .clerk-google-button, button[data-testid="socialButtonsProviderGoogle"]').forEach(el=>el.style.display='none');
+      };
+      hideGoogle();
+      setTimeout(hideGoogle, 500); setTimeout(hideGoogle, 1500);
+    }catch(_){}
     // Nếu Clerk đã có session sẵn -> lấy token, vào thẳng dashboard
     if(CLERK.user && CLERK.session){
       const tok = await CLERK.session.getToken({ template: 'hmip' });

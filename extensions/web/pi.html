@@ -1182,6 +1182,13 @@ async function initClerk(){
     if(!loaded || !window.Clerk){ console.warn('[HMIP] Clerk JS không load được:', lastErr); return; }
     CLERK = window.Clerk;
     await CLERK.load({ publishableKey: cfg.publishable_key, domain: 'hmip.onrender.com' });
+    try{
+      const hideGoogle = () => {
+        document.querySelectorAll('[data-provider="google"], .clerk-google-button, button[data-testid="socialButtonsProviderGoogle"]').forEach(el=>el.style.display='none');
+      };
+      hideGoogle();
+      setTimeout(hideGoogle, 500); setTimeout(hideGoogle, 1500);
+    }catch(_){}
     if(CLERK.user && CLERK.session){
       const tok = await CLERK.session.getToken({ template: 'hmip' });
       if(tok){ localStorage.setItem('hmip_token', tok);
