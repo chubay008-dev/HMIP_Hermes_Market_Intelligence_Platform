@@ -195,8 +195,33 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 
 **KHÔNG cào được từ runner — đừng thử lại tốn thời gian:**
 - Tiki API (403), Sendo API (500), bachhoaxanh/lotte/emart (SPA/geo-block/SSL), tops.vn, kingfoodmart.vn (timeout), annam-gourmet.com, koolbeer.vn, dongson, beercraft.vn, belgo.vn, roosterbeers.com, biacraft, fuzzylogicbrewing.com (rỗng)
-- Các site SPA mở được nhưng HTML tĩnh không có giá: chai.vn, vuabia.com, bianhagau.vn, c-brewmaster.vn, tetebeer.com, thombrewery.vn, steersmanbrewery.com
-- TikTok Shop/Facebook/Zalo: không có cách hợp lệ cào giá
-- Skeleton `scripts/sources/tiki.py`, `retail_vn.py`, `sendo.py` giữ để mở lại khi có proxy/headless browser
+- Các site SPA mở được nhưng HTML tĩnh không có giá: chai.vn, vuabia.com, vuabia.net, bianhagau.vn, c-brewmaster.vn, tetebeer.com, thombrewery.vn, steersmanbrewery.com, tlmart.vn, ruoungoaihaigiacat.com, vietgourmet.vn (406), ruousi.vn (giá rác)
+- TikTok Shop: actor Apify `pratikdani~tiktok-shop-search-scraper` chỉ trả merchandise in logo bia (quần áo/ly), không phải bia uống → skeleton `apify_tiktok.py` SKIP. Facebook/Instagram/Zalo/YouTube/Telegram: không có cách hợp lệ cào giá (chỉ dùng cho news/sentiment nếu cần)
+- bachhoanhaveo.com (**khác bachhoaxanh**) có HTML tĩnh với giá thật → adapter `bachhoanhaveo.py`
+- Skeleton `scripts/sources/{tiki,retail_vn,sendo,apify_tiktok}.py` giữ để mở lại khi có proxy/headless browser
 
 **Lưu ý:** `channels{}` trong prices_real.json là dữ liệu seed tĩnh, có giá rác (mmmega 752k, gs25 870k cho cùng Saigon Special) — reconcile lọc bằng IQR, không nên tin giá seed tuyệt đối.
+
+## Cấu hình hệ thống — cập nhật (21/08/2026)
+
+**Branches:**
+- HMIP: default `main`
+- beer-price-scan: default `main` (đã tạo từ `openhands/data-upload` 20/08 — schedule chỉ chạy trên default branch)
+
+**Secrets (đã set trong GitHub Secrets của từng repo):**
+- beer-price-scan: `SMTP_APP_PASS`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_WEBHOOK_URL`, `SUPABASE_URL`, `SUPABASE_KEY`, `HMIP_SYNC_PAT`
+- HMIP: `APIFY_TOKEN`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`
+
+**Bot/Token hiện tại:**
+- Telegram: `@lich_quet_tu_dong_bot` (token `8836505362:...`), chat_id `8891619372`
+- Discord: App `AI Lịch quét tự động` (App ID `1540215286781706300`), server `chu7's Hermes Server` (`1533881868108169428`), channel `general` (`1533881868678725696`)
+- ⚠️ App ID & Public Key của Discord **không phải bot token** — không dùng để gửi tin nhắn. Bot token lấy từ Developer Portal → Bot → Token.
+- Render API key cũ `rnd_sBLIS...` **vẫn chưa rotate** — pipeline cũ `run_auto.sh` local dùng (đã bỏ hardcode, cần env khi chạy).
+
+**Pipeline notify:**
+- beer-scan: notify.py gửi TG + Discord (đã có sẵn)
+- HMIP reconcile: `scripts/notify_report.py` gửi TG + Discord, `if: always()`, summary từ `last_reconcile.json`
+- Cả 2 pipeline báo kết quả qua TG + Discord mỗi sáng khi xong.
+
+**Vấn đề đã fix:**
+- beer-scan schedule không chạy → do default branch `openhands/data-upload`, không có `main`. Fix: tạo `main` + đổi default (20/08).
