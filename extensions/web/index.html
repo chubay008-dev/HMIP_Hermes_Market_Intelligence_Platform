@@ -146,13 +146,18 @@
 
 <div id="login">
   <div class="box">
+    <div style="text-align:center;margin-bottom:14px">
+      <div class="seg" id="loginLangSeg" role="group" aria-label="Language / Ngôn ngữ / 语言">
+        <button data-lang="vi">VI</button><button data-lang="en">EN</button><button data-lang="zh">中文</button>
+      </div>
+    </div>
     <h3>🔐 HMIP — <span data-i18n="loginTitle">Đăng nhập</span></h3>
     <p data-i18n="loginText">Chào mừng đến HMIP. Đăng nhập bằng tài khoản của bạn.</p>
     <button class="btn primary" id="clerkBtn" style="width:100%;text-align:center;padding:12px;font-size:15px">🔑 <span data-i18n="clerkLogin">Đăng nhập bằng tài khoản (email/tin nhắn)</span></button>
     <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--dim)" id="clerkHint"></div>
-    <div style="margin:16px 0 6px;text-align:center;font-size:11px;color:var(--muted)">— hoặc —</div>
+    <div style="margin:16px 0 6px;text-align:center;font-size:11px;color:var(--muted)" data-i18n="loginOr">— hoặc —</div>
     <details>
-      <summary style="cursor:pointer;font-size:12px;color:var(--muted);text-align:center">Dùng API token (dành cho cron/API)</summary>
+      <summary style="cursor:pointer;font-size:12px;color:var(--muted);text-align:center" data-i18n="loginTokenToggle">Dùng API token (dành cho cron/API)</summary>
       <input id="tok" type="password" placeholder="API token" style="margin-top:8px">
       <div class="err" id="loginErr"></div>
       <button class="btn" id="loginBtn" data-i18n="loginBtn" style="width:100%;text-align:center">Vào dashboard</button>
@@ -326,6 +331,9 @@ const T = {
     aiTitle:"AI Analyst", aiAsk:"Phân tích", aiHint:"Đặt câu hỏi về sản phẩm / thương hiệu. AI phân tích từ dữ liệu thật (rule-based).",
     aiPlaceholder:"Hỏi AI: tại sao Tiger tăng giá tuần này?",
     loginTitle:"Nhập mã truy cập", loginText:"Ứng dụng được bảo vệ. Nhập HMIP_API_TOKEN do quản trị viên cung cấp.", loginBtn:"Vào dashboard", clerkLogin:"Đăng nhập bằng tài khoản (email/tin nhắn)",
+    loginOr:"— hoặc —", loginTokenToggle:"Dùng API token (dành cho cron/API)",
+    clerkHintText:"Quên mật khẩu? Bấm \"Đăng nhập\" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.",
+    clerkLoading:"Đang tải Clerk…", clerkErr:"Lỗi đăng nhập Clerk: ",
     noData:"Không có dữ liệu khớp bộ lọc.", emptyChart:"Chưa chọn sản phẩm nào — tick vào ô bên trên", loading:"Đang tải…",
     dec:{IGNORE:"IGNORE", ALERT:"ALERT", ESCALATE:"ESCALATE", HUMAN_REVIEW:"HUMAN_REVIEW"},
     aiGreeting:"Xin chào! Hãy hỏi về một sản phẩm hoặc thương hiệu, ví dụ: \"Tại sao Tiger tăng giá?\" hoặc \"So sánh Heineken và Tiger\".",
@@ -361,6 +369,9 @@ const T = {
     aiTitle:"AI Analyst", aiAsk:"Analyze", aiHint:"Ask about a product / brand. AI analyzes real data (rule-based).",
     aiPlaceholder:"Ask AI: why did Tiger price rise this week?",
     loginTitle:"Enter access code", loginText:"App is protected. Enter the HMIP_API_TOKEN provided by admin.", loginBtn:"Enter dashboard", clerkLogin:"Sign in with account (email/message)",
+    loginOr:"— or —", loginTokenToggle:"Use API token (for cron/API)",
+    clerkHintText:"Forgot password? Click \"Sign in\" → Forgot password (Clerk emails a reset link). Messages: via Telegram bot.",
+    clerkLoading:"Loading Clerk…", clerkErr:"Clerk sign-in error: ",
     noData:"No data matches the filters.", emptyChart:"No product selected — tick a box above", loading:"Loading…",
     dec:{IGNORE:"IGNORE", ALERT:"ALERT", ESCALATE:"ESCALATE", HUMAN_REVIEW:"HUMAN_REVIEW"},
     aiGreeting:"Hello! Ask about a product or brand, e.g. \"Why did Tiger rise?\" or \"Compare Heineken and Tiger\".",
@@ -396,6 +407,9 @@ const T = {
     aiTitle:"AI 分析师", aiAsk:"分析", aiHint:"询问产品或品牌。AI 基于真实数据(规则式)分析。",
     aiPlaceholder:"问 AI: Tiger 本周为何涨价?",
     loginTitle:"输入访问码", loginText:"应用已受保护。请输入管理员提供的 HMIP_API_TOKEN。", loginBtn:"进入面板", clerkLogin:"使用账户登录（邮件/消息）",
+    loginOr:"— 或 —", loginTokenToggle:"使用 API 令牌（用于 cron/API）",
+    clerkHintText:"忘记密码？点击“登录”→ 忘记密码（Clerk 会发送重置邮件）。消息：通过 Telegram 机器人。",
+    clerkLoading:"正在加载 Clerk…", clerkErr:"Clerk 登录错误：",
     noData:"没有符合筛选条件的数据。", emptyChart:"未选择产品 — 勾选上方复选框", loading:"加载中…",
     dec:{IGNORE:"忽略", ALERT:"警报", ESCALATE:"升级", HUMAN_REVIEW:"人工复核"},
     aiGreeting:"你好!请询问产品或品牌,例如:\"Tiger 为何涨价?\"或\"对比 Heineken 与 Tiger\"。",
@@ -454,7 +468,9 @@ function applyLang(){
   ['#f_dec','#f_dec_a'].forEach(s=>{ const sel=$(s); if(!sel) return;
     Array.from(sel.options).forEach(o=>{ if(o.value && T[LANG].dec[o.value]) o.textContent = T[LANG].dec[o.value]; }); });
   $('#theme').textContent = THEME==='dark' ? '🌙' : '☀️';
-  $$('#langSeg button').forEach(b=> b.classList.toggle('on', b.dataset.lang===LANG));
+  $$('#langSeg button, #loginLangSeg button').forEach(b=> b.classList.toggle('on', b.dataset.lang===LANG));
+  // clerkHint được đánh dấu filled sau khi Clerk config load — refresh theo ngôn ngữ
+  const hint=$('#clerkHint'); if(hint && hint.dataset.filled) hint.textContent=t('clerkHintText');
   // re-render data-driven views only if data already loaded
   if(LATEST.length || ALERTS.length || CHART){ renderAll(); }
 }
@@ -852,8 +868,11 @@ $('#f_real_reset').onclick = () => { $('#f_real').value=''; renderRealPrices(); 
 
 /* ---------- theme & lang ---------- */
 $('#theme').onclick = () => { THEME = THEME==='dark'?'light':'dark'; localStorage.setItem('hmip_theme',THEME); applyTheme(); };
-$('#langSeg').addEventListener('click',e=>{ const b=e.target.closest('button[data-lang]'); if(!b) return;
-  LANG=b.dataset.lang; localStorage.setItem('hmip_lang',LANG); applyLang(); });
+function setLang(l){ LANG=l; localStorage.setItem('hmip_lang',LANG); applyLang(); }
+['langSeg','loginLangSeg'].forEach(id=>{
+  const el=document.getElementById(id); if(!el) return;
+  el.addEventListener('click',e=>{ const b=e.target.closest('button[data-lang]'); if(!b) return; setLang(b.dataset.lang); });
+});
 applyTheme();
 
 /* ---------- AI Analyst (rule-based) ---------- */
@@ -960,7 +979,7 @@ async function initClerk(){
     CLERK_KEY = cfg.publishable_key;
     // Hiện nút (đã hiện mặc định, đảm bảo)
     if(btn){ btn.style.display=''; }
-    if(hint){ hint.textContent = 'Quên mật khẩu? Bấm "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
+    if(hint){ hint.dataset.filled='1'; hint.textContent = t('clerkHintText'); }
     // Nạp Clerk JS — thử nhiều CDN phòng bị chặn
     const CDNS = [
       'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js',
@@ -1007,7 +1026,7 @@ async function initClerk(){
 }
 
 document.getElementById('clerkBtn').onclick = async () => {
-  if(!CLERK){ toast('Đang tải Clerk…'); return; }
+  if(!CLERK){ toast(t('clerkLoading')); return; }
   try{
     // Nếu đã signed in (session tồn tại) -> lấy token thẳng, không mở modal (tránh conflict)
     if(CLERK.session && CLERK.user){
@@ -1050,7 +1069,7 @@ document.getElementById('clerkBtn').onclick = async () => {
       setTimeout(check, 800);
     };
     check();
-  }catch(e){ toast('Lỗi đăng nhập Clerk: '+e.message); }
+  }catch(e){ toast(t('clerkErr')+e.message); }
 };
 
 async function init(){

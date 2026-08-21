@@ -135,6 +135,9 @@
   #login input{width:100%;padding:11px 12px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:4px}
   #login .err{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px}
   #login .btn{width:100%;text-align:center}
+  .lang-seg{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+  .lang-seg button{background:transparent;color:var(--muted);border:none;padding:5px 12px;cursor:pointer;font-size:12px}
+  .lang-seg button.on{background:var(--accent);color:#08131c;font-weight:600}
 </style>
 <!-- ApexCharts (local bundle — không phụ thuộc CDN ngoài, an toàn khi Render/network chặn) -->
 <script src="/static/vendor/apexcharts.min.js"></script>
@@ -143,13 +146,18 @@
 
 <div id="login">
   <div class="box">
+    <div style="text-align:center;margin-bottom:14px">
+      <div class="lang-seg" id="loginLangSeg" role="group" aria-label="Language / Ngôn ngữ / 语言">
+        <button data-lang="vi">VI</button><button data-lang="en">EN</button><button data-lang="zh">中文</button>
+      </div>
+    </div>
     <h3>🔐 HMIP — <span data-i18n="loginTitle">Đăng nhập</span></h3>
     <p data-i18n="loginText">Chào mừng đến Workspace. Đăng nhập bằng tài khoản của bạn.</p>
     <button class="btn primary" id="clerkBtn" style="width:100%;text-align:center;padding:12px;font-size:15px"><span data-i18n="clerkLogin">🔑 Đăng nhập bằng tài khoản (email/tin nhắn)</span></button>
     <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--muted)" id="clerkHint"></div>
-    <div style="margin:16px 0 6px;text-align:center;font-size:11px;color:var(--muted)">— hoặc —</div>
+    <div style="margin:16px 0 6px;text-align:center;font-size:11px;color:var(--muted)" data-i18n="loginOr">— hoặc —</div>
     <details>
-      <summary style="cursor:pointer;font-size:12px;color:var(--muted);text-align:center">Dùng API token (dành cho cron/API)</summary>
+      <summary style="cursor:pointer;font-size:12px;color:var(--muted);text-align:center" data-i18n="loginTokenToggle">Dùng API token (dành cho cron/API)</summary>
       <input id="tok" type="password" placeholder="API token" style="margin-top:8px">
       <div class="err" id="loginErr"></div>
       <button class="btn" id="loginBtn" style="width:100%;text-align:center" data-i18n="loginBtn">Vào Workspace</button>
@@ -332,6 +340,9 @@ const esc = s => (s??"").toString().replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;'
 const I18N = {
   vi: {
     app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven", loginTitle:"Đăng nhập", loginText:"Workspace được bảo vệ. Đăng nhập bằng tài khoản, hoặc nhập token truy cập cũ.", clerkLogin:"🔑 Đăng nhập bằng tài khoản", logout:"Đăng xuất",
+    loginOr:"— hoặc —", loginTokenToggle:"Dùng API token (dành cho cron/API)",
+    clerkHintText:"Quên mật khẩu? Bấm \"Đăng nhập\" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.",
+    errBadToken:"Sai token", errNoToken:"Thiếu hoặc sai token", clerkLoading:"Đang tải Clerk…", clerkErr:"Lỗi đăng nhập Clerk: ",
     tokBtn:"🔐 Token", tokTitle:"Nhập mã truy cập (dùng chung với Monitor cũ)",
     seedBtn:"⟳ Seed dữ liệu", seedTitle:"Tạo dữ liệu thị trường mẫu",
     themeBtn:"🌓 Theme", oldMonitor:"← Monitor cũ", language:"🌐 Ngôn ngữ", home:"🏠 Trang Chủ",
@@ -363,9 +374,16 @@ const I18N = {
     errLoad:"Lỗi tải dữ liệu: ", seedFirst:"Thử bấm \"Seed dữ liệu\" trước.",
     cheapest:"Kênh rẻ nhất: ", priciest:" · Cao nhất: ",
     noData:"Chưa có dữ liệu. Bấm 'Seed dữ liệu' để tạo market data.",
+    loginBtn:"Vào Workspace", colBest:"Kênh rẻ nhất", colSrc:"Nguồn",
+    mktTitle:"Thị trường Bia Việt Nam", mktSub:"Thị phần & xu hướng bia VN (data research web thực tế, 2024-2026).",
+    realChTitle:"Channel Comparison — Giá thật thị trường", realChSub:"So sánh giá niêm yết thực tế đa kênh (Tiki / Web / LotteMart / BachHoaXanh / Emart / websosanh) — nguồn research web, không phải data ảo.",
+    realChChartTitle:"Channel Comparison — Biểu đồ giá thật", realChChartSub:"Giá trung bình thùng 24 lon theo kênh (Tiki / Lotte / BachHoaXanh / Emart / websosanh) từ research web thực tế.",
   },
   en: {
     app:"HMIP Price Intelligence", workspace:"Workspace v2.0 · Spec-driven", loginTitle:"Sign in", loginText:"Workspace is protected. Sign in with your account, or enter the legacy access token.", clerkLogin:"🔑 Sign in with account", logout:"Log out",
+    loginOr:"— or —", loginTokenToggle:"Use API token (for cron/API)",
+    clerkHintText:"Forgot password? Click \"Sign in\" → Forgot password (Clerk emails a reset link). Messages: via Telegram bot.",
+    errBadToken:"Wrong token", errNoToken:"Missing or invalid token", clerkLoading:"Loading Clerk…", clerkErr:"Clerk sign-in error: ",
     tokBtn:"🔐 Token", tokTitle:"Enter access token (shared with Old Monitor)",
     seedBtn:"⟳ Seed data", seedTitle:"Generate sample market data",
     themeBtn:"🌓 Theme", oldMonitor:"← Old Monitor", language:"🌐 Language", home:"🏠 Home",
@@ -397,9 +415,16 @@ const I18N = {
     errLoad:"Data load error: ", seedFirst:"Try clicking \"Seed data\" first.",
     cheapest:"Cheapest channel: ", priciest:" · Priciest: ",
     noData:"No data yet. Click 'Seed data' to generate market data.",
+    loginBtn:"Enter Workspace", colBest:"Cheapest channel", colSrc:"Source",
+    mktTitle:"Vietnam Beer Market", mktSub:"VN beer market share & trends (real web research data, 2024-2026).",
+    realChTitle:"Channel Comparison — Real market prices", realChSub:"Actual multi-channel list prices (Tiki / Web / LotteMart / BachHoaXanh / Emart / websosanh) — web research source, not simulated data.",
+    realChChartTitle:"Channel Comparison — Real price chart", realChChartSub:"Average case-of-24 price per channel (Tiki / Lotte / BachHoaXanh / Emart / websosanh) from real web research.",
   },
   zh: {
     app:"HMIP 价格情报", workspace:"Workspace v2.0 · Spec-driven", loginTitle:"登录", loginText:"Workspace 受保护。请用账户登录，或输入旧版访问令牌。", clerkLogin:"🔑 使用账户登录", logout:"退出",
+    loginOr:"— 或 —", loginTokenToggle:"使用 API 令牌（用于 cron/API）",
+    clerkHintText:"忘记密码？点击“登录”→ 忘记密码（Clerk 会发送重置邮件）。消息：通过 Telegram 机器人。",
+    errBadToken:"令牌错误", errNoToken:"缺少或无效的令牌", clerkLoading:"正在加载 Clerk…", clerkErr:"Clerk 登录错误：",
     tokBtn:"🔐 令牌", tokTitle:"输入访问令牌（与旧监视器共用）",
     seedBtn:"⟳ 种子数据", seedTitle:"生成示例市场数据",
     themeBtn:"🌓 主题", oldMonitor:"← 旧监视器", language:"🌐 语言", home:"🏠 主页",
@@ -431,6 +456,10 @@ const I18N = {
     errLoad:"数据加载错误：", seedFirst:"请先点击“种子数据”。",
     cheapest:"最便宜渠道：", priciest:" · 最贵渠道：",
     noData:"暂无数据。点击“种子数据”生成市场数据。",
+    loginBtn:"进入工作台", colBest:"最便宜渠道", colSrc:"来源",
+    mktTitle:"越南啤酒市场", mktSub:"越南啤酒市场份额与趋势（真实网络调研数据，2024-2026）。",
+    realChTitle:"渠道对比 — 市场真实价格", realChSub:"多渠道实际标价比较（Tiki / Web / LotteMart / BachHoaXanh / Emart / websosanh）— 网络调研来源，非模拟数据。",
+    realChChartTitle:"渠道对比 — 真实价格图表", realChChartSub:"各渠道 24 罐整箱平均价（Tiki / Lotte / BachHoaXanh / Emart / websosanh），来自真实网络调研。",
   },
 };
 let LANG = localStorage.getItem('hmip_lang') || 'vi';
@@ -453,14 +482,25 @@ function applyLang(){
     const key = el.getAttribute('data-i18n-ph');
     if(I18N[LANG][key] !== undefined) el.placeholder = I18N[LANG][key];
   });
+  document.querySelectorAll('#loginLangSeg button').forEach(b=> b.classList.toggle('on', b.dataset.lang===LANG));
+  // clerkHint được đánh dấu filled sau khi Clerk config load — refresh theo ngôn ngữ
+  const hint = document.getElementById('clerkHint');
+  if(hint && hint.dataset.filled) hint.textContent = t('clerkHintText');
+}
+function setLang(l){
+  LANG = l;
+  localStorage.setItem('hmip_lang', LANG);
+  applyLang();
+  // Chỉ reload data nếu đã đăng nhập (tránh 401 khi đang ở màn login)
+  if(localStorage.getItem('hmip_token')) loadAll();
 }
 document.getElementById('langBtn').onclick = () => {
   const i = LANGS.indexOf(LANG);
-  LANG = LANGS[(i+1) % LANGS.length];
-  localStorage.setItem('hmip_lang', LANG);
-  applyLang();
-  loadAll();
+  setLang(LANGS[(i+1) % LANGS.length]);
 };
+document.querySelectorAll('#loginLangSeg button').forEach(b=>{
+  b.onclick = () => setLang(b.dataset.lang);
+});
 applyLang();
 
 
@@ -468,7 +508,7 @@ async function api(path, opts={}){
   const tok = localStorage.getItem('hmip_token') || '';
   opts.headers = Object.assign({}, opts.headers, {'Content-Type':'application/json', 'Authorization':'Bearer '+tok});
   const r = await fetch(API+path, opts);
-  if(r.status === 401){ showLogin(); throw new Error('Thiếu hoặc sai token'); }
+  if(r.status === 401){ showLogin(); throw new Error(t('errNoToken')); }
   if(!r.ok){ let d; try{d=await r.json();}catch(_){d={detail:r.statusText};} throw new Error(typeof d.detail==='string'?d.detail:JSON.stringify(d.detail)); }
   return r.json();
 }
@@ -485,7 +525,7 @@ document.getElementById('loginBtn').onclick = async () => {
   if(!v){ document.getElementById('loginErr').textContent='*'; return; }
   localStorage.setItem('hmip_token', v);
   try{ await api('/api/price-intelligence/status'); hideLogin(); $('#logoutBtn').style.display=''; updateTokBadge(); loadCatalog().then(()=>loadAll()); }
-  catch(e){ localStorage.removeItem('hmip_token'); document.getElementById('loginErr').textContent='Sai token'; }
+  catch(e){ localStorage.removeItem('hmip_token'); document.getElementById('loginErr').textContent=t('errBadToken'); }
 };
 document.getElementById('logoutBtn').onclick = async () => {
   localStorage.removeItem('hmip_token'); updateTokBadge();
@@ -1160,7 +1200,7 @@ async function initClerk(){
     const btn = document.getElementById('clerkBtn');
     if(btn){ btn.style.display=''; }
     const hint = document.getElementById('clerkHint');
-    if(hint){ hint.textContent = 'Quên mật khẩu? Bấm "Đăng nhập" → Quên mật khẩu (Clerk gửi email reset). Tin nhắn: qua Telegram bot.'; }
+    if(hint){ hint.dataset.filled='1'; hint.textContent = t('clerkHintText'); }
     const CDNS = [
       'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js',
       'https://unpkg.com/@clerk/clerk-js@5/dist/clerk.browser.js',
@@ -1198,7 +1238,7 @@ async function initClerk(){
   }catch(e){ console.warn('Clerk init lỗi (bỏ qua):', e); }
 }
 document.getElementById('clerkBtn').onclick = async () => {
-  if(!CLERK){ alert('Đang tải Clerk…'); return; }
+  if(!CLERK){ alert(t('clerkLoading')); return; }
   try{
     // Nếu đã signed in -> lấy token thẳng (tránh conflict cannot_render_single_session)
     if(CLERK.session && CLERK.user){
@@ -1234,7 +1274,7 @@ document.getElementById('clerkBtn').onclick = async () => {
       setTimeout(check, 800);
     };
     check();
-  }catch(e){ alert('Lỗi đăng nhập Clerk: '+e.message); }
+  }catch(e){ alert(t('clerkErr')+e.message); }
 };
 
 // ---- init ----

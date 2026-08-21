@@ -61,6 +61,7 @@ python -m extensions.scheduler
     - `pi_store.py` — đã thêm cột `metadata` cho `pi_skus` (marker); **PR #12: `migrate_brand_ids()`** backfill `brand_id` observation từ `pi_products.brand_id`, xoá brand rỗng/Unknown (idempotent, wire vào `api.py` lifespan startup)
     - `analytics.py` — **PR #12:** JOIN `pi_brands` qua `pi_products.brand_id` (không qua `pi_observations.brand_id`) cho `positioning_matrix()`/`catalog()`/`competitor_comparison()` → Competitor Comparison + Price Index (by Brand) không còn "Unknown"; **+`promotion_by_brand` + `promotion_timeline`** (chart Promotion Intelligence)
   - `run_workflow.py` — NỐI kernel vào runtime thật (fix F-01)
+  - `web/index.html` + `web/pi.html` — i18n 3 ngôn ngữ (vi/en/zh) trong dict `T` / `I18N`; login overlay có bộ chọn riêng `#loginLangSeg` (header seg bị overlay che). Khi thêm chuỗi UI mới: thêm key vào CẢ 3 dict, đánh dấu `data-i18n` trong markup; chuỗi set bằng JS (hint/lỗi) phải qua `t(key)` — đừng hardcode
   - `collect_adapters.py` — adapter giá (demo/http/Tiki 3 tầng — legacy, riêng PI dùng chain smart)
   - `auth.py` — Bearer token middleware
 - **`domains/beer/pricing/`** — vertical slice PRC-001 (7 task: collect→extract→validate→enrich→compare→decide→alert)
