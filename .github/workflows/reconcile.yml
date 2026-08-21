@@ -1,8 +1,14 @@
 name: Reconcile giá đa nguồn
 
+# Hai lịch trong cùng file, định tuyến job bằng github.event.schedule:
+#   08:00 VN — job reconcile (giá thật → prices_real.json → Render auto-deploy)
+#   08:30 VN — job app-sync (giá quét trang chủ + PI charts workspace trên Render)
+# workflow_dispatch chạy cả hai (app-sync chỉ chạy nếu reconcile thành công).
+
 on:
   schedule:
-    - cron: "0 2 * * *"   # 09:00 VN (UTC+7) — chạy sau beer-price-scan (07:30)
+    - cron: "0 1 * * *"    # 08:00 VN (UTC+7) — chạy sau beer-price-scan (07:30)
+    - cron: "30 1 * * *"   # 08:30 VN (UTC+7) — app sync sau reconcile 30'
   workflow_dispatch: {}
 
 permissions:
@@ -10,6 +16,7 @@ permissions:
 
 jobs:
   reconcile:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 1 * * *'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,3 +60,58 @@ jobs:
         run: |
           SUMMARY=$(python3 -c "import json; d=json.load(open('knowledge/dynamic/last_reconcile.json')); print(f\"reconcile: {d['touched']} SKU, thay đổi {d['changed']}, conflict {d['conflicts']}, anomaly {d['anomalies']}\")" 2>/dev/null || echo "reconcile hoàn tất")
           python3 scripts/notify_report.py --task "reconcile" --summary "$SUMMARY"
+
+  # ---- daily app sync (giá quét trang chủ + PI charts workspace) ---------
+  # Chạy 08:30 VN (cron riêng) hoặc theo sau reconcile khi dispatch tay.
+  # Trigger 2 endpoint async-nền trên Render (trả 200 ngay, không chặn runner):
+  #   - POST /api/run-all → bảng giá quét trang chủ (/api/latest)
+  #   - POST /api/price-intelligence/collect-if-stale → PI charts workspace
+  # Secret cần: HMIP_API_TOKEN (= giá trị HMIP_API_TOKEN trên Render Dashboard).
+  app-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: reconcile
+    if: >
+      always() && (
+        github.event.schedule == '30 1 * * *'
+        || (github.event_name == 'workflow_dispatch' && needs.reconcile.result == 'success')
+      )
+    env:
+      HMIP_BASE_URL: https://hmip.onrender.com
+    steps:
+      - name: Kiểm tra secret HMIP_API_TOKEN
+        env:
+          HMIP_API_TOKEN: ${{ secrets.HMIP_API_TOKEN }}
+        run: |
+          if [ -z "$HMIP_API_TOKEN" ]; then
+            echo "::error::Thiếu secret HMIP_API_TOKEN. Thêm tại Settings → Secrets → Actions (giá trị = HMIP_API_TOKEN trên Render Dashboard)."
+            exit 1
+          fi
+
+      - name: Wake Render (free tier ngủ sau 15')
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" -m 20 "$HMIP_BASE_URL/api/health" || true)
+            echo "lần $i: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "::error::App không sống sau 5 phút (Render đang deploy lại hoặc sập?)."
+          exit 1
+
+      - name: Trigger giá quét (/api/run-all → bảng trang chủ)
+        env:
+          HMIP_API_TOKEN: ${{ secrets.HMIP_API_TOKEN }}
+        run: |
+          curl -sS -f -m 60 -X POST "$HMIP_BASE_URL/api/run-all" \
+            -H "Authorization: Bearer $HMIP_API_TOKEN"
+          echo
+
+      - name: Trigger PI collect (/api/price-intelligence/collect-if-stale → workspace)
+        env:
+          HMIP_API_TOKEN: ${{ secrets.HMIP_API_TOKEN }}
+        run: |
+          curl -sS -f -m 60 -X POST \
+            "$HMIP_BASE_URL/api/price-intelligence/collect-if-stale" \
+            -H "Authorization: Bearer $HMIP_API_TOKEN"
+          echo
