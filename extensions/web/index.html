@@ -868,7 +868,15 @@ $('#f_real_reset').onclick = () => { $('#f_real').value=''; renderRealPrices(); 
 
 /* ---------- theme & lang ---------- */
 $('#theme').onclick = () => { THEME = THEME==='dark'?'light':'dark'; localStorage.setItem('hmip_theme',THEME); applyTheme(); };
-function setLang(l){ LANG=l; localStorage.setItem('hmip_lang',LANG); applyLang(); }
+function setLang(l){
+  LANG=l; localStorage.setItem('hmip_lang',LANG);
+  // Clerk chỉ nhận localization lúc load() → khi đang ở màn login (modal Clerk
+  // còn dùng) phải reload trang để initClerk chạy lại với ngôn ngữ mới.
+  const loginEl=document.getElementById('login');
+  const loginShown = !loginEl || loginEl.style.display !== 'none';
+  if(CLERK && loginShown){ location.reload(); return; }
+  applyLang();
+}
 ['langSeg','loginLangSeg'].forEach(id=>{
   const el=document.getElementById(id); if(!el) return;
   el.addEventListener('click',e=>{ const b=e.target.closest('button[data-lang]'); if(!b) return; setLang(b.dataset.lang); });
@@ -962,6 +970,208 @@ $('#auto').onclick = async () => {
 /* ---------- init: tự ẩn login overlay khi auth đang tắt ---------- */
 
 /* ---------- Clerk auth (song song với token tĩnh) ---------- */
+// Bản dịch modal Clerk (Sign in / Sign up / Quên mật khẩu) theo ngôn ngữ UI
+const CLERK_LOCALES = {
+  vi: {
+    dividerText: 'hoặc',
+    formButtonPrimary: 'Tiếp tục',
+    backButton: 'Quay lại',
+    formFieldLabel__emailAddress: 'Địa chỉ email',
+    formFieldLabel__password: 'Mật khẩu',
+    formFieldLabel__confirmPassword: 'Xác nhận mật khẩu',
+    formFieldLabel__emailCode: 'Mã xác minh email',
+    formFieldInputPlaceholder__emailAddress: 'nhap@email.com',
+    formFieldInputPlaceholder__firstName: 'Nhập tên',
+    formFieldInputPlaceholder__lastName: 'Nhập họ',
+    formFieldInputPlaceholder__password: 'Nhập mật khẩu',
+    formFieldAction__forgotPassword: 'Quên mật khẩu?',
+    formFieldLabel__firstName: 'Tên',
+    formFieldLabel__lastName: 'Họ',
+    formFieldHintText__optional: 'Không bắt buộc',
+    socialButtonsBlockButton: 'Tiếp tục với {{provider}}',
+    signIn: {
+      start: {
+        title: 'Đăng nhập vào {{applicationName}}',
+        subtitle: 'Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục',
+        actionText: 'Chưa có tài khoản?',
+        actionLink: 'Đăng ký',
+      },
+      password: {
+        title: 'Nhập mật khẩu',
+        subtitle: 'để tiếp tục tới {{applicationName}}',
+        actionLink: 'Dùng cách khác',
+      },
+      forgotPassword: {
+        title: 'Đặt lại mật khẩu',
+        subtitle: 'để đặt lại mật khẩu của bạn',
+        formTitle: 'Mã đặt lại mật khẩu',
+        formSubtitle: 'Nhập mã đã gửi tới email của bạn',
+        resendButton: 'Gửi lại mã',
+      },
+      emailCode: {
+        title: 'Kiểm tra email',
+        subtitle: 'để tiếp tục tới {{applicationName}}',
+        formTitle: 'Mã xác minh',
+        formSubtitle: 'Nhập mã đã gửi tới email của bạn',
+        resendButton: 'Gửi lại mã',
+      },
+    },
+    signUp: {
+      start: {
+        title: 'Tạo tài khoản',
+        subtitle: 'Chào mừng! Điền thông tin để bắt đầu',
+        actionText: 'Đã có tài khoản?',
+        actionLink: 'Đăng nhập',
+      },
+      emailCode: {
+        title: 'Xác minh email',
+        subtitle: 'để tiếp tục tới {{applicationName}}',
+        formTitle: 'Mã xác minh',
+        formSubtitle: 'Nhập mã đã gửi tới email của bạn',
+        resendButton: 'Gửi lại mã',
+      },
+      continue: {
+        title: 'Điền thông tin còn thiếu',
+        subtitle: 'để tiếp tục tới {{applicationName}}',
+        actionText: 'Đã có tài khoản?',
+        actionLink: 'Đăng nhập',
+      },
+    },
+  },
+  en: {
+    dividerText: 'or',
+    formButtonPrimary: 'Continue',
+    backButton: 'Back',
+    formFieldLabel__emailAddress: 'Email address',
+    formFieldLabel__password: 'Password',
+    formFieldLabel__confirmPassword: 'Confirm password',
+    formFieldLabel__emailCode: 'Email verification code',
+    formFieldInputPlaceholder__emailAddress: 'you@email.com',
+    formFieldInputPlaceholder__firstName: 'First name',
+    formFieldInputPlaceholder__lastName: 'Last name',
+    formFieldInputPlaceholder__password: 'Enter your password',
+    formFieldAction__forgotPassword: 'Forgot password?',
+    formFieldLabel__firstName: 'First name',
+    formFieldLabel__lastName: 'Last name',
+    formFieldHintText__optional: 'Optional',
+    socialButtonsBlockButton: 'Continue with {{provider}}',
+    signIn: {
+      start: {
+        title: 'Sign in to {{applicationName}}',
+        subtitle: 'Welcome back! Please sign in to continue',
+        actionText: "Don't have an account?",
+        actionLink: 'Sign up',
+      },
+      password: {
+        title: 'Enter your password',
+        subtitle: 'to continue to {{applicationName}}',
+        actionLink: 'Use another method',
+      },
+      forgotPassword: {
+        title: 'Reset password',
+        subtitle: 'to reset your password',
+        formTitle: 'Reset password code',
+        formSubtitle: 'Enter the code sent to your email',
+        resendButton: 'Resend code',
+      },
+      emailCode: {
+        title: 'Check your email',
+        subtitle: 'to continue to {{applicationName}}',
+        formTitle: 'Verification code',
+        formSubtitle: 'Enter the code sent to your email',
+        resendButton: 'Resend code',
+      },
+    },
+    signUp: {
+      start: {
+        title: 'Create your account',
+        subtitle: 'Welcome! Please fill in the details to get started',
+        actionText: 'Have an account?',
+        actionLink: 'Sign in',
+      },
+      emailCode: {
+        title: 'Verify your email',
+        subtitle: 'to continue to {{applicationName}}',
+        formTitle: 'Verification code',
+        formSubtitle: 'Enter the code sent to your email',
+        resendButton: 'Resend code',
+      },
+      continue: {
+        title: 'Fill in missing fields',
+        subtitle: 'to continue to {{applicationName}}',
+        actionText: 'Have an account?',
+        actionLink: 'Sign in',
+      },
+    },
+  },
+  zh: {
+    dividerText: '或',
+    formButtonPrimary: '继续',
+    backButton: '返回',
+    formFieldLabel__emailAddress: '电子邮件地址',
+    formFieldLabel__password: '密码',
+    formFieldLabel__confirmPassword: '确认密码',
+    formFieldLabel__emailCode: '邮箱验证码',
+    formFieldInputPlaceholder__emailAddress: 'you@email.com',
+    formFieldInputPlaceholder__firstName: '请输入名字',
+    formFieldInputPlaceholder__lastName: '请输入姓氏',
+    formFieldInputPlaceholder__password: '请输入密码',
+    formFieldAction__forgotPassword: '忘记密码？',
+    formFieldLabel__firstName: '名字',
+    formFieldLabel__lastName: '姓氏',
+    formFieldHintText__optional: '可选',
+    socialButtonsBlockButton: '使用 {{provider}} 继续',
+    signIn: {
+      start: {
+        title: '登录 {{applicationName}}',
+        subtitle: '欢迎回来！请登录以继续',
+        actionText: '还没有账户？',
+        actionLink: '注册',
+      },
+      password: {
+        title: '输入密码',
+        subtitle: '以继续使用 {{applicationName}}',
+        actionLink: '使用其他方式',
+      },
+      forgotPassword: {
+        title: '重置密码',
+        subtitle: '以重置您的密码',
+        formTitle: '重置密码验证码',
+        formSubtitle: '请输入发送到您邮箱的验证码',
+        resendButton: '重新发送验证码',
+      },
+      emailCode: {
+        title: '查看您的邮箱',
+        subtitle: '以继续使用 {{applicationName}}',
+        formTitle: '验证码',
+        formSubtitle: '请输入发送到您邮箱的验证码',
+        resendButton: '重新发送验证码',
+      },
+    },
+    signUp: {
+      start: {
+        title: '创建账户',
+        subtitle: '欢迎！请填写信息以开始',
+        actionText: '已有账户？',
+        actionLink: '登录',
+      },
+      emailCode: {
+        title: '验证您的邮箱',
+        subtitle: '以继续使用 {{applicationName}}',
+        formTitle: '验证码',
+        formSubtitle: '请输入发送到您邮箱的验证码',
+        resendButton: '重新发送验证码',
+      },
+      continue: {
+        title: '填写缺少的信息',
+        subtitle: '以继续使用 {{applicationName}}',
+        actionText: '已有账户？',
+        actionLink: '登录',
+      },
+    },
+  },
+};
+const clerkLocale = () => CLERK_LOCALES[LANG] || CLERK_LOCALES.vi;
 let CLERK = null;          // Clerk client instance
 let CLERK_KEY = "";
 
@@ -1002,7 +1212,7 @@ async function initClerk(){
     if(!loaded || !window.Clerk){ console.warn('[HMIP] Clerk JS không load được:', lastErr); return; }
     CLERK = window.Clerk;
     // publishableKey truyền vào cả script tag và load() để chắc chắn
-    await CLERK.load({ publishableKey: CLERK_KEY, domain: 'hmip.onrender.com' });
+    await CLERK.load({ publishableKey: CLERK_KEY, domain: 'hmip.onrender.com', localization: clerkLocale() });
     // Force ẩn nút Google (nếu Clerk dev mode vẫn tự show) - backend đã tắt nhưng JS có thể cache
     try{
       const hideGoogle = () => {
@@ -1038,7 +1248,7 @@ document.getElementById('clerkBtn').onclick = async () => {
           try{ await api('/api/products'); $('#login').style.display='none'; load(); syncAuto(); autoScanIfStale(); return; }catch(__){} }
       }
     }
-    await CLERK.openSignIn();   // modal: email/pass + "Quên mật khẩu" (reset email)
+    await CLERK.openSignIn({ localization: clerkLocale() });   // modal: email/pass + "Quên mật khẩu" (reset email)
     const check = async () => {
       try{
         if(CLERK.session && CLERK.user){
