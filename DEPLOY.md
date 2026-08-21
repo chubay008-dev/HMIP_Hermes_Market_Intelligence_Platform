@@ -49,8 +49,6 @@ docker push ghcr.io/<user>/hmip:latest
 3. Runtime: Docker; Branch: main
 4. Env vars:
    - `HMIP_API_TOKEN` = `<chuỗi dài ngẫu nhiên>`
-   - `HMIP_AUTOSCAN` = `on`
-   - `HMIP_SCAN_INTERVAL_MIN` = `30`
    - `HMIP_COLLECT_MODE` = `demo` (hoặc `http` nếu có API thật)
    - `HMIP_TELEGRAM_BOT_TOKEN`, `HMIP_TELEGRAM_CHAT_ID` (tùy chọn)
 5. Deploy → Render cho URL `https://hmip-xxx.onrender.com`

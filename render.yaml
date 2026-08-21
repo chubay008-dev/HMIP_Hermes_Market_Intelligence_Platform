@@ -20,9 +20,7 @@ services:
       - key: HMIP_IN_DOCKER
         value: "1"
       - key: HMIP_AUTOSCAN
-        value: "on"            # bật quét tự động nền (APScheduler)
-      - key: HMIP_SCAN_INTERVAL_MIN
-        value: "30"            # quét mỗi 30 phút (free tier tránh quá tải)
+        value: "off"           # tắt quét tự động nền (APScheduler) — đã gỡ job nền 21/08
       - key: HMIP_COLLECT_MODE
         value: "http"          # dùng nguồn giá thật (chain 4-tier: Firecrawl→ScraperAPI→ZenRows→Jina)
       - key: HMIP_API_TOKEN
@@ -30,8 +28,6 @@ services:
         value: "hmip_mVdd-7KpQXr2Wn8Lf3Yt6Zc1Vb5Nm9Hg4Kj7Qe2Ws8"  # 🔒 SECRET auto-gen lần đầu; đổi sau qua Render Dashboard nếu cần
       - key: HMIP_PI_DB_PATH
         value: "/app/data/hmip_pi.db"   # Price Intelligence DB (trong volume; free tier ephemeral → marker giữ giá thật cố định)
-      - key: HMIP_PI_COLLECT_MIN
-        value: "360"                    # quét gia tăng mỗi 6h (chỉ ghi khi giá đổi + notify; tiết kiệm credit)
       - key: HMIP_CHANNELS
         value: "tiki,shopee,lazada"     # kênh thu thập: tiki (API JSON), shopee/lazada (HTML search). Mỗi kênh = observation riêng → so sánh cross-channel.
       - key: HMIP_NOTIFY_SKU_COOLDOWN_MIN

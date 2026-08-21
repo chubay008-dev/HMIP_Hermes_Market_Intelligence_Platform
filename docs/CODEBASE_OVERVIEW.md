@@ -286,7 +286,7 @@ HMIP/
 | `hmip_auto_scan` | IntervalTrigger | `HMIP_SCAN_INTERVAL_MIN` (mặc định 30 phút) | Quét toàn bộ catalog, ghi SQLite, đẩy Telegram nếu decision≠IGNORE |
 | `hmip_pi_collect` | IntervalTrigger | `HMIP_PI_COLLECT_MIN` (mặc định 30 phút) | Thu thập giá thật PI (Firecrawl→Tiki), detect events |
 
-- Auto-scan bật khi `HMIP_AUTOSCAN=on`. Mặc định `off` trong `start.sh` nhưng `on` trong `docker-compose.yml`/`render.yaml`.
+- Auto-scan bật khi `HMIP_AUTOSCAN=on`. Mặc định `off` ở mọi nơi (đã gỡ job nền từ `docker-compose.yml`/`render.yaml` 21/08).
 - `max_instances=1, coalesce=True` — tránh chồng chéo.
 - Seed PI chạy **bất đồng bộ** (background thread) để không block startup/Render timeout. `[VERIFIED]` — `extensions/pi/service.py:seed_async`.
 

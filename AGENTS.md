@@ -131,7 +131,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - Auth: `HMIP_API_TOKEN` (đơn) hoặc `HMIP_API_TOKENS` (JSON array). Không set = auth tắt (dev mode).
 - Thu thập giá: `HMIP_COLLECT_MODE` (demo|http). `http` mà không set `HMIP_PRICE_API_BASE` → fallback Tiki API.
 - Chain smart PI: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render `sync: false`).
-- Scheduler: `HMIP_AUTOSCAN=on`, `HMIP_SCAN_INTERVAL_MIN`, `HMIP_PI_COLLECT_MIN`.
+- Scheduler: `HMIP_AUTOSCAN` (bật/tắt quét nền `hmip_auto_scan` + `hmip_pi_collect`; 21/08 đã gỡ — deploy mặc định `off`), `HMIP_SCAN_INTERVAL_MIN`, `HMIP_PI_COLLECT_MIN` (chu kỳ nếu bật lại).
 - Auto-scan khi vào trang: `HMIP_AUTO_SCAN_STALE_MIN` (mặc định 5'). Khi user truy cập `/`, `/pi`, `/workspace` → frontend gọi `/api/scan-if-stale` (+ `/api/price-intelligence/collect-if-stale` cho PI) → backend chỉ quét background nếu dữ liệu cũ hơn cửa sổ; fresh → skip (tránh spam Render/credit khi refresh). `0` = luôn quét.
 - Xem `.env.example` cho danh sách đầy đủ (ghi rõ biến nào đã/ chưa nối code).
 
