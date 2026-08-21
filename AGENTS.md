@@ -193,7 +193,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - beer-price-scan (Kamereo anchor, GO!, TGD, BNK, Thế giới đồ uống, Bia Nhập Khẩu, Đại Lộc, East West, Pasteur St, Heart of Darkness, 7 Bridges) → đồng bộ qua `sync_to_hmip.py` ở repo beer-price-scan, secret `HMIP_SYNC_PAT`
 - websosanh (adapter `scripts/sources/websosanh.py`, ~28 SKU), Shopee qua Apify `xtracto~shopee-search` (secret `APIFY_TOKEN`, input `country:"vn"`, chặn giá thùng >=150k tránh nhầm combo)
 - Reconcile: `scripts/reconcile_prices.py` — merge trung vị + IQR + SOURCE_TRUST + conflict/anomaly flags; SKU map thủ công `config/beer_scan_sku_map.json`. Workflow `.github/workflows/reconcile.yml` 08:00 VN (cron `"0 1 * * *"`).
-- App sync (21/08, gộp trong `reconcile.yml` job `app-sync`) 08:30 VN (cron `"30 1 * * *"`, định tuyến bằng `github.event.schedule`) — wake Render rồi trigger `POST /api/run-all` (giá quét trang chủ) + `POST /api/price-intelligence/collect-if-stale` (PI charts workspace) bằng Bearer `HMIP_API_TOKEN` (secret GitHub). Vì scheduler Render (`HMIP_AUTOSCAN=off`) đã tắt, đây là cơ chế định kỳ duy nhất cập nhật bảng giá quét + PI; cả 2 endpoint async nền, không chặn runner. `workflow_dispatch` chạy cả 2 job (app-sync chỉ khi reconcile success).
+- App sync (21/08, gộp trong `reconcile.yml` job `app-sync`) 08:30 VN (cron `"30 1 * * *"`, định tuyến bằng `github.event.schedule`) — wake Render rồi trigger `POST /api/scan-if-stale` (giá quét trang chủ, async) + `POST /api/price-intelligence/collect-if-stale` (PI charts workspace) bằng Bearer `HMIP_API_TOKEN` (secret GitHub). Vì scheduler Render (`HMIP_AUTOSCAN=off`) đã tắt, đây là cơ chế định kỳ duy nhất cập nhật bảng giá quét + PI. ⚠️ **KHÔNG dùng `POST /api/run-all`** — endpoint này quét ĐỒNG BỘ ~68 SP, vượt 60s → curl timeout (exit 28); `scan-if-stale` async nền trả ngay + có stale-guard 5'. `workflow_dispatch` chạy cả 2 job (app-sync chỉ khi reconcile success).
 
 **KHÔNG cào được từ runner — đừng thử lại tốn thời gian:**
 - Tiki API (403), Sendo API (500), bachhoaxanh/lotte/emart (SPA/geo-block/SSL), tops.vn, kingfoodmart.vn (timeout), annam-gourmet.com, koolbeer.vn, dongson, beercraft.vn, belgo.vn, roosterbeers.com, biacraft, fuzzylogicbrewing.com (rỗng)
@@ -212,7 +212,12 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 
 **Secrets (đã set trong GitHub Secrets của từng repo):**
 - beer-price-scan: `SMTP_APP_PASS`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_WEBHOOK_URL`, `SUPABASE_URL`, `SUPABASE_KEY`, `HMIP_SYNC_PAT`
-- HMIP: `APIFY_TOKEN`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`
+- HMIP: `APIFY_TOKEN`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, **`HMIP_API_TOKEN`** (21/08 — cho job app-sync gọi Render API; giá trị = `HMIP_API_TOKEN` trên Render Dashboard)
+
+**Supabase (DB bền vững cho app Render):**
+- Project `earlqyhtchhfqcxtmivh` (ap-southeast-1, ACTIVE_HEALTHY) chứa 17 bảng: `products`, `price_points` (giá quét trang chủ), toàn bộ `pi_*` (PI workspace).
+- Render env `DATABASE_URL` + `HMIP_PI_DATABASE_URL` đều trỏ pooler `aws-0-ap-southeast-1.pooler.supabase.com:6543` (user `postgres.earlqyhtchhfqcxtmivh`) → dữ liệu sống qua mỗi lần redeploy. Đã xác minh 21/08: 68 products, 6.8k price_points, timestamp mới đúng giờ app-sync chạy.
+- Project thứ hai `jucxgvonahsqmpszghux` ("beer-price-scan") là DB riêng của repo scan, không dính app HMIP.
 
 **Bot/Token hiện tại:**
 - Telegram: `@lich_quet_tu_dong_bot` (token `8836505362:...`), chat_id `8891619372`
@@ -224,6 +229,21 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - beer-scan: notify.py gửi TG + Discord (đã có sẵn)
 - HMIP reconcile: `scripts/notify_report.py` gửi TG + Discord, `if: always()`, summary từ `last_reconcile.json`
 - Cả 2 pipeline báo kết quả qua TG + Discord mỗi sáng khi xong.
+
+## Báo cáo email hằng ngày (beer-price-scan `send_email.py`, 07:30 VN)
+
+Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chubay008@gmail.com`, BCC):
+- **Song ngữ VN + ZH**: `chubay008@gmail.com`, `kalihello541@gmail.com`
+- **Chỉ tiếng Trung**: `uythanhhoang@gmail.com`, `yingxue0510@gmail.com`
+- Subject: "Báo cáo ngành bia VN 越南啤酒行业报告 – dd/mm/yyyy". Cùng 1 lần quét với dữ liệu sync sang HMIP (build_report.py build từ `data_overrides.json` vừa refresh) → **email = raw scan ngày X; trang web "Giá thật"/"Channel Comparison" = cùng ngày X sau reconcile** (median+IQR nên có thể khác nhẹ, đó là cố ý).
+- Nếu đổi danh sách nhận: sửa `RECIPIENTS`/`ZH_ONLY_RECIPIENTS` trong `send_email.py` ở repo beer-price-scan.
+
+## Quyết định vận hành (chốt 21/08/2026)
+
+- **Giữ nguyên 3 mốc**: 07:30 beer-scan → 08:00 reconcile → 08:30 app-sync. Email đến ~07:40, web cập nhật ~08:10 — độ trễ này là thiết kế (buffer an toàn), KHÔNG phải lỗi. Không dời reconcile sớm hơn vì rủi ro beer-scan chưa sync xong.
+- **Set secret GitHub khi token của agent là `ghu_...` (GitHub App user token):** bị 403 "Resource not accessible by integration" khi ghi Actions secrets → cần classic PAT của user + REST API (`GET .../actions/secrets/public-key` → mã hóa libsodium sealed box → `PUT .../actions/secrets/{name}`). Script tham khảo: đã dùng 21/08 set `HMIP_API_TOKEN`.
+- **Kiểm tra hệ thống không cần đăng nhập dashboard:** Render API `GET /v1/services/{id}/env-vars` (key `rnd_...`); Supabase Management API `POST /v1/projects/{ref}/database/query` (key `sbp_...`). Hai credential này user cung cấp trong chat 21/08 và đã được khuyên rotate/revoke sau dùng.
+- **Chạy thử pipeline không chờ lịch:** Actions → "Reconcile giá đa nguồn" → Run workflow → chạy cả reconcile + app-sync nối tiếp.
 
 **Vấn đề đã fix:**
 - beer-scan schedule không chạy → do default branch `openhands/data-upload`, không có `main`. Fix: tạo `main` + đổi default (20/08).

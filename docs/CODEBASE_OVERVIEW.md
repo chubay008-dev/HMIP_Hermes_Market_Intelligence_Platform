@@ -281,6 +281,8 @@ HMIP/
 
 **APScheduler** (`BackgroundScheduler` trong web app, `BlockingScheduler` trong scheduler độc lập). `[VERIFIED]` — `extensions/api.py`, `extensions/scheduler.py`.
 
+⚠️ **Cập nhật 21/08/2026:** `HMIP_AUTOSCAN=off` trên Render → các job scheduler nền dưới đây đã **tắt trên production** (bảng chỉ còn đúng cho chạy local/standalone). Cơ chế định kỳ production chuyển sang GitHub Actions (mục 11b).
+
 | Job | Trigger | Lịch | Mục đích |
 |---|---|---|---|
 | `hmip_auto_scan` | IntervalTrigger | `HMIP_SCAN_INTERVAL_MIN` (mặc định 30 phút) | Quét toàn bộ catalog, ghi SQLite, đẩy Telegram nếu decision≠IGNORE |
@@ -291,6 +293,22 @@ HMIP/
 - Seed PI chạy **bất đồng bộ** (background thread) để không block startup/Render timeout. `[VERIFIED]` — `extensions/pi/service.py:seed_async`.
 
 **Không có message queue / Celery / worker process tách rời.** Tất cả chạy trong cùng process web. `[VERIFIED]`.
+
+### 11b. Pipeline định kỳ production (GitHub Actions, từ 21/08/2026)
+
+Scheduler Render đã tắt (`HMIP_AUTOSCAN=off`) → lịch chạy thật nằm ở GitHub Actions, 3 mốc sáng (giờ VN):
+
+| Giờ VN | Workflow | Repo | Việc |
+|---|---|---|---|
+| 07:30 | `daily-scan.yml` | beer-price-scan | Quét nguồn giá → build báo cáo → **email 4 hộp thư** (xem bảng dưới) → push Supabase (repo scan) → `sync_to_hmip.py` sync `data_overrides.json` sang `knowledge/dynamic/beer_scan/latest/` → notify TG+Discord |
+| 08:00 | `reconcile.yml` job `reconcile` | HMIP (cron `0 1 * * *`) | `reconcile_prices.py` merge trung vị + IQR + trust → commit `prices_real.json` → **Render auto-deploy** → trang chủ "Giá thật" + workspace "Channel Comparison" cập nhật |
+| 08:30 | `reconcile.yml` job `app-sync` | HMIP (cron `30 1 * * *`) | Wake Render → `POST /api/scan-if-stale` (giá quét trang chủ) → `POST /api/price-intelligence/collect-if-stale` (PI charts) → Supabase `price_points` + `pi_observations` |
+
+- Hai cron trong cùng file, định tuyến job bằng `github.event.schedule`; `workflow_dispatch` chạy cả 2 (app-sync chỉ khi reconcile success).
+- ⚠️ **KHÔNG dùng `POST /api/run-all` từ CI** — endpoint đồng bộ ~68 SP → vượt 60s → curl timeout (exit 28). Dùng `scan-if-stale` (async, stale-guard 5').
+- Email báo cáo (beer-scan `send_email.py`, Gmail SMTP secret `SMTP_APP_PASS`): song ngữ VN+ZH → `chubay008@gmail.com`, `kalihello541@gmail.com`; chỉ ZH → `uythanhhoang@gmail.com`, `yingxue0510@gmail.com`. Email = raw scan ngày X; web = cùng ngày X sau reconcile (khác nhẹ do median+IQR, cố ý).
+- Secrets cần: repo HMIP có `HMIP_API_TOKEN` (= `HMIP_API_TOKEN` trên Render Dashboard); repo beer-scan có `HMIP_SYNC_PAT`, `SMTP_APP_PASS`, `APIFY_TOKEN`, TG/Discord, Supabase của repo scan.
+- Độ trễ email (~07:40) → web (~08:10) là **thiết kế** (buffer cho beer-scan sync xong), không phải lỗi.
 
 ---
 
@@ -438,7 +456,7 @@ HMIP/
 6. **Config không validate schema:** `ConfigLoader.validate()` chỉ kiểm tra kiểu dict. `[VERIFIED]`.
 7. **Retry policy không diễn giải đúng:** `RetryPolicy.strategy` lưu nhưng không diễn giải — backoff luôn tuyến tính. `[VERIFIED]` — `docs/ARCHITECTURE.md` mục 10.
 8. **Single-process, không scale:** Tất cả scheduler + web + worker trong 1 process. Không thể scale ngang (replica) mà không chuyển SQLite sang Postgres. `[INFERRED]` — `DEPLOY.md` mục "Lưu ý bảo mật".
-9. **Render free ephemeral FS:** data reset mỗi restart → auto-seed lại (mất lịch sử thật). `[VERIFIED]` — `render.yaml` comment.
+9. **Render free ephemeral FS:** data reset mỗi restart → auto-seed lại (mất lịch sử thật). `[VERIFIED]` — `render.yaml` comment. ✅ **ĐÃ GIẢI QUYẾT (21/08/2026):** `DATABASE_URL` + `HMIP_PI_DATABASE_URL` trên Render trỏ Supabase Postgres (pooler `aws-0-ap-southeast-1.pooler.supabase.com:6543`, project `earlqyhtchhfqcxtmivh`) → dữ liệu sống qua redeploy. SQLite chỉ còn là fallback khi không set env.
 
 ---
 
