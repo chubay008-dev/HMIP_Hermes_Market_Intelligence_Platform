@@ -193,6 +193,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - beer-price-scan (Kamereo anchor, GO!, TGD, BNK, Thế giới đồ uống, Bia Nhập Khẩu, Đại Lộc, East West, Pasteur St, Heart of Darkness, 7 Bridges) → đồng bộ qua `sync_to_hmip.py` ở repo beer-price-scan, secret `HMIP_SYNC_PAT`
 - websosanh (adapter `scripts/sources/websosanh.py`, ~28 SKU), Shopee qua Apify `xtracto~shopee-search` (secret `APIFY_TOKEN`, input `country:"vn"`, chặn giá thùng >=150k tránh nhầm combo)
 - Reconcile: `scripts/reconcile_prices.py` — merge trung vị + IQR + SOURCE_TRUST + conflict/anomaly flags; SKU map thủ công `config/beer_scan_sku_map.json`. Workflow `.github/workflows/reconcile.yml` 09:00 VN.
+- Daily app sync (21/08): `.github/workflows/daily_app_sync.yml` 09:30 VN (sau reconcile) — wake Render rồi trigger `POST /api/run-all` (giá quét trang chủ) + `POST /api/price-intelligence/collect-if-stale` (PI charts workspace) bằng Bearer `HMIP_API_TOKEN` (secret GitHub). Vì scheduler Render (`HMIP_AUTOSCAN=off`) đã tắt, đây là cơ chế định kỳ duy nhất cập nhật bảng giá quét + PI; cả 2 endpoint async nền, không chặn runner.
 
 **KHÔNG cào được từ runner — đừng thử lại tốn thời gian:**
 - Tiki API (403), Sendo API (500), bachhoaxanh/lotte/emart (SPA/geo-block/SSL), tops.vn, kingfoodmart.vn (timeout), annam-gourmet.com, koolbeer.vn, dongson, beercraft.vn, belgo.vn, roosterbeers.com, biacraft, fuzzylogicbrewing.com (rỗng)
