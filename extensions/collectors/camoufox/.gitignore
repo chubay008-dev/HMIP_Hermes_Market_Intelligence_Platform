@@ -1,0 +1,11 @@
+# Dữ liệu DB (không commit)
+bia_prices.db
+bia_prices.db-shm
+bia_prices.db-wal
+*.db
+# Log
+bia_monitor.log
+# Venv (nếu ai tạo trong thư mục)
+camoufox-venv/
+venv/
+__pycache__/
