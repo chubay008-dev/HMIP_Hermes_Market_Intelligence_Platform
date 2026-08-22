@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  actions: read  # auto_remediate đọc log run khi fail
 
 jobs:
   reconcile:
@@ -49,6 +50,17 @@ jobs:
           echo "### Reconcile $(date -u +%Y-%m-%d)" >> $GITHUB_STEP_SUMMARY
           cat knowledge/dynamic/last_reconcile.json >> $GITHUB_STEP_SUMMARY
 
+      - name: Auto-remediation (mở session OpenHands khi fail)
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENHANDS_API_KEY: ${{ secrets.OPENHANDS_API_KEY }}
+          JOB_LABEL: "HMIP reconcile"
+          TELEGRAM_DONE_BOT_TOKEN: ${{ secrets.TELEGRAM_DONE_BOT_TOKEN }}
+          TELEGRAM_DONE_CHAT_ID: ${{ secrets.TELEGRAM_DONE_CHAT_ID }}
+          DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
+          DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
+        run: python3 scripts/auto_remediate.py
       - name: Thông báo hoàn tất (Telegram + Discord)
         if: always()
         env:
@@ -120,6 +132,17 @@ jobs:
             -H "Authorization: Bearer $HMIP_API_TOKEN" || true)
           echo "$resp"
 
+      - name: Auto-remediation (mở session OpenHands khi fail)
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENHANDS_API_KEY: ${{ secrets.OPENHANDS_API_KEY }}
+          JOB_LABEL: "HMIP app-sync"
+          TELEGRAM_DONE_BOT_TOKEN: ${{ secrets.TELEGRAM_DONE_BOT_TOKEN }}
+          TELEGRAM_DONE_CHAT_ID: ${{ secrets.TELEGRAM_DONE_CHAT_ID }}
+          DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
+          DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
+        run: python3 scripts/auto_remediate.py
       - name: Thông báo hoàn tất (Telegram + Discord)
         if: always()
         env:
