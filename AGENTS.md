@@ -211,8 +211,9 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - beer-price-scan: default `main` (đã tạo từ `openhands/data-upload` 20/08 — schedule chỉ chạy trên default branch)
 
 **Secrets (đã set trong GitHub Secrets của từng repo):**
-- beer-price-scan: `SMTP_APP_PASS`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_WEBHOOK_URL`, `SUPABASE_URL`, `SUPABASE_KEY`, `HMIP_SYNC_PAT`
+- beer-price-scan: `SMTP_APP_PASS`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_WEBHOOK_URL`, `SUPABASE_URL`, `SUPABASE_KEY`, `HMIP_SYNC_PAT` (rotate 22/08)
 - HMIP: `APIFY_TOKEN`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `DISCORD_BOT_TOKEN`, `DISCORD_CHANNEL_ID`, **`HMIP_API_TOKEN`** (21/08 — cho job app-sync gọi Render API; giá trị = `HMIP_API_TOKEN` trên Render Dashboard)
+- **CẢ 2 repo (22/08)**: `TELEGRAM_DONE_BOT_TOKEN` + `TELEGRAM_DONE_CHAT_ID` (=8891619372) — bot thông báo hoàn tất `@Job_tu_dong_email_bao_cao_bot`; `DISCORD_DONE_BOT_TOKEN` + `DISCORD_DONE_CHANNEL_ID` (=1533881868678725696) — bot `AI Lịch quét tự động` → `#general`; `OPENHANDS_API_KEY` — mở session OpenHands Cloud cho auto-remediation
 
 **Supabase (DB bền vững cho app Render):**
 - Project `earlqyhtchhfqcxtmivh` (ap-southeast-1, ACTIVE_HEALTHY) chứa 17 bảng: `products`, `price_points` (giá quét trang chủ), toàn bộ `pi_*` (PI workspace).
@@ -220,17 +221,15 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - Project thứ hai `jucxgvonahsqmpszghux` ("beer-price-scan") là DB riêng của repo scan, không dính app HMIP.
 
 **Bot/Token hiện tại:**
-- Telegram: `@lich_quet_tu_dong_bot` (token `8836505362:...`), chat_id `8891619372`
-- Discord: App `AI Lịch quét tự động` (App ID `1540215286781706300`), server `chu7's Hermes Server` (`1533881868108169428`), channel `general` (`1533881868678725696`)
+- Telegram: `@lich_quet_tu_dong_bot` (token `8836505362:...`, không còn workflow nào gọi từ 22/08) + **`@Job_tu_dong_email_bao_cao_bot`** (id `8946172106`, bot thông báo hoàn tất từ 22/08), chat_id chung `8891619372`
+- Discord: App/bot `AI Lịch quét tự động` (App ID `1540215286781706300`), server `chu7's Hermes Server` (`1533881868108169428`), channel `general` (`1533881868678725696`)
 - ⚠️ App ID & Public Key của Discord **không phải bot token** — không dùng để gửi tin nhắn. Bot token lấy từ Developer Portal → Bot → Token.
 - Render API key cũ `rnd_sBLIS...` **vẫn chưa rotate** — pipeline cũ `run_auto.sh` local dùng (đã bỏ hardcode, cần env khi chạy).
 
-**Pipeline notify:**
-- beer-scan: notify.py gửi TG + Discord (đã có sẵn)
-- HMIP reconcile: `scripts/notify_report.py` gửi TG + Discord, `if: always()`, summary từ `last_reconcile.json`
-- Cả 2 pipeline báo kết quả qua TG + Discord mỗi sáng khi xong.
+**Pipeline notify (CŨ — đã gỡ khỏi workflow 22/08):**
+- ~~beer-scan: notify.py gửi TG + Discord~~ / ~~HMIP reconcile: `scripts/notify_report.py`~~ — cả 2 file vẫn còn trong repo nhưng không còn được workflow gọi. Thay bằng `notify_done.py` (bot mới) + `auto_remediate.py` (khi fail) — xem mục "Quyết định vận hành".
 
-## Báo cáo email hằng ngày (beer-price-scan `send_email.py`, 07:30 VN)
+## Báo cáo email hằng ngày (beer-price-scan `send_email.py`, 03:00 VN từ 22/08)
 
 Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chubay008@gmail.com`, BCC):
 - **Song ngữ VN + ZH**: `chubay008@gmail.com`, `kalihello541@gmail.com`
@@ -251,3 +250,24 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 - beer-scan schedule không chạy → do default branch `openhands/data-upload`, không có `main`. Fix: tạo `main` + đổi default (20/08).
 - `HMIP_SYNC_PAT` hết hạn (22/08) → bước "Sync scan data to HMIP repo" fail "Invalid username or token". Fix: rotate PAT mới vào secret. ⚠️ **`gh run rerun --failed` KHÔNG cứu được sync**: rerun checkout lại SHA cũ → step "Commit & push" bị remote reject (đã có commit cùng ngày) → step sync bị skip. Cách đồng bộ bù: clone beer-price-scan@main về local rồi chạy `HMIP_SYNC_PAT=... python3 sync_to_hmip.py` (script chỉ đọc file JSON/report ở repo root).
 - **GitHub Actions free tier trễ lịch 2,5–3h** vào khung UTC 00:00–04:00 (tức 07:00–11:00 VN): 3 mốc 07:30/08:00/08:30 VN thực tế chạy ~10:13/10:26/10:55 VN (quan sát 21–22/08). Pipeline vẫn đúng thứ tự, email đến ~10:30–11:00 VN. Đây là giới hạn SLA của GitHub, không phải lỗi pipeline.
+
+## Nhật ký phiên 22/08/2026 — đại tu pipeline thông báo & tự xử lý lỗi
+
+**Bối cảnh:** user hỏi "vì sao chưa nhận email" → phát hiện GitHub Actions free tier trễ 2,5–3h ở khung UTC 00:00–04:00 (không phải lỗi). Sau đó user yêu cầu chuỗi thay đổi lớn.
+
+**Đã làm (theo thứ tự):**
+1. Chẩn đoán độ trễ GitHub Actions (xem mục "Vấn đề đã fix").
+2. Rotate secret `HMIP_SYNC_PAT` (PAT cũ hết hạn) + đồng bộ bù dữ liệu scan vào HMIP bằng tay (clone beer-price-scan → chạy `sync_to_hmip.py` local — vì `gh run rerun` checkout SHA cũ không cứu được).
+3. Đổi lịch 3 cron job: 03:00 scan (`0 20 * * *`) → 03:30 reconcile (`30 20 * * *`) → 04:00 app-sync (`0 21 * * *`) VN.
+4. Thêm tin "HOÀN TẤT pipeline" qua bot Telegram mới `@Job_tu_dong_email_bao_cao_bot` — script `notify_done.py` (cả 2 repo), step `if: always()`.
+5. Mở rộng thông báo hoàn tất sang Discord (bot `AI Lịch quét tự động` → `#general`). Fix lỗi Discord 403: bắt buộc header `User-Agent: DiscordBot (...)`.
+6. Gỡ nhóm thông báo cũ (`notify.py`, `notify_report.py`) khỏi workflow theo yêu cầu user — chỉ còn bot mới.
+7. **Auto-remediation (Lớp 2):** step `if: failure()` chạy `auto_remediate.py` → mở session OpenHands Cloud tự chẩn đoán/xử lý (hoàn toàn cloud, user không cần mở máy). Ban đầu chỉ mở PR chờ review → user chốt phương án (b) **auto-merge có điều kiện** (CI xanh + rerun/verify pass + báo Telegram sau merge).
+8. Set secrets qua REST API + classic PAT của user: `TELEGRAM_DONE_*`, `DISCORD_DONE_*`, `OPENHANDS_API_KEY` (cả 2 repo).
+9. Test thực tế: 4 lần workflow_dispatch trên HMIP — phát hiện & fix 2 bug (app-sync thiếu `actions/checkout` → f2cec94; Discord thiếu UA → e01d618). DRY_RUN auto_remediate với run fail thật 32552326709: nhận diện đúng step + log.
+
+**Commits chính:** beer-price-scan `1d4ec81→d7d844e→e8d32a6→c2710f3→2d26b5a`; HMIP `d532342→9b39929→f2cec94→b940e58→b7e642f→efe8418→e01d618→cd0a94e→1c1dec6→63cbf65→f266a19→f479b00→291daa0`.
+
+**Chờ theo dõi 23/08:** lần chạy đầu tiên theo lịch mới (03:00–04:30 VN) — kiểm chứng: độ trễ GitHub Actions ở khung giờ mới, email ~03:25, 3+3 tin hoàn tất, và auto-remediation nếu có job fail.
+
+**Credentials đã lộ trong chat (đã khuyên rotate):** PAT `ghp_daJn...` (đã dùng set secrets), Discord bot token `MTU0MDIx...`, Telegram bot token mới `8946172106:...`. Các giá trị này đều đã nằm an toàn trong GitHub Secrets — rotate dashboard-side rồi cập nhật lại secrets khi user sẵn sàng.
