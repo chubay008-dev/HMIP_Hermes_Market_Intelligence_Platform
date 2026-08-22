@@ -82,9 +82,14 @@ Nhiệm vụ (làm tuần tự):
 1. Clone repo, checkout {branch}, đọc AGENTS.md nếu có để nắm bối cảnh vận hành.
 2. Chẩn đoán nguyên nhân gốc từ log trên; nếu cần thêm log: `gh run view {run_id} --repo {repo} --log-failed`.
 3. Nếu lỗi TẠM THỜI (timeout mạng, HTTP 502/503, rate limit dịch vụ ngoài, Render cold start, site nguồn chặn scrape thoáng qua): KHÔNG sửa code — chỉ rerun `gh run rerun {run_id} --repo {repo} --failed` rồi báo cáo.
-4. Nếu lỗi do CODE/CONFIG: sửa tối thiểu đúng nguyên nhân, chạy test liên quan, tạo branch `fix/auto-remediate-{run_id}`, push, mở Pull Request (KHÔNG merge) mô tả nguyên nhân + cách sửa. Trước khi mở PR, kiểm tra không trùng PR đang mở xử lý cùng lỗi.
-5. TUYỆT ĐỐI KHÔNG: tự merge PR, push thẳng lên {branch}, thay đổi/xoá secrets, tắt workflow.
-6. Kết thúc bằng báo cáo ngắn (tiếng Việt): nguyên nhân gốc, hành động đã làm, link PR nếu có."""
+4. Nếu lỗi do CODE/CONFIG: sửa tối thiểu đúng nguyên nhân, chạy test liên quan, tạo branch `fix/auto-remediate-{run_id}`, push, mở Pull Request mô tả nguyên nhân + cách sửa. Trước khi mở PR, kiểm tra không trùng PR đang mở xử lý cùng lỗi.
+5. AUTO-MERGE CÓ ĐIỀU KIỆN — chỉ merge PR vừa mở khi THỎA ĐỦ 3 điều kiện:
+   a) Mọi CI check của PR xanh (nếu PR không có workflow nào chạy thì coi như đạt điều kiện này);
+   b) Rerun workflow bị lỗi TRÊN BRANCH FIX thành công — chứng minh fix đúng (ví dụ: `gh run rerun {run_id} --repo {repo} --failed` nếu rerun dùng được code branch fix; nếu không rerun được trên branch fix thì mô phỏng bằng cách chạy lại các lệnh của step fail ngay trong sandbox và xác nhận pass);
+   c) Sau khi merge, GỬI THÔNG BÁO "đã tự merge PR #<số>" kèm link PR về Telegram (chat 8891619372, bot token trong secret TELEGRAM_DONE_BOT_TOKEN của repo) để chủ repo kiểm tra lại + revert nếu cần.
+   Nếu THIẾU bất kỳ điều kiện nào (CI đỏ, rerun vẫn fail, không verify được) → KHÔNG merge, để PR mở chờ chủ repo review.
+6. TUYỆT ĐỐI KHÔNG: push thẳng lên {branch} (mọi sửa đổi phải qua PR), thay đổi/xoá secrets, tắt workflow, merge khi chưa đủ 3 điều kiện ở bước 5.
+7. Kết thúc bằng báo cáo ngắn (tiếng Việt): nguyên nhân gốc, hành động đã làm, link PR + trạng thái merge nếu có."""
 
 
 def _get(url: str, headers: dict) -> dict:

@@ -13,7 +13,9 @@ on:
 
 permissions:
   contents: write
-  actions: read  # auto_remediate đọc log run khi fail
+  actions: read         # auto_remediate đọc log run khi fail
+  pull-requests: write  # agent mở/merge PR auto-remediate có điều kiện
+  checks: read          # agent đọc trạng thái CI check của PR
 
 jobs:
   reconcile:
