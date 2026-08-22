@@ -45,19 +45,25 @@ def main() -> None:
     token = os.environ.get("TELEGRAM_DONE_BOT_TOKEN", "")
     chat = os.environ.get("TELEGRAM_DONE_CHAT_ID", "")
     if token and chat:
-        st = _post(f"https://api.telegram.org/bot{token}/sendMessage",
-                   {"chat_id": chat, "text": msg})
-        results.append(f"Telegram {st}")
+        try:
+            st = _post(f"https://api.telegram.org/bot{token}/sendMessage",
+                       {"chat_id": chat, "text": msg})
+            results.append(f"Telegram {st}")
+        except Exception as e:
+            results.append(f"Telegram lỗi {type(e).__name__}: {e}")
     else:
         results.append("Telegram SKIP(thiếu env)")
 
     dc_token = os.environ.get("DISCORD_DONE_BOT_TOKEN", "")
     dc_channel = os.environ.get("DISCORD_DONE_CHANNEL_ID", "")
     if dc_token and dc_channel:
-        st = _post(f"https://discord.com/api/v10/channels/{dc_channel}/messages",
-                   {"content": msg, "allowed_mentions": {"parse": []}},
-                   {"Authorization": f"Bot {dc_token}"})
-        results.append(f"Discord {st}")
+        try:
+            st = _post(f"https://discord.com/api/v10/channels/{dc_channel}/messages",
+                       {"content": msg, "allowed_mentions": {"parse": []}},
+                       {"Authorization": f"Bot {dc_token}"})
+            results.append(f"Discord {st}")
+        except Exception as e:
+            results.append(f"Discord lỗi {type(e).__name__}: {e}")
     else:
         results.append("Discord SKIP(thiếu env)")
 
