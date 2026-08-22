@@ -61,13 +61,15 @@ jobs:
           SUMMARY=$(python3 -c "import json; d=json.load(open('knowledge/dynamic/last_reconcile.json')); print(f\"reconcile: {d['touched']} SKU, thay đổi {d['changed']}, conflict {d['conflicts']}, anomaly {d['anomalies']}\")" 2>/dev/null || echo "reconcile hoàn tất")
           python3 scripts/notify_report.py --task "reconcile" --summary "$SUMMARY"
 
-      - name: Thông báo hoàn tất (Telegram bot riêng)
+      - name: Thông báo hoàn tất (Telegram + Discord)
         if: always()
         env:
           RUN_STATUS: ${{ job.status }}
           DONE_TASK_DESC: "Thu thập đa nguồn → reconcile → commit prices_real.json"
           TELEGRAM_DONE_BOT_TOKEN: ${{ secrets.TELEGRAM_DONE_BOT_TOKEN }}
           TELEGRAM_DONE_CHAT_ID: ${{ secrets.TELEGRAM_DONE_CHAT_ID }}
+          DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
+          DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
         run: python3 scripts/notify_done.py
 
   # ---- daily app sync (giá quét trang chủ + PI charts workspace) ---------
@@ -130,11 +132,13 @@ jobs:
             -H "Authorization: Bearer $HMIP_API_TOKEN" || true)
           echo "$resp"
 
-      - name: Thông báo hoàn tất (Telegram bot riêng)
+      - name: Thông báo hoàn tất (Telegram + Discord)
         if: always()
         env:
           RUN_STATUS: ${{ job.status }}
           DONE_TASK_DESC: "Wake Render → trigger quét giá trang chủ + PI collect"
           TELEGRAM_DONE_BOT_TOKEN: ${{ secrets.TELEGRAM_DONE_BOT_TOKEN }}
           TELEGRAM_DONE_CHAT_ID: ${{ secrets.TELEGRAM_DONE_CHAT_ID }}
+          DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
+          DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
         run: python3 scripts/notify_done.py

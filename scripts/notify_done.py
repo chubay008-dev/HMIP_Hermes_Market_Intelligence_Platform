@@ -31,18 +31,37 @@ msg = (f"{ICON} HOÀN TẤT pipeline {now_vn} (giờ VN)\n"
        f"Trạng thái: {STATUS}")
 
 
+def _post(url: str, data: dict, headers: dict | None = None) -> int:
+    h = {"Content-Type": "application/json"}
+    h.update(headers or {})
+    req = urllib.request.Request(url, data=json.dumps(data).encode(), headers=h)
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return r.status
+
+
 def main() -> None:
+    results = []
+
     token = os.environ.get("TELEGRAM_DONE_BOT_TOKEN", "")
     chat = os.environ.get("TELEGRAM_DONE_CHAT_ID", "")
-    if not token or not chat:
-        print("SKIP: thiếu TELEGRAM_DONE_BOT_TOKEN/TELEGRAM_DONE_CHAT_ID")
-        return
-    req = urllib.request.Request(
-        f"https://api.telegram.org/bot{token}/sendMessage",
-        data=json.dumps({"chat_id": chat, "text": msg}).encode(),
-        headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=20) as r:
-        print(f"Telegram done-notify: {r.status}")
+    if token and chat:
+        st = _post(f"https://api.telegram.org/bot{token}/sendMessage",
+                   {"chat_id": chat, "text": msg})
+        results.append(f"Telegram {st}")
+    else:
+        results.append("Telegram SKIP(thiếu env)")
+
+    dc_token = os.environ.get("DISCORD_DONE_BOT_TOKEN", "")
+    dc_channel = os.environ.get("DISCORD_DONE_CHANNEL_ID", "")
+    if dc_token and dc_channel:
+        st = _post(f"https://discord.com/api/v10/channels/{dc_channel}/messages",
+                   {"content": msg, "allowed_mentions": {"parse": []}},
+                   {"Authorization": f"Bot {dc_token}"})
+        results.append(f"Discord {st}")
+    else:
+        results.append("Discord SKIP(thiếu env)")
+
+    print("done-notify:", "; ".join(results))
 
 
 if __name__ == "__main__":
