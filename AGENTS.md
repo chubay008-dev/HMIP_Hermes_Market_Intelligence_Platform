@@ -247,3 +247,5 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 
 **Vấn đề đã fix:**
 - beer-scan schedule không chạy → do default branch `openhands/data-upload`, không có `main`. Fix: tạo `main` + đổi default (20/08).
+- `HMIP_SYNC_PAT` hết hạn (22/08) → bước "Sync scan data to HMIP repo" fail "Invalid username or token". Fix: rotate PAT mới vào secret. ⚠️ **`gh run rerun --failed` KHÔNG cứu được sync**: rerun checkout lại SHA cũ → step "Commit & push" bị remote reject (đã có commit cùng ngày) → step sync bị skip. Cách đồng bộ bù: clone beer-price-scan@main về local rồi chạy `HMIP_SYNC_PAT=... python3 sync_to_hmip.py` (script chỉ đọc file JSON/report ở repo root).
+- **GitHub Actions free tier trễ lịch 2,5–3h** vào khung UTC 00:00–04:00 (tức 07:00–11:00 VN): 3 mốc 07:30/08:00/08:30 VN thực tế chạy ~10:13/10:26/10:55 VN (quan sát 21–22/08). Pipeline vẫn đúng thứ tự, email đến ~10:30–11:00 VN. Đây là giới hạn SLA của GitHub, không phải lỗi pipeline.
