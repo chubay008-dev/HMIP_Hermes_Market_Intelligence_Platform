@@ -88,6 +88,7 @@ jobs:
     env:
       HMIP_BASE_URL: https://hmip.onrender.com
     steps:
+      - uses: actions/checkout@v4
       - name: Kiểm tra secret HMIP_API_TOKEN
         env:
           HMIP_API_TOKEN: ${{ secrets.HMIP_API_TOKEN }}
