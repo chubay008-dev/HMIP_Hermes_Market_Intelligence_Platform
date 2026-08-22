@@ -32,7 +32,8 @@ msg = (f"{ICON} HOÀN TẤT pipeline {now_vn} (giờ VN)\n"
 
 
 def _post(url: str, data: dict, headers: dict | None = None) -> int:
-    h = {"Content-Type": "application/json"}
+    h = {"Content-Type": "application/json",
+         "User-Agent": "DiscordBot (https://github.com/chubay008-dev/HMIP_Hermes_Market_Intelligence_Platform, 1.0)"}
     h.update(headers or {})
     req = urllib.request.Request(url, data=json.dumps(data).encode(), headers=h)
     with urllib.request.urlopen(req, timeout=20) as r:
