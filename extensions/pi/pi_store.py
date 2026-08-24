@@ -25,7 +25,7 @@ from __future__ import annotations
 import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable
 
 from extensions.db_backend import connect as _backend_connect, is_postgres as _is_pg, session as _backend_session
@@ -228,6 +228,32 @@ def init_pi_db(path: str | None = None) -> None:
                 payload        TEXT
             );
             CREATE INDEX IF NOT EXISTS idx_pi_notify_scope ON pi_notify_state(scope);
+
+            -- Intelligence Topic: một vấn đề (sku|channel|region|event_type)
+            -- có vòng đời — first_seen / last_updated / status / delta tích luỹ.
+            -- Là derived view của pi_price_events, rebuild idempotent sau mỗi
+            -- lần detect/seed (Daily Report Engine, "Context Once, Delta Every Day").
+            CREATE TABLE IF NOT EXISTS pi_topics (
+                topic_key        TEXT PRIMARY KEY,
+                sku_id           TEXT,
+                channel_id       TEXT,
+                region_id        TEXT,
+                event_type       TEXT,
+                first_seen       TEXT NOT NULL,
+                last_updated     TEXT NOT NULL,
+                status           TEXT NOT NULL,
+                baseline_price   REAL,
+                current_price    REAL,
+                last_change_pct  REAL,
+                total_change_pct REAL,
+                severity         TEXT,
+                significance     TEXT,
+                event_count      INTEGER DEFAULT 1,
+                last_event_id    TEXT,
+                last_reported_at TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_pi_topics_updated ON pi_topics(last_updated);
+            CREATE INDEX IF NOT EXISTS idx_pi_topics_status  ON pi_topics(status);
             """
         )
         # Migration: thêm cột metadata cho pi_skus (DB cũ chưa có) để lưu
@@ -520,6 +546,153 @@ def insert_alert(
             (alert_id, event_id, sku_id, severity, created_at, message, dedup_key),
         )
         return cur.rowcount > 0
+
+
+# ---------------------------------------------------------------------------
+# Intelligence Topics (Daily Report Engine)
+# ---------------------------------------------------------------------------
+
+_TOPIC_OPEN_DAYS = 7  # topic "mở" nếu còn cập nhật trong 7 ngày qua
+
+
+def _severity_from_pct(change_pct: float | None) -> str:
+    from extensions.pi.models import Severity, DEFAULT_THRESHOLDS
+    a = abs(change_pct or 0.0)
+    t = DEFAULT_THRESHOLDS
+    if a >= t["high"]:
+        return Severity.CRITICAL.value
+    if a >= t["medium"]:
+        return Severity.HIGH.value
+    if a >= t["low"]:
+        return Severity.MEDIUM.value
+    return Severity.LOW.value
+
+
+def rebuild_topics(path: str | None = None) -> int:
+    """Rebuild pi_topics từ pi_price_events (delete + insert, idempotent).
+
+    Mỗi topic = một Intelligence Event có vòng đời (sku|channel|region|
+    event_type): first_seen/last_updated/baseline/current/delta tích luỹ.
+    Giữ lại last_reported_at của topic đã từng đưa vào Daily Report.
+    Trả số topic.
+    """
+    if path is None:
+        path = DEFAULT_PI_DB_PATH
+    init_pi_db(path)
+    events = fetch_all(
+        """SELECT event_id, sku_id, channel_id, region_id, timestamp, old_price,
+                  new_price, change_percent, event_type, significance
+           FROM pi_price_events ORDER BY timestamp, event_id""",
+        path=path)
+    reported = {r["topic_key"]: r["last_reported_at"]
+                for r in fetch_all("SELECT topic_key, last_reported_at FROM pi_topics", path=path)}
+    topics: dict[str, dict[str, Any]] = {}
+    now = datetime.now(timezone.utc)
+    for e in events:
+        key = "|".join(str(e.get(k) or "") for k in ("sku_id", "channel_id", "region_id", "event_type"))
+        t = topics.get(key)
+        if t is None:
+            t = {
+                "topic_key": key, "sku_id": e["sku_id"], "channel_id": e["channel_id"],
+                "region_id": e["region_id"], "event_type": e["event_type"],
+                "first_seen": e["timestamp"], "baseline_price": e["old_price"],
+                "event_count": 0, "significance": e["significance"],
+            }
+            topics[key] = t
+        t["event_count"] += 1
+        t["last_updated"] = e["timestamp"]
+        t["current_price"] = e["new_price"] if e["new_price"] is not None else t.get("current_price")
+        t["last_change_pct"] = e["change_percent"]
+        t["last_event_id"] = e["event_id"]
+        if e["significance"] in ("HIGH",):
+            t["significance"] = e["significance"]
+        base = t.get("baseline_price")
+        cur = t.get("current_price")
+        t["total_change_pct"] = round((cur - base) / base * 100.0, 2) if base and cur else None
+        t["severity"] = _severity_from_pct(t["last_change_pct"])
+    cols = ["topic_key", "sku_id", "channel_id", "region_id", "event_type",
+            "first_seen", "last_updated", "status", "baseline_price", "current_price",
+            "last_change_pct", "total_change_pct", "severity", "significance",
+            "event_count", "last_event_id", "last_reported_at"]
+    with _session(path) as c:
+        c.execute("DELETE FROM pi_topics")
+        for t in topics.values():
+            last_dt = datetime.fromisoformat(t["last_updated"].replace("Z", "+00:00"))
+            if last_dt.tzinfo is None:
+                last_dt = last_dt.replace(tzinfo=timezone.utc)
+            status = "OPEN" if (now - last_dt) <= timedelta(days=_TOPIC_OPEN_DAYS) else "RESOLVED"
+            c.execute(
+                """INSERT OR IGNORE INTO pi_topics
+                   (topic_key, sku_id, channel_id, region_id, event_type, first_seen,
+                    last_updated, status, baseline_price, current_price, last_change_pct,
+                    total_change_pct, severity, significance, event_count, last_event_id,
+                    last_reported_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                tuple(t.get(col) if col != "status" else status for col in cols[:-1])
+                + (reported.get(t["topic_key"]),),
+            )
+    return len(topics)
+
+
+def list_topics(status: str | None = None, updated_since: str | None = None,
+                limit: int = 200, path: str | None = None) -> list[dict[str, Any]]:
+    """Danh sách topic kèm tên sản phẩm/brand (cho Daily Report + API)."""
+    clauses: list[str] = []
+    params: list[Any] = []
+    if status:
+        clauses.append("t.status = ?")
+        params.append(status)
+    if updated_since:
+        clauses.append("t.last_updated >= ?")
+        params.append(updated_since)
+    where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+    rows = fetch_all(
+        f"""SELECT t.topic_key, t.sku_id, t.channel_id, t.region_id, t.event_type,
+                   t.first_seen, t.last_updated, t.status, t.baseline_price,
+                   t.current_price, t.last_change_pct, t.total_change_pct, t.severity,
+                   t.significance, t.event_count, t.last_event_id, t.last_reported_at,
+                   p.product_name, b.name AS brand
+            FROM pi_topics t
+            LEFT JOIN pi_skus s ON s.sku_id = t.sku_id
+            LEFT JOIN pi_products p ON p.product_id = s.product_id
+            LEFT JOIN pi_brands b ON b.brand_id = p.brand_id
+            {where}
+            ORDER BY t.last_updated DESC LIMIT ?""",
+        params + [limit], path=path)
+    return [dict(r) for r in rows]
+
+
+def topic_timeline(topic_key: str, limit: int = 200, path: str | None = None) -> list[dict[str, Any]]:
+    """Timeline event của 1 topic (History: View Timeline)."""
+    parts = topic_key.split("|")
+    if len(parts) != 4:
+        return []
+    sku_id, channel_id, region_id, event_type = parts
+    rows = fetch_all(
+        """SELECT event_id, timestamp, old_price, new_price, change_percent,
+                  event_type, significance
+           FROM pi_price_events
+           WHERE sku_id = ? AND (channel_id = ? OR ? = '')
+             AND (region_id = ? OR ? = '') AND event_type = ?
+           ORDER BY timestamp DESC LIMIT ?""",
+        (sku_id, channel_id, channel_id, region_id, region_id, event_type, limit),
+        path=path)
+    return [dict(r) for r in rows]
+
+
+def mark_topics_reported(topic_keys: list[str], reported_at: str,
+                         path: str | None = None) -> int:
+    """Ghi mốc topic đã đưa vào Daily Report (last_reported_at)."""
+    if not topic_keys:
+        return 0
+    n = 0
+    with _session(path) as c:
+        for key in topic_keys:
+            cur = c.execute(
+                "UPDATE pi_topics SET last_reported_at = ? WHERE topic_key = ?",
+                (reported_at, key))
+            n += cur.rowcount or 0
+    return n
 
 
 def insert_ai_analysis(

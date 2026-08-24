@@ -170,7 +170,16 @@ def detect_events(product_id: str | None = None, rerun: bool = False,
         except Exception as exc:
             log.warning("Notify failed: %s", exc)
 
-    return {"status": "detected", "new_events": new_events, "new_alerts": new_alerts}
+    # Đồng bộ Intelligence Topics (Daily Report Engine) — derived view của
+    # pi_price_events, rebuild idempotent sau mỗi lần detect.
+    topics = 0
+    try:
+        topics = pi_store.rebuild_topics(path=path)
+    except Exception as exc:  # noqa: BLE001
+        log.warning("rebuild_topics lỗi: %s", exc)
+
+    return {"status": "detected", "new_events": new_events,
+            "new_alerts": new_alerts, "topics": topics}
 
 
 def _emit_event(*, sku_id: str, channel_id: str, region_id: str, timestamp: str,

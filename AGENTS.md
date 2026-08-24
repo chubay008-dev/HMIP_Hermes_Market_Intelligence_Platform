@@ -58,6 +58,8 @@ python -m extensions.scheduler
     - `price_extract.py` — `extract_product_price(brand=)` dùng chung: filter hotline garbage + brand matching
     - `firecrawl_collector.py` (tier 1), `scraperapi_collector.py` (tier 2), `zenrows_collector.py` (tier 3), `jina_collector.py` (tier 4)
     - `service.py` — orchestration; `mark_ready` đã sửa `global _seed_state`
+  - `report_engine.py` — **Daily Intelligence Report** ("Context Once — Delta Every Day"): build 7-section (EXEC SUMMARY → NEW → CHANGED → WATCHLIST → ACTIONS → SIGNALS → HISTORY), render markdown Telegram/Discord, send qua `notifiers.send_text`. Phân loại theo events của NGÀY REPORT (không `last_updated` hiện tại) → backfill ngày quá khứ đúng.
+  - `pi_store.py` — thêm `pi_topics` (Intelligence Event có vòng đời: first_seen/last_updated/status/baseline/current/total delta/last_event id). `rebuild_topics()` idempotent (delete+insert, giữ `last_reported_at`); gọi cuối `detect_events()`.
     - `pi_store.py` — đã thêm cột `metadata` cho `pi_skus` (marker); **PR #12: `migrate_brand_ids()`** backfill `brand_id` observation từ `pi_products.brand_id`, xoá brand rỗng/Unknown (idempotent, wire vào `api.py` lifespan startup)
     - `analytics.py` — **PR #12:** JOIN `pi_brands` qua `pi_products.brand_id` (không qua `pi_observations.brand_id`) cho `positioning_matrix()`/`catalog()`/`competitor_comparison()` → Competitor Comparison + Price Index (by Brand) không còn "Unknown"; **+`promotion_by_brand` + `promotion_timeline`** (chart Promotion Intelligence)
   - `run_workflow.py` — NỐI kernel vào runtime thật (fix F-01)

@@ -99,6 +99,31 @@ def _resolve_channel() -> str | None:
     return None
 
 
+def send_text(message: str) -> bool:
+    """Gửi text thô (Daily Report Engine). Console-fallback nếu chưa cấu hình."""
+    if not is_configured():
+        log.info("[notify:discord:console-fallback] %s", message.replace("*", ""))
+        return True
+    channel_id = _resolve_channel()
+    if not channel_id:
+        log.warning("Discord: không lấy được channel_id (DM create fail?)")
+        return False
+    try:
+        resp = httpx.post(
+            _DISCORD_MSG.format(channel_id=channel_id),
+            headers={"Authorization": f"Bot {BOT_TOKEN}", "Content-Type": "application/json"},
+            json={"content": message, "allowed_mentions": {"parse": []}},
+            timeout=15.0,
+        )
+        if resp.status_code not in (200, 201):
+            log.warning("Discord send_text fail HTTP %s: %s", resp.status_code, resp.text[:200])
+            return False
+        return True
+    except httpx.HTTPError as exc:
+        log.error("Discord send_text failed: %s", exc)
+        return False
+
+
 def notify(
     decision: str,
     product_name: str,
@@ -114,29 +139,7 @@ def notify(
     unit_ml: dung tích 1 lon/chai (mặc định 330ml). Dùng hiển thị đơn vị chai.
     """
     message = _format(decision, product_name, price, delta_percent, base_price, pack_size, unit_ml)
-
-    if not is_configured():
-        log.info("[notify:discord:console-fallback] %s", message.replace("*", ""))
-        return True
-
-    channel_id = _resolve_channel()
-    if not channel_id:
-        log.warning("Discord: không lấy được channel_id (DM create fail?)")
-        return False
-    try:
-        resp = httpx.post(
-            _DISCORD_MSG.format(channel_id=channel_id),
-            headers={"Authorization": f"Bot {BOT_TOKEN}", "Content-Type": "application/json"},
-            json={"content": message, "allowed_mentions": {"parse": []}},
-            timeout=15.0,
-        )
-        if resp.status_code not in (200, 201):
-            log.warning("Discord send fail HTTP %s: %s", resp.status_code, resp.text[:200])
-            return False
-        return True
-    except httpx.HTTPError as exc:
-        log.error("Discord notify failed: %s", exc)
-        return False
+    return send_text(message)
 
 
 if __name__ == "__main__":

@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import FileResponse
@@ -88,6 +89,33 @@ def _start_pi_collect(interval_min: int = 30) -> None:
         trigger=IntervalTrigger(minutes=interval_min),
         id="hmip_pi_collect", max_instances=1, coalesce=True,
         next_run_time=datetime.now() + timedelta(seconds=10),
+    )
+    if not _auto_scheduler.running:
+        _auto_scheduler.start()
+
+
+def _daily_report_job() -> None:
+    """Job nền: gửi Daily Intelligence Report ("Context Once — Delta Every Day").
+
+    Build 7-section report (NEW/CHANGED/WATCHLIST/Actions/Signals) rồi đẩy
+    Telegram/Discord. Best-effort: kênh chưa cấu hình → console fallback,
+    không block job khác. Kênh được chống spam nội tại: UNCHANGED topics
+    không đưa vào báo cáo.
+    """
+    try:
+        r = pi_service.send_daily_report(path=os.getenv("HMIP_PI_DB_PATH") or None)
+        log.info("Daily report sent: %s", r)
+    except Exception as exc:  # noqa: BLE001
+        log.exception("Daily report job lỗi: %s", exc)
+
+
+def _start_daily_report(hour: int = 8, minute: int = 0) -> None:
+    if _auto_scheduler.get_job("hmip_daily_report"):
+        return
+    _auto_scheduler.add_job(
+        _daily_report_job,
+        trigger=CronTrigger(hour=hour, minute=minute),
+        id="hmip_daily_report", max_instances=1, coalesce=True,
     )
     if not _auto_scheduler.running:
         _auto_scheduler.start()
@@ -165,6 +193,13 @@ async def lifespan(_app: FastAPI):
         _start_auto_scan()
         # Job PI: quét giá thật (chain 4-tier) định kỳ + detect/notify.
         _start_pi_collect(int(os.getenv("HMIP_PI_COLLECT_MIN", "30")))
+    # Daily Intelligence Report (mặc định BẬT, 08:00 UTC — chỉ console-fallback
+    # nếu chưa cấu hình Telegram/Discord; tắt bằng HMIP_DAILY_REPORT=off).
+    if os.getenv("HMIP_DAILY_REPORT", "on").lower() not in ("0", "off", "false", "no"):
+        _start_daily_report(
+            hour=int(os.getenv("HMIP_DAILY_REPORT_HOUR", "8")),
+            minute=int(os.getenv("HMIP_DAILY_REPORT_MINUTE", "0")),
+        )
     yield
     if _auto_scheduler.running:
         _auto_scheduler.shutdown(wait=False)
@@ -601,6 +636,39 @@ def pi_events(
     return pi_service.price_events({
         "product_id": product_id, "channel_id": channel_id,
         "region_id": region_id, "event_type": event_type}, limit=limit)
+
+
+# ---- Daily Intelligence Report ("Context Once — Delta Every Day") ----
+
+@app.get("/api/price-intelligence/daily-report")
+def pi_daily_report(date: str | None = None) -> dict[str, Any]:
+    """Payload JSON 7-section của Daily Report. date = YYYY-MM-DD (mặc định hôm nay)."""
+    return pi_service.daily_report(date)
+
+
+@app.get("/api/price-intelligence/daily-report/text")
+def pi_daily_report_text(date: str | None = None) -> Response:
+    """Bản markdown (TG/Discord copy-paste hoặc đọc trực tiếp)."""
+    return Response(content=pi_service.daily_report_text(date),
+                    media_type="text/plain")
+
+
+@app.post("/api/price-intelligence/daily-report/send")
+def pi_daily_report_send(date: str | None = None) -> dict[str, Any]:
+    """Build + đẩy Daily Report lên Telegram/Discord (best-effort)."""
+    return pi_service.send_daily_report(date)
+
+
+@app.get("/api/price-intelligence/topics")
+def pi_topics(status: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+    """Intelligence Topics — mỗi topic = 1 vấn đề có vòng đời (First seen/Last updated/Status)."""
+    return pi_service.topics(status=status, limit=limit)
+
+
+@app.get("/api/price-intelligence/topics/timeline")
+def pi_topic_timeline(topic_key: str, limit: int = 200) -> list[dict[str, Any]]:
+    """History → View Timeline: timeline event của 1 topic."""
+    return pi_service.topic_timeline(topic_key, limit=limit)
 
 
 @app.get("/api/prices/alerts")

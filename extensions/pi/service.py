@@ -15,7 +15,7 @@ import threading
 import time
 from typing import Any
 
-from extensions.pi import pi_store, seed, analytics, events, ai_analyst
+from extensions.pi import pi_store, seed, analytics, events, ai_analyst, report_engine
 
 
 # ---- Seed background state (tránh Render request timeout do seed chạy đồng bộ) ----
@@ -158,6 +158,35 @@ def price_events(filters: dict[str, Any] | None = None, limit: int = 100,
 def alerts(severity: str | None = None, limit: int = 100,
            path: str | None = None) -> list[dict[str, Any]]:
     return events.list_alerts(severity, limit, path=path)
+
+
+# ---- Daily Intelligence Report ("Context Once — Delta Every Day") ----
+
+def daily_report(report_date: str | None = None, path: str | None = None) -> dict[str, Any]:
+    """Payload 7-section của Daily Report (JSON)."""
+    return report_engine.build_daily_report(report_date, path=path)
+
+
+def daily_report_text(report_date: str | None = None, path: str | None = None) -> str:
+    """Bản markdown của Daily Report (Telegram/Discord copy-paste)."""
+    return report_engine.render_markdown(daily_report(report_date, path=path))
+
+
+def topics(status: str | None = None, limit: int = 100,
+           path: str | None = None) -> list[dict[str, Any]]:
+    """Intelligence Topics (mỗi topic = 1 Intelligence Event có vòng đời)."""
+    return pi_store.list_topics(status=status, limit=limit, path=path)
+
+
+def topic_timeline(topic_key: str, limit: int = 200,
+                   path: str | None = None) -> list[dict[str, Any]]:
+    """Timeline event của 1 topic (History → View Timeline)."""
+    return pi_store.topic_timeline(topic_key, limit=limit, path=path)
+
+
+def send_daily_report(report_date: str | None = None, path: str | None = None) -> dict[str, Any]:
+    """Build + gửi Daily Report lên Telegram/Discord (best-effort)."""
+    return report_engine.send_daily_report(report_date, path=path)
 
 
 def sku_explorer(sku_id: str, path: str | None = None) -> dict[str, Any]:
