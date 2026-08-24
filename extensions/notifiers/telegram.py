@@ -61,6 +61,25 @@ def _format(
     )
 
 
+def send_text(message: str) -> bool:
+    """Gửi text thô (Daily Report Engine). Console-fallback nếu chưa cấu hình."""
+    if not is_configured():
+        log.info("[notify:console-fallback] %s", message.replace("*", ""))
+        return True
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    try:
+        resp = httpx.post(
+            url,
+            json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"},
+            timeout=10.0,
+        )
+        resp.raise_for_status()
+        return True
+    except httpx.HTTPError as exc:
+        log.error("Telegram send_text failed: %s", exc)
+        return False
+
+
 def notify(
     decision: str,
     product_name: str,
@@ -79,23 +98,7 @@ def notify(
     để không làm hỏng luồng scheduler.
     """
     message = _format(decision, product_name, price, delta_percent, base_price, pack_size, unit_ml)
-
-    if not is_configured():
-        log.info("[notify:console-fallback] %s", message.replace("*", ""))
-        return True
-
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    try:
-        resp = httpx.post(
-            url,
-            json={"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"},
-            timeout=10.0,
-        )
-        resp.raise_for_status()
-        return True
-    except httpx.HTTPError as exc:
-        log.error("Telegram notify failed: %s", exc)
-        return False
+    return send_text(message)
 
 
 if __name__ == "__main__":
