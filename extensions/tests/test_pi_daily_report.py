@@ -26,6 +26,16 @@ def db():
     return PI_DB
 
 
+@pytest.fixture(autouse=True)
+def _no_real_email(monkeypatch):
+    """TUYỆT ĐỐI không gửi email thật từ test (env CI có SMTP_APP_PASS thật).
+
+    Test email bật lại bằng monkeypatch.setenv('HMIP_EMAIL_REPORT', 'on')
+    + mock smtplib.SMTP_SSL.
+    """
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "off")
+
+
 def _busiest_day(db: str) -> str:
     row = pi_store.fetch_one(
         "SELECT substr(timestamp,1,10) AS d, COUNT(*) AS n FROM pi_price_events "
@@ -126,3 +136,164 @@ def test_send_daily_report_marks_topics(db):
     row = pi_store.fetch_one(
         "SELECT COUNT(*) AS n FROM pi_topics WHERE last_reported_at = ?", (day,), path=db)
     assert row["n"] == res["topics_reported"]
+
+# ---------------------------------------------------------------------------
+# Email channel (PR: vi + zh qua Gmail SMTP) — mock SMTP để không gọi mạng.
+# ---------------------------------------------------------------------------
+
+def test_email_render_html_vi_and_zh(db):
+    from extensions.pi import email_report
+    day = _busiest_day(db)
+    report = report_engine.build_daily_report(report_date=day, path=db)
+    for lang, must_have in (
+        ("vi", ("BÁO CÁO TIN TỨC FMCG HÀNG NGÀY", "TÓM TẮT ĐIỀU HÀNH",
+                "MỚI HÔM NAY", "THAY ĐỔI", "LỊCH SỬ", "DAILY FMCG INTELLIGENCE REPORT")),
+        ("zh", ("每日快消品情报报告", "执行摘要", "今日新增",
+                "自上次报告以来的变化", "历史与来源")),
+    ):
+        subject, body = email_report.render_html(report, lang=lang)
+        for needle in must_have:
+            assert needle in body or needle in subject, f"[{lang}] missing {needle!r}"
+        assert "<html>" in body and "</html>" in body
+
+def test_email_render_full_payload_all_branches():
+    """Render không lỗi KeyError khi có đủ NEW + CHANGED + WATCHLIST (cả 2 ngôn ngữ)."""
+    from extensions.pi import email_report
+    topic = {
+        "topic_key": "SKU1|ch1|rg1|PRICE_INCREASE", "sku_id": "SKU1",
+        "product_name": "Bia Test 330ml", "brand": "TestBrand",
+        "channel_id": "tiki", "region_id": "HN", "event_type": "PRICE_INCREASE",
+        "severity": "HIGH", "status": "OPEN", "first_seen": "2026-08-20T03:00:00",
+        "last_updated": "2026-08-24T03:00:00", "event_count": 3,
+        "baseline_price": 10000.0, "current_price": 12000.0,
+        "total_change_pct": 20.0, "last_change_pct": 5.0,
+        "today_old_price": 11000.0, "today_new_price": 12000.0,
+        "today_change_pct": 9.09, "today_events": 1,
+    }
+    new_topic = dict(topic, topic_key="SKU2|ch1|rg1|PRICE_DECREASE",
+                     sku_id="SKU2", event_type="PRICE_DECREASE",
+                     first_seen="2026-08-24T03:00:00")
+    report = {
+        "report_date": "2026-08-24", "generated_at": "2026-08-24T08:00:00",
+        "overall_status": "ATTENTION",
+        "summary": {"critical": 0, "important": 1, "new_topics": 1,
+                    "changed_topics": 1, "watchlist": 1},
+        "actions": {"immediate": [], "today": [topic], "monitor": [topic]},
+        "new_topics": [new_topic], "changed_topics": [topic],
+        "watchlist": [topic],
+        "signals": [{"signal": "Pricing", "current": "2 biến động",
+                     "change": "7.0% TB", "direction": "↑", "confidence": "High"}],
+        "top_critical": [], "top_important": [topic],
+    }
+    for lang, must_have in (
+        ("vi", ("MỚI HÔM NAY", "Theo dõi từ", "Delta tích luỹ", "Đang theo dõi", "tổng")),
+        ("zh", ("今日新增", "跟踪自", "累积变化", "观察中", "总计")),
+    ):
+        subject, body = email_report.render_html(report, lang=lang)
+        for needle in must_have:
+            assert needle in body, f"[{lang}] missing {needle!r}"
+        assert "HÔME" not in body  # không còn lỗi chính tả
+
+
+
+def test_email_recipients_and_send_all_langs(db, monkeypatch):
+    from extensions.pi import email_report
+    day = _busiest_day(db)
+    report = report_engine.build_daily_report(report_date=day, path=db)
+    calls: list[dict] = []
+
+    class _FakeSMTP:
+        def __init__(self, host, port, timeout=30, context=None):
+            calls.append({"host": host, "port": port})
+
+        def login(self, user, password):
+            calls.append({"login": user})
+
+        def sendmail(self, frm, to, msg):
+            calls.append({"send": list(to), "subject": frm})
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr("smtplib.SMTP_SSL", _FakeSMTP)
+    monkeypatch.setenv("SMTP_USER", "chubay008@gmail.com")
+    monkeypatch.setenv("SMTP_APP_PASS", "tok")
+    sent = email_report.send_report_email(report)
+    assert sent == {"vi": True, "zh": True}
+    tos = [c["send"] for c in calls if "send" in c]
+    vi = next(t for t in tos if "chubay008@gmail.com" in t)
+    zh = next(t for t in tos if "uythanhhoang@gmail.com" in t)
+    assert len(vi) == 2 and "kalihello541@gmail.com" in vi
+    assert len(zh) == 2 and "yingxue0510@gmail.com" in zh  # ZH thuần → uythanhhoang+yingxue0510
+
+
+def test_email_recipients_env_override(db, monkeypatch):
+    from extensions.pi import email_report
+    day = _busiest_day(db)
+    report = report_engine.build_daily_report(report_date=day, path=db)
+    calls: list[dict] = []
+
+    class _FakeSMTP:
+        def __init__(self, host, port, timeout=30, context=None):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def sendmail(self, frm, to, msg):
+            calls.append({"send": list(to)})
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr("smtplib.SMTP_SSL", _FakeSMTP)
+    monkeypatch.setenv("SMTP_USER", "u@x")
+    monkeypatch.setenv("SMTP_APP_PASS", "p")
+    monkeypatch.setenv("EMAIL_ZH", "uythanhhoang@gmail.com,yingxue0510@gmail.com")
+    email_report.send_report_email(report)
+    zh = next(t for t in (c["send"] for c in calls if "send" in c) if "yingxue0510@gmail.com" in t)
+    assert len(zh) == 2  # default đã có yingxue0510 (bổ sung)
+
+
+def test_send_daily_report_includes_email(db, monkeypatch):
+    captured = {}
+
+    class _FakeSMTP:
+        def __init__(self, host, port, timeout=30, context=None):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def sendmail(self, frm, to, msg):
+            captured.setdefault("lang", []).append((frm, list(to)))
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr("smtplib.SMTP_SSL", _FakeSMTP)
+    monkeypatch.setenv("SMTP_USER", "u@x")
+    monkeypatch.setenv("SMTP_APP_PASS", "p")
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "on")  # autouse fixture tắt mặc định
+    day = _busiest_day(db)
+    res = report_engine.send_daily_report(report_date=day, path=db)
+    assert res["sent"]["email"] == {"vi": True, "zh": True}
+    assert res["sent"]["telegram"] and res["sent"]["discord"]
+
+
+def test_email_disabled_env(db, monkeypatch):
+    from extensions.pi import email_report
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "off")
+    assert email_report.email_report_enabled() is False
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "on")
+    assert email_report.email_report_enabled() is True
+

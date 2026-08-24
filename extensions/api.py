@@ -193,11 +193,11 @@ async def lifespan(_app: FastAPI):
         _start_auto_scan()
         # Job PI: quét giá thật (chain 4-tier) định kỳ + detect/notify.
         _start_pi_collect(int(os.getenv("HMIP_PI_COLLECT_MIN", "30")))
-    # Daily Intelligence Report (mặc định BẬT, 08:00 UTC — chỉ console-fallback
-    # nếu chưa cấu hình Telegram/Discord; tắt bằng HMIP_DAILY_REPORT=off).
-    if os.getenv("HMIP_DAILY_REPORT", "on").lower() not in ("0", "off", "false", "no"):
+    # Daily Intelligence Report: GH Actions workflow điều khiển (sau app-sync) —
+    # Render scheduler chỉ bật khi HMIP_DAILY_REPORT=on (user tự bật trên Render).
+    if os.getenv("HMIP_DAILY_REPORT", "off").lower() in ("1", "on", "true", "yes"):
         _start_daily_report(
-            hour=int(os.getenv("HMIP_DAILY_REPORT_HOUR", "8")),
+            hour=int(os.getenv("HMIP_DAILY_REPORT_HOUR", "0")),
             minute=int(os.getenv("HMIP_DAILY_REPORT_MINUTE", "0")),
         )
     yield
@@ -894,6 +894,22 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
     return {"triggered": True, "reason": "stale" if last else "empty",
             "last_scan": (last.isoformat() if last else None),
             "msg": "Đang thu thập giá nền. Poll /api/price-intelligence/overview."}
+
+
+@app.post("/api/price-intelligence/collect")
+def pi_collect_blocking(limit: int | None = None) -> dict[str, Any]:
+    """Thu thập giá PI ĐỒNG BỘ (blocking) — dùng cho GH Actions app-sync/report.
+
+    collect-if-stale chạy background → workflow không biết khi nào xong.
+    Endpoint này chạy đến khi collect + detect_events xong mới trả về,
+    để job report (sau app-sync) đọc được dữ liệu mới nhất.
+    """
+    from extensions.pi import collectors as _col
+    from extensions.pi import events as _ev
+    _path = os.getenv("HMIP_PI_DB_PATH") or None
+    r = _col.collect_realtime_smart(limit=limit, path=_path)
+    _ev.detect_events(path=_path)
+    return {"status": "done", "collect": r, "msg": "PI collect + events xong."}
 
 
 # ------------------------------------------------------------- static

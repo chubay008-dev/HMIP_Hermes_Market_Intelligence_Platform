@@ -352,12 +352,95 @@ def _render_changed_topic(t: dict[str, Any]) -> str:
 # Delivery — gửi qua Telegram/Discord (best-effort)
 # ---------------------------------------------------------------------------
 
+def render_text_vi(report: dict[str, Any]) -> str:
+    """Render daily report thành plain-text tiếng Việt — ghi đúng vào file .txt.
+
+    Nội dung giống Telegram/Discord markdown (7 section) một nguồn, đảm bảo
+    file txt vật lý khớp với những gì đã gửi.
+    """
+    lines: list[str] = []
+    rpt = report["report_date"]
+    fmt_date = "/".join(reversed(rpt.split("-"))) if "-" in rpt else rpt
+    lines.append(f"DAILY FMCG INTELLIGENCE REPORT — {fmt_date}")
+    lines.append(f"Generated: {report['generated_at']}")
+    s = report["summary"]
+    lines.append("")
+    lines.append("1️⃣ TÓM TẮT ĐIỀU HÀNH")
+    lines.append(f"Kỳ báo cáo: 24h • Trạng thái tổng: {report['overall_status']}")
+    lines.append(f"Critical: {s['critical']} • Important: {s['important']} • "
+                 f"Mới: {s['new_topics']} • Thay đổi: {s['changed_topics']} • "
+                 f"Theo dõi: {s['watchlist']}")
+    lines.append("")
+    lines.append("2️⃣ MỚI HÔM NAY")
+    if report["new_topics"]:
+        for t in report["new_topics"]:
+            lines.append(f"🆕 {_topic_name(t)}")
+            lines.append(f"   What: {_event_label(t)} "
+                         f"{_pct(_day_change(t))} @ {t.get('channel_id')} "
+                         f"({t.get('region_id')})")
+            d0, d1 = _day_old(t), _day_new(t)
+            if d0 is not None and d1 is not None:
+                lines.append(f"   Giá: {d0:,.0f}đ → {d1:,.0f}đ "
+                             f"({_pct(_day_change(t))}) • Impact: {_impact(t)}")
+            lines.append(f"   First seen: {_fmt_date(_day(t.get('first_seen')))}")
+    else:
+        lines.append("Không có thông tin mới hôm nay.")
+    lines.append("")
+    lines.append("3️⃣ THAY ĐỔI SO VỚI LẦN BÁO TRƯỚC")
+    if report["changed_topics"]:
+        for t in report["changed_topics"]:
+            lines.append(f"🔄 {_topic_name(t)}")
+            lines.append(f"   Theo dõi từ: {_fmt_date(_day(t.get('first_seen')))} "
+                         f"({t.get('event_count', 1)} lần cập nhật)")
+            o, n = _day_old(t), _day_new(t)
+            if o is not None and n is not None:
+                lines.append(f"   Hôm nay: {o:,.0f}đ → {n:,.0f}đ "
+                             f"({_pct(_day_change(t))})")
+            lines.append(f"   Delta tích luỹ: {_pct(t.get('total_change_pct'))} • "
+                         f"Impact: {_impact(t)}")
+    else:
+        lines.append("Không có thay đổi nào trên các vấn đề đang theo dõi.")
+    lines.append("")
+    lines.append("4️⃣ DANH SÁCH THEO DÕI")
+    if report["watchlist"]:
+        for t in report["watchlist"]:
+            st = "Đang theo dõi" if t["status"] == "OPEN" else "Ổn định"
+            lines.append(f"• {_topic_name(t)} — {st} "
+                         f"({t.get('event_count', 1)} lần cập nhật, "
+                         f"tổng {_pct(t.get('total_change_pct'))})")
+    else:
+        lines.append("Watchlist trống.")
+    a = report["actions"]
+    lines.append("")
+    lines.append("5️⃣ HÀNH ĐỘNG KHUYẾN NGHỊ")
+    for label, key in (("P1 — Ngay", "immediate"), ("P2 — Hôm nay", "today"),
+                       ("P3 — Theo dõi", "monitor")):
+        names = ", ".join(_topic_name(t) for t in a[key]) or "—"
+        lines.append(f"{label}: {names}")
+    lines.append("")
+    lines.append("6️⃣ TÍN HIỆU THỊ TRƯỜNG CHÍNH")
+    if report["signals"]:
+        for sig in report["signals"]:
+            lines.append(f"• {sig['signal']}: {sig['current']} ({sig['change']}) "
+                         f"{sig['direction']} — confidence {sig['confidence']}")
+    else:
+        lines.append("Không có signal đáng kể.")
+    lines.append("")
+    lines.append("7️⃣ LỊCH SỬ & NGUỒN")
+    lines.append("Timeline & raw data: endpoint /api/price-intelligence/topics. "
+                 "Nguồn: collectors Firecrawl/ScraperAPI/ZenRows/Jina.")
+    return "\n".join(lines) + "\n"
+
+
 def send_daily_report(report_date: str | None = None,
                       path: str | None = None) -> dict[str, Any]:
-    """Build + render + đẩy lên Telegram/Discord + đánh dấu topic đã report.
+    """Build + render + đẩy lên Telegram/Discord + email VN/ZH + đánh dấu topic.
 
-    Trả dict {sent: {telegram, discord}, text_len, report_date}. Kênh nào chưa
-    cấu hình → console fallback (vẫn tính sent=True như notify() gốc).
+    Trả dict {sent: {telegram, discord, email}, text_len, report_date}.
+    Kênh nào chưa cấu hình → console fallback.
+    Email: extensions/pi/email_report.send_report_email — bilingual
+    (vi → chubay008 + kalihello541, zh → uythanhhoang + yingxue0510),
+    định tuyến qua EMAIL_VI/EMAIL_ZH; tắt bằng HMIP_EMAIL_REPORT=off.
     """
     from extensions.notifiers import discord as dc
     from extensions.notifiers import telegram as tg
@@ -366,9 +449,17 @@ def send_daily_report(report_date: str | None = None,
     text = render_markdown(report)
     sent_tg = tg.send_text(text)
     sent_dc = dc.send_text(text)
+    sent_email: dict[str, bool] = {}
+    from extensions.pi import email_report
+    if email_report.email_report_enabled():
+        sent_email = email_report.send_report_email(report)
+        log.info("Daily report email → %s", sent_email)
+
     keys = [t["topic_key"] for t in (report["new_topics"] + report["changed_topics"])]
-    if sent_tg or sent_dc:
+    email_ok = any(sent_email.values()) if sent_email else False
+    sent_any = sent_tg or sent_dc or email_ok
+    if sent_any:
         pi_store.mark_topics_reported(keys, report["report_date"], path=path)
-    return {"sent": {"telegram": sent_tg, "discord": sent_dc},
+    return {"sent": {"telegram": sent_tg, "discord": sent_dc, "email": sent_email},
             "text_len": len(text), "report_date": report["report_date"],
-            "topics_reported": len(keys) if (sent_tg or sent_dc) else 0}
+            "topics_reported": len(keys) if sent_any else 0}

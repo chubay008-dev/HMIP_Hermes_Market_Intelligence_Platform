@@ -198,6 +198,7 @@ HMIP/
 - `GET /api/price-intelligence/{catalog,overview,workspace,status}`
 - `POST /api/price-intelligence/seed` — seed dữ liệu bất đồng bộ
 - `GET /api/prices/{trend,index-trend,index,positioning,channel-comparison,regional,promotions,events,alerts}`
+- **Daily Report (PR #20):** `GET /api/price-intelligence/daily-report` (payload JSON 7-section), `GET /api/price-intelligence/daily-report/text` (markdown), `POST /api/price-intelligence/daily-report/send` (đẩy TG/Discord + đánh dấu reported), `GET /api/price-intelligence/topics` (list Intelligence Events có status), `GET /api/price-intelligence/topics/timeline?topic_key=` (History View per topic)
 - `GET /api/prices/sku/{sku_id}`
 - `POST /api/prices/{reset,collect}`
 - `POST /api/ai/price-analysis` — AI Analyst (event_id hoặc question)
@@ -287,8 +288,15 @@ HMIP/
 |---|---|---|---|
 | `hmip_auto_scan` | IntervalTrigger | `HMIP_SCAN_INTERVAL_MIN` (mặc định 30 phút) | Quét toàn bộ catalog, ghi SQLite, đẩy Telegram nếu decision≠IGNORE |
 | `hmip_pi_collect` | IntervalTrigger | `HMIP_PI_COLLECT_MIN` (mặc định 30 phút) | Thu thập giá thật PI (Firecrawl→Tiki), detect events |
+| `hmip_daily_report` | **CronTrigger** | `HMIP_DAILY_REPORT_HOUR` (mặc định **0:00** hàng ngày, UTC = 07:00 VN) + `HMIP_DAILY_REPORT_MINUTE` (mặc định 0) | **Daily Intelligence Report** — "Context Once, Delta Every Day": rebuild topics → render 7 section → đẩy Telegram/Discord |
 
-- Auto-scan bật khi `HMIP_AUTOSCAN=on`. Mặc định `off` ở mọi nơi (đã gỡ job nền từ `docker-compose.yml`/`render.yaml` 21/08).
+- Daily Report **KHÔNG mặc định BẬT** (`HMIP_DAILY_REPORT`→`off`): GH Actions workflow điều khiển — Render scheduler chỉ lấy kênh public khi user chọn `HMIP_DAILY_REPORT=on` bản thân Render. Workflow `reconcile.yml` giờ 3 job: `reconcile` (03:30 VN) → `app-sync` (04:00 VN — **`/collect` blocking chờ PI xong trước**, không file/) → **`report` (needs: app-sync — `POST /daily-report/send` trên Render đọc dữ liệu đã nạp)**.
+
+- Email channel (PR #21): `extensions/pi/email_report.py` render HTML bilingual — vi → chubay008+kalihello541; **zh thuần → uythanhhoang+yingxue0510**. Env `EMAIL_VI`/`EMAIL_ZH` điều chỉnh; `HMIP_EMAIL_REPORT`=on (mặc định); SMTP Gmail SSL (host/port/user/AppPass qua env).
+
+- `render_text_vi(report)` — plain-text VN render cho /daily-report/text + bot scripts (future scripts/notify_daily_report.py).
+
+- Endpoint public: (1) `GET .../daily-report` JSON; (2) `/text` markdown; (3) `POST .../send` (workflow); (4) `GET .../topics` list; (5) `/topics/timeline?topic_key=` History; (6) **`POST .../collect` blocking (app-sync)**; (7) `POST .../collect-if-stale` async (khởi client vào /pi).
 - `max_instances=1, coalesce=True` — tránh chồng chéo.
 - Seed PI chạy **bất đồng bộ** (background thread) để không block startup/Render timeout. `[VERIFIED]` — `extensions/pi/service.py:seed_async`.
 
@@ -300,15 +308,39 @@ Scheduler Render đã tắt (`HMIP_AUTOSCAN=off`) → lịch chạy thật nằm
 
 | Giờ VN | Workflow | Repo | Việc |
 |---|---|---|---|
-| 07:30 | `daily-scan.yml` | beer-price-scan | Quét nguồn giá → build báo cáo → **email 4 hộp thư** (xem bảng dưới) → push Supabase (repo scan) → `sync_to_hmip.py` sync `data_overrides.json` sang `knowledge/dynamic/beer_scan/latest/` → notify TG+Discord |
-| 08:00 | `reconcile.yml` job `reconcile` | HMIP (cron `0 1 * * *`) | `reconcile_prices.py` merge trung vị + IQR + trust → commit `prices_real.json` → **Render auto-deploy** → trang chủ "Giá thật" + workspace "Channel Comparison" cập nhật |
-| 08:30 | `reconcile.yml` job `app-sync` | HMIP (cron `30 1 * * *`) | Wake Render → `POST /api/scan-if-stale` (giá quét trang chủ) → `POST /api/price-intelligence/collect-if-stale` (PI charts) → Supabase `price_points` + `pi_observations` |
+| 03:00 VN | `daily-scan.yml` | beer-price-scan | Quét nguồn giá → build báo cáo → **email 4 hộp thư** (VN 2 + ZH 2: vi → chubay008,kalihello541; **zh thuần → uythanhhoang,yingxue0510**) → push Supabase → `sync_to_hmip.py` → notify TG+Discord |
+| 03:30 VN | `reconcile.yml` job `reconcile` | HMIP (cron `30 20 * * *`) | `reconcile_prices.py` merge trung vị + IQR + trust → commit `prices_real.json` → **Render auto-deploy** → trang chủ "Giá thật" + workspace "Channel Comparison" cập nhật |
+| 04:00 VN | `reconcile.yml` job `app-sync` | HMIP (cron `0 21 * * *`) | Wake Render → `POST /api/scan-if-stale` (giá quét trang chủ) → **`POST /api/price-intelligence/collect` (blocking — chờ PI xong trước)** |
+| ≈05:00 VN | `reconcile.yml` job `report` | HMIP (needs: app-sync) | `POST /api/price-intelligence/daily-report/send` trên Render → gửi **TG+Discord+Email** |
 
 - Hai cron trong cùng file, định tuyến job bằng `github.event.schedule`; `workflow_dispatch` chạy cả 2 (app-sync chỉ khi reconcile success).
-- ⚠️ **KHÔNG dùng `POST /api/run-all` từ CI** — endpoint đồng bộ ~68 SP → vượt 60s → curl timeout (exit 28). Dùng `scan-if-stale` (async, stale-guard 5').
-- Email báo cáo (beer-scan `send_email.py`, Gmail SMTP secret `SMTP_APP_PASS`): song ngữ VN+ZH → `chubay008@gmail.com`, `kalihello541@gmail.com`; chỉ ZH → `uythanhhoang@gmail.com`, `yingxue0510@gmail.com`. Email = raw scan ngày X; web = cùng ngày X sau reconcile (khác nhẹ do median+IQR, cố ý).
+- ⚠️ **KHÔNG dùng `POST /api/run-all` từ CI** — endpoint đồng bộ → timeout. Dùng `scan-if-stale` (async trang chủ, stale-guard 5') + **`/api/price-intelligence/collect` (blocking — chờ PI xong)** cho report.
+- Email báo cáo (beer-scan `send_email.py`, Gmail SMTP secret `SMTP_APP_PASS`): song ngữ VN+ZH → `chubay008@gmail.com`, `kalihello541@gmail.com`; chỉ ZH → `uythanhhoang@gmail.com`, `yingxue0510@gmail.com`. Daily Report (HMIP, PR #21): vi → chubay008+kalihello541; **zh thuần → uythanhhoang+yingxue0510**. Email = raw scan ngày X (beer-scan); web = cùng ngày X sau reconcile; HMIP report = sau app-sync (dữ liệu đã nạp).
 - Secrets cần: repo HMIP có `HMIP_API_TOKEN` (= `HMIP_API_TOKEN` trên Render Dashboard); repo beer-scan có `HMIP_SYNC_PAT`, `SMTP_APP_PASS`, `APIFY_TOKEN`, TG/Discord, Supabase của repo scan.
 - Độ trễ email (~07:40) → web (~08:10) là **thiết kế** (buffer cho beer-scan sync xong), không phải lỗi.
+
+### 11c. Daily Intelligence Report Engine (PR #20, 2026-08-27)
+
+"Báo cáo hằng ngày" là **topic-state + delta**, không phải một message lặp lại snapshot. Tổng hợp trong `extensions/pi/report_engine.py` + cột `pi_topics` ở `pi_store.py`.
+
+**Pipeline (chạy cùng app, chạy cả local + GH-actions-ngầm):**
+
+1. **Collect (scheduled)** — `_pi_collect_job` (IntervalTrigger) cắm giá/observations vào PI DB (Render local storage `HMIP_PI_DB_PATH`); production source-of-truth cho giá nằm GitHub Actions `reconcile`+`app-sync` + Supabase cho giá quét; PI cột nằm local Render.
+2. **Detect + Topics** — `events.detect_events()` quét `pi_observations` → tạo `pi_price_events` (severity/dedup/significance) → gọi `pi_store.rebuild_topics()` **(idempotent)** → `pi_topics` (topic = sku\|channel\|region\|event_type, first_seen/last_updated/status/baseline/current/total delta/last_reported_at).
+3. **Report** — `report_engine.build_daily_report(date)` phân loại NEW (first_seen = ngày đó) / CHANGED (đã biết, cập nhật ngày đó, +enrich `today_old→new/today_change_pct` do event đầu→cuối) / WATCHLIST (OPEN không đổi) → payload JSON 7-section; `render_markdown()` → text; `send_daily_report()` → Telegram/Discord qua `notifiers.send_text` (raw, console fallback) → `mark_topics_reported()`.
+4. **API** — `GET /api/price-intelligence/daily-report`/(`/text`) + `POST /send`; `GET /api/price-intelligence/topics` (status) + `/topics/timeline?topic_key=` (History/timeline).
+
+**Quyết định kiến trúc (ưu tiên đúng không nuốt data ngày tương):** phân loại NEW vs CHANGED dựa trên **events của `report_date`** (không dùng `last_updated` hiện tại của pi_topics), nên backfill ngày quá khứ đúng báo cáo (không "chỉ có changed, không new").
+
+**Rendering:** mỗi topic có `today_old/today_new/today_change_pct` tính từ event đầu→cuối của ngày (lấy từ `pi_price_events`) → section CHANGED chính xác "hôm nay" mà vẫn giữ lifecycle (`total_change_pct`).
+
+**Delivery:** `@notifiers.*.send_text` — raw markdown; **Email kênh mới (**PR #21 mới)**: `extensions/pi/email_report.py` render HTML bilingual (vi → chubay008+kalihello541; zh → uythanhhoang (yingxue đã gỡ 28/08 — có thể thêm lại bất cứ lúc nào)) + Gmail SMTP_SSL; console fallback (như `notify()` cổ xưa), không block trên kênh chưa cấu hình.
+
+**Email config:** `SMTP_HOST`(=smtp.gmail.com), `SMTP_PORT`(=465 SSL), `SMTP_USER`(=chubay008@gmail.com), `SMTP_APP_PASS` (secret), ghi đè recipients qua `EMAIL_VI`/`EMAIL_ZH` (comma). Tắt kênh này: `HMIP_EMAIL_REPORT=off` (mặc định on — trong `send_daily_report`).
+
+⚠️ **Nguồn dữ liệu — KHÔNG lấy seed:** báo cáo chỉ từ `pi_topics`/`pi_price_events` trong SQLite `HMIP_PI_DB_PATH` (nạp bởi `_pi_collect_job` + GH Actions `reconcile/app-sync`). `report_date=None` = hôm nay; nếu không có events (db mới) → báo "không có" (không spam seed). Bản mẫu mà user thấy `24/07/2026` là vì seed 20 ngày look-back — không chạy ở Render.
+
+**Lifecycle/production:** render.yaml Render ephemeral FS → PI DB + topics sống cùng volume; `HMIP_DAILY_REPORT=on` để tắt; giờ/miúp qua `HMIP_DAILY_REPORT_HOUR/MINUTE`.
 
 ---
 
@@ -328,6 +360,9 @@ Scheduler Render đã tắt (`HMIP_AUTOSCAN=off`) → lịch chạy thật nằm
 | `HMIP_SCAN_INTERVAL_MIN` | 30 | Chu kỳ quét (phút) | Có |
 | `HMIP_PI_COLLECT_MIN` | 30 | Chu kỳ quét PI (phút) | Có |
 | `HMIP_PI_AUTOSEED` | on | Auto-seed PI khi rỗng | Có |
+| `HMIP_DAILY_REPORT` | on | Bật/tắt Daily Intelligence Report | Có |
+| `HMIP_DAILY_REPORT_HOUR` | 0 | Giờ chạy report (UTC = 07:00 VN) | Có |
+| `HMIP_DAILY_REPORT_MINUTE` | 0 | Phút chạy report (UTC) | Có |
 | `HMIP_API_TOKEN` / `HMIP_API_TOKENS` | — | Bearer token auth | Có |
 | `HMIP_PRICE_API_BASE`/`_KEY`/`_FIELD_*` | — | Nguồn giá http | Có |
 | `HMIP_BASE_PRICE_<ID>` | — | Ghi đè giá tham chiếu | Có |
