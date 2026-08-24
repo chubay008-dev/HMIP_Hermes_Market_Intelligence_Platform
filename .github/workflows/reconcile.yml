@@ -82,7 +82,7 @@ jobs:
   # Secret cần: HMIP_API_TOKEN (= giá trị HMIP_API_TOKEN trên Render Dashboard).
   app-sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     needs: reconcile
     if: >
       always() && (
@@ -125,13 +125,15 @@ jobs:
             -H "Authorization: Bearer $HMIP_API_TOKEN" || true)
           echo "$resp"
 
-      - name: Trigger PI collect (/api/price-intelligence/collect-if-stale → workspace)
+      - name: Trigger PI collect (blocking /api/price-intelligence/collect → workspace)
         env:
           HMIP_API_TOKEN: ${{ secrets.HMIP_API_TOKEN }}
         run: |
-          resp=$(curl -sS -m 30 -X POST \
-            "$HMIP_BASE_URL/api/price-intelligence/collect-if-stale" \
-            -H "Authorization: Bearer $HMIP_API_TOKEN" || true)
+          # Endpoint blocking (mới, PR #21): đến khi PI collect xong hoàn toàn —
+          # report job phía sau đọc dữ liệu mới nhất. -f: fail đỏ khi 401/5xx.
+          resp=$(curl -sSf -m 300 -X POST \
+            "$HMIP_BASE_URL/api/price-intelligence/collect?limit=200" \
+            -H "Authorization: Bearer $HMIP_API_TOKEN")
           echo "$resp"
 
       - name: Auto-remediation (mở session OpenHands khi fail)
@@ -155,3 +157,63 @@ jobs:
           DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
           DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
         run: python3 scripts/notify_done.py
+
+  # ---- daily report (SAU app-sync + reconcile — đọc dữ liệu đã nạp) ---------
+  # Trigger khi app-sync xong (cùng cron 0 21) → dữ liệu mới nhất.
+  # Cùng gọi /daily-report/send trên Render (API 1 chỗ) → không chồng chéo.
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: app-sync
+    if: >
+      always() && (
+        needs.app-sync.result == 'success'
+        && (
+          github.event.schedule == '0 21 * * *'
+          || github.event_name == 'workflow_dispatch'
+        )
+      )
+    env:
+      HMIP_BASE_URL: https://hmip.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kiểm tra secret HMIP_API_TOKEN
+        env:
+          HMIP_API_TOKEN: ${{ secrets.HMIP_API_TOKEN }}
+        run: |
+          if [ -z "$HMIP_API_TOKEN" ]; then
+            echo "::error::Thiếu secret HMIP_API_TOKEN."
+            exit 1
+          fi
+
+      - name: Wake Render trước khi report
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" -m 20 "$HMIP_BASE_URL/api/health" || true)
+            echo "lần $i: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "::error::Render không sống."
+          exit 1
+
+      - name: Gửi Daily Report qua Render (TG/Discord/email + topics track)
+        env:
+          HMIP_API_TOKEN: ${{ secrets.HMIP_API_TOKEN }}
+        run: |
+          resp=$(curl -sSf -m 120 -X POST \
+            "$HMIP_BASE_URL/api/price-intelligence/daily-report/send" \
+            -H "Authorization: Bearer $HMIP_API_TOKEN")
+          echo "$resp"
+
+      - name: Thông báo hoàn tất (Telegram + Discord)
+        if: always()
+        env:
+          RUN_STATUS: ${{ job.status }}
+          DONE_TASK_DESC: "Daily FMCG Intelligence Report — sau app-sync (dữ liệu mới nhất)"
+          TELEGRAM_DONE_BOT_TOKEN: ${{ secrets.TELEGRAM_DONE_BOT_TOKEN }}
+          TELEGRAM_DONE_CHAT_ID: ${{ secrets.TELEGRAM_DONE_CHAT_ID }}
+          DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
+          DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
+        run: python3 scripts/notify_done.py
+

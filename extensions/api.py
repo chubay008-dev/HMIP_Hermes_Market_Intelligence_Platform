@@ -896,6 +896,22 @@ def pi_collect_if_stale(limit: int | None = None) -> dict[str, Any]:
             "msg": "Đang thu thập giá nền. Poll /api/price-intelligence/overview."}
 
 
+@app.post("/api/price-intelligence/collect")
+def pi_collect_blocking(limit: int | None = None) -> dict[str, Any]:
+    """Thu thập giá PI ĐỒNG BỘ (blocking) — dùng cho GH Actions app-sync/report.
+
+    collect-if-stale chạy background → workflow không biết khi nào xong.
+    Endpoint này chạy đến khi collect + detect_events xong mới trả về,
+    để job report (sau app-sync) đọc được dữ liệu mới nhất.
+    """
+    from extensions.pi import collectors as _col
+    from extensions.pi import events as _ev
+    _path = os.getenv("HMIP_PI_DB_PATH") or None
+    r = _col.collect_realtime_smart(limit=limit, path=_path)
+    _ev.detect_events(path=_path)
+    return {"status": "done", "collect": r, "msg": "PI collect + events xong."}
+
+
 # ------------------------------------------------------------- static
 
 if _STATIC_DIR.exists():
