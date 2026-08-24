@@ -1,9 +1,10 @@
-name: Reconcile giá đa nguồn
+name: Reconcile giá đa nguồn + Daily Report
 
-# Hai lịch trong cùng file, định tuyến job bằng github.event.schedule:
+# Ba lịch trong cùng file, định tuyến job bằng github.event.schedule:
 #   03:30 VN — job reconcile (giá thật → prices_real.json → Render auto-deploy)
-#   04:00 VN — job app-sync (giá quét trang chủ + PI charts workspace trên Render)
-# workflow_dispatch chạy cả hai (app-sync chỉ chạy nếu reconcile thành công).
+#   04:00 VN — job app-sync (giá quét trang chủ + PI collect BLOCKING — xong thật)
+#   ≈05:00 VN — job report (needs: app-sync → gọi /daily-report/send → TG+Discord+Email)
+# workflow_dispatch chạy cả ba (app-sync chỉ chạy nếu reconcile thành công).
 
 on:
   schedule:
@@ -74,11 +75,11 @@ jobs:
           DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
         run: python3 scripts/notify_done.py
 
-  # ---- daily app sync (giá quét trang chủ + PI charts workspace) ---------
-  # Chạy 08:30 VN (cron riêng) hoặc theo sau reconcile khi dispatch tay.
-  # Trigger 2 endpoint async-nền trên Render (trả 200 ngay, không chặn runner):
-  #   - POST /api/run-all → bảng giá quét trang chủ (/api/latest)
-  #   - POST /api/price-intelligence/collect-if-stale → PI charts workspace
+  # ---- daily app sync (giá quét trang chủ + PI collect) --------------------
+  # Chạy 04:00 VN (cron riêng) hoặc theo sau reconcile khi dispatch tay.
+  # Trigger 2 endpoint trên Render (trả 200, không chặn runner):
+  #   - POST /api/scan-if-stale → bảng giá quét trang chủ (/api/latest)
+  #   - POST /api/price-intelligence/collect (BLOCKING — chờ PI xong) → workspace
   # Secret cần: HMIP_API_TOKEN (= giá trị HMIP_API_TOKEN trên Render Dashboard).
   app-sync:
     runs-on: ubuntu-latest
