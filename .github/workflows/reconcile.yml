@@ -132,7 +132,12 @@ jobs:
         run: |
           # Endpoint blocking (mới, PR #21): đến khi PI collect xong hoàn toàn —
           # report job phía sau đọc dữ liệu mới nhất. -f: fail đỏ khi 401/5xx.
-          resp=$(curl -sSf -m 300 -X POST \
+          # Collect duyệt 68 SP × 5 kênh × tier chain (mỗi call sleep 0.6s, HTTP
+          # tới 60s) → thường 10-25'. -m 300 cũ quá ngắn (run 32782202819 timeout
+          # đúng 300s); nâng 1800s (30'), vẫn trong budget job timeout-minutes: 45.
+          # KHÔNG thêm --retry: server vẫn chạy collect tiếp sau khi client ngắt,
+          # retry sẽ kích hoạt collect thứ hai chạy song song.
+          resp=$(curl -sSf -m 1800 -X POST \
             "$HMIP_BASE_URL/api/price-intelligence/collect?limit=200" \
             -H "Authorization: Bearer $HMIP_API_TOKEN")
           echo "$resp"
