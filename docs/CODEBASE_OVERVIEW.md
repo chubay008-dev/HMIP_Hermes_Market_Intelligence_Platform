@@ -329,9 +329,11 @@ Scheduler Render đã tắt (`HMIP_AUTOSCAN=off`) → lịch chạy thật nằm
 
 **Rendering:** mỗi topic có `today_old/today_new/today_change_pct` tính từ event đầu→cuối của ngày (lấy từ `pi_price_events`) → section CHANGED chính xác "hôm nay" mà vẫn giữ lifecycle (`total_change_pct`).
 
-**Delivery:** `@notifiers.*.send_text` — raw markdown; **Email kênh mới (**PR #21 mới)**: `extensions/pi/email_report.py` render HTML bilingual (vi → chubay008+kalihello541; zh → uythanhhoang+yingxue0510) + Gmail SMTP_SSL; console fallback (như `notify()` cổ xưa), không block trên kênh chưa cấu hình.
+**Delivery:** `@notifiers.*.send_text` — raw markdown; **Email kênh mới (**PR #21 mới)**: `extensions/pi/email_report.py` render HTML bilingual (vi → chubay008+kalihello541; zh → uythanhhoang (yingxue đã gỡ 28/08 — có thể thêm lại bất cứ lúc nào)) + Gmail SMTP_SSL; console fallback (như `notify()` cổ xưa), không block trên kênh chưa cấu hình.
 
 **Email config:** `SMTP_HOST`(=smtp.gmail.com), `SMTP_PORT`(=465 SSL), `SMTP_USER`(=chubay008@gmail.com), `SMTP_APP_PASS` (secret), ghi đè recipients qua `EMAIL_VI`/`EMAIL_ZH` (comma). Tắt kênh này: `HMIP_EMAIL_REPORT=off` (mặc định on — trong `send_daily_report`).
+
+⚠️ **Nguồn dữ liệu — KHÔNG lấy seed:** báo cáo chỉ từ `pi_topics`/`pi_price_events` trong SQLite `HMIP_PI_DB_PATH` (nạp bởi `_pi_collect_job` + GH Actions `reconcile/app-sync`). `report_date=None` = hôm nay; nếu không có events (db mới) → báo "không có" (không spam seed). Bản mẫu mà user thấy `24/07/2026` là vì seed 20 ngày look-back — không chạy ở Render.
 
 **Lifecycle/production:** render.yaml Render ephemeral FS → PI DB + topics sống cùng volume; `HMIP_DAILY_REPORT=on` để tắt; giờ/miúp qua `HMIP_DAILY_REPORT_HOUR/MINUTE`.
 

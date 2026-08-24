@@ -178,7 +178,38 @@ def test_email_recipients_and_send_all_langs(db, monkeypatch):
     vi = next(t for t in tos if "chubay008@gmail.com" in t)
     zh = next(t for t in tos if "uythanhhoang@gmail.com" in t)
     assert len(vi) == 2 and "kalihello541@gmail.com" in vi
-    assert len(zh) == 2 and "yingxue0510@gmail.com" in zh
+    assert len(zh) == 1  # yingxue0510 đã gỡ (28/08) — chỉ uythanhhoang
+
+
+def test_email_recipients_env_override(db, monkeypatch):
+    from extensions.pi import email_report
+    day = _busiest_day(db)
+    report = report_engine.build_daily_report(report_date=day, path=db)
+    calls: list[dict] = []
+
+    class _FakeSMTP:
+        def __init__(self, host, port, timeout=30, context=None):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def sendmail(self, frm, to, msg):
+            calls.append({"send": list(to)})
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr("smtplib.SMTP_SSL", _FakeSMTP)
+    monkeypatch.setenv("SMTP_USER", "u@x")
+    monkeypatch.setenv("SMTP_APP_PASS", "p")
+    monkeypatch.setenv("EMAIL_ZH", "uythanhhoang@gmail.com,yingxue0510@gmail.com")
+    email_report.send_report_email(report)
+    zh = next(t for t in (c["send"] for c in calls if "send" in c) if "yingxue0510@gmail.com" in t)
+    assert len(zh) == 2  # override có thể thêm lại yingxue0510 khi muốn
 
 
 def test_send_daily_report_includes_email(db, monkeypatch):

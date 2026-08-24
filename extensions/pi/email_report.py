@@ -34,7 +34,7 @@ from extensions.pi.report_engine import (
 log = logging.getLogger("hmip.email_report")
 
 _VI = ["chubay008@gmail.com", "kalihello541@gmail.com"]
-_ZH = ["uythanhhoang@gmail.com", "yingxue0510@gmail.com"]
+_ZH = ["uythanhhoang@gmail.com"]  # yingxue0510 tạm thời gỡ (28/08) — có thể thêm lại bất cứ lúc nào
 
 _L: dict[str, dict[str, str]] = {
     "vi": {
@@ -270,7 +270,7 @@ def send_via_smtp(subject: str, html_body: str, to_addrs: list[str],
 
 
 def send_report_email(report: dict[str, Any]) -> dict[str, bool]:
-    """Gửi bilingual: vi → chubay008/kalihello541; zh → uythanhhoang/yingxue0510.
+    """Gửi bilingual: vi → chubay008 + kalihello541; zh → uythanhhoang (yingxue đã gỡ 28/08).
 
     Hoạn lọc qua env EMAIL_VI / EMAIL_ZH. Trả {"vi": bool, "zh": bool}.
     """
