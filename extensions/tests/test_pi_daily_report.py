@@ -137,7 +137,7 @@ def test_email_render_html_vi_and_zh(db):
     report = report_engine.build_daily_report(report_date=day, path=db)
     for lang, must_have in (
         ("vi", ("BÁO CÁO TIN TỨC FMCG HÀNG NGÀY", "TÓM TẮT ĐIỀU HÀNH",
-                "MỚI HÔME NAY", "THAY ĐỔI", "LỊCH SỬ", "DAILY FMCG INTELLIGENCE REPORT")),
+                "MỚI HÔM NAY", "THAY ĐỔI", "LỊCH SỬ", "DAILY FMCG INTELLIGENCE REPORT")),
         ("zh", ("每日快消品情报报告", "执行摘要", "今日新增",
                 "自上次报告以来的变化", "历史与来源")),
     ):
@@ -145,6 +145,45 @@ def test_email_render_html_vi_and_zh(db):
         for needle in must_have:
             assert needle in body or needle in subject, f"[{lang}] missing {needle!r}"
         assert "<html>" in body and "</html>" in body
+
+def test_email_render_full_payload_all_branches():
+    """Render không lỗi KeyError khi có đủ NEW + CHANGED + WATCHLIST (cả 2 ngôn ngữ)."""
+    from extensions.pi import email_report
+    topic = {
+        "topic_key": "SKU1|ch1|rg1|PRICE_INCREASE", "sku_id": "SKU1",
+        "product_name": "Bia Test 330ml", "brand": "TestBrand",
+        "channel_id": "tiki", "region_id": "HN", "event_type": "PRICE_INCREASE",
+        "severity": "HIGH", "status": "OPEN", "first_seen": "2026-08-20T03:00:00",
+        "last_updated": "2026-08-24T03:00:00", "event_count": 3,
+        "baseline_price": 10000.0, "current_price": 12000.0,
+        "total_change_pct": 20.0, "last_change_pct": 5.0,
+        "today_old_price": 11000.0, "today_new_price": 12000.0,
+        "today_change_pct": 9.09, "today_events": 1,
+    }
+    new_topic = dict(topic, topic_key="SKU2|ch1|rg1|PRICE_DECREASE",
+                     sku_id="SKU2", event_type="PRICE_DECREASE",
+                     first_seen="2026-08-24T03:00:00")
+    report = {
+        "report_date": "2026-08-24", "generated_at": "2026-08-24T08:00:00",
+        "overall_status": "ATTENTION",
+        "summary": {"critical": 0, "important": 1, "new_topics": 1,
+                    "changed_topics": 1, "watchlist": 1},
+        "actions": {"immediate": [], "today": [topic], "monitor": [topic]},
+        "new_topics": [new_topic], "changed_topics": [topic],
+        "watchlist": [topic],
+        "signals": [{"signal": "Pricing", "current": "2 biến động",
+                     "change": "7.0% TB", "direction": "↑", "confidence": "High"}],
+        "top_critical": [], "top_important": [topic],
+    }
+    for lang, must_have in (
+        ("vi", ("MỚI HÔM NAY", "Theo dõi từ", "Delta tích luỹ", "Đang theo dõi", "tổng")),
+        ("zh", ("今日新增", "跟踪自", "累积变化", "观察中", "总计")),
+    ):
+        subject, body = email_report.render_html(report, lang=lang)
+        for needle in must_have:
+            assert needle in body, f"[{lang}] missing {needle!r}"
+        assert "HÔME" not in body  # không còn lỗi chính tả
+
 
 
 def test_email_recipients_and_send_all_langs(db, monkeypatch):

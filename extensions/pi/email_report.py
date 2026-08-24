@@ -39,9 +39,9 @@ _ZH = ["uythanhhoang@gmail.com"]  # yingxue0510 tạm thời gỡ (28/08) — c�
 _L: dict[str, dict[str, str]] = {
     "vi": {
         "title": "BÁO CÁO TIN TỨC FMCG HÀNG NGÀY — {date}",
-        "period": "Kỳ báo cáo: 24h • Tổng trạng: {overall}",
+        "period": "Kỳ báo cáo: 24h • Trạng thái tổng: {overall}",
         "s1": "1️⃣ TÓM TẮT ĐIỀU HÀNH",
-        "s2": "2️⃣ 🆕 MỚI HÔME NAY",
+        "s2": "2️⃣ 🆕 MỚI HÔM NAY",
         "s3": "3️⃣ 🔄 THAY ĐỔI SO VỚI LẦN BÁO TRƯỚC",
         "s4": "4️⃣ 📌 DANH SÁCH THEO DÕI",
         "s5": "5️⃣ 🎯 HÀNH ĐỘNG KHUYẾN NGHỊ",
@@ -63,6 +63,7 @@ _L: dict[str, dict[str, str]] = {
         "today": "Hôm nay", "cumulative": "Delta tích luỹ", "impact": "Impact",
         "what": "What", "where": "Where", "first_seen": "First seen",
         "why": "Why", "from": "từ", "updates": "lần cập nhật",
+        "tracked_since": "Theo dõi từ", "total": "tổng",
     },
     "zh": {
         "title": "每日快消品情报报告 — {date}",
@@ -90,6 +91,7 @@ _L: dict[str, dict[str, str]] = {
         "today": "今日", "cumulative": "累积变化", "impact": "影响",
         "what": "事件", "where": "渠道/区域", "first_seen": "首次发现",
         "why": "原因", "from": "从", "updates": "次更新",
+        "tracked_since": "跟踪自", "total": "总计",
     },
 }
 
@@ -149,7 +151,7 @@ def render_html(report: dict[str, Any], lang: str = "vi") -> tuple[str, str]:
         for t in report["changed_topics"]:
             parts.append(
                 f"<p>🔄 <b>{html.escape(_topic_name(t))}</b><br>"
-                f"• {_l(lang,'before')} {_l(lang,'first_seen')}: "
+                f"• {_l(lang,'tracked_since')}: "
                 f"{html.escape(_fmt_date(_day(t.get('first_seen'))))} "
                 f"({t.get('event_count', 1)} {_l(lang,'updates')})<br>"
                 f"• {_l(lang,'today')}: {_vnd(_day_old(t))} → {_vnd(_day_new(t))} "
@@ -166,7 +168,7 @@ def render_html(report: dict[str, Any], lang: str = "vi") -> tuple[str, str]:
             parts.append(
                 f"<p>• {html.escape(_topic_name(t))} — {status} "
                 f"({t.get('event_count', 1)} {_l(lang, 'updates')}, "
-                f"tổng {_pct(t.get('total_change_pct'))})</p>")
+                f"{_l(lang, 'total')} {_pct(t.get('total_change_pct'))})</p>")
     else:
         parts.append(f"<p>{_l(lang, 'no_watch')}</p>")
 
