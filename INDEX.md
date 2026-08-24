@@ -43,7 +43,7 @@ Dự án hoàn thành 2026-08-04. File này là điểm bắt đầu khi quay l�
 | `deployment/RELEASE_CHECKLIST.md` | Quy trình release 6 bước, có mục "known gaps" thật thà. |
 | `.env.example` | Toàn bộ biến môi trường, mỗi biến ghi rõ đã nối vào code hay chỉ mới khai báo. |
 | `config/{runtime,logging,deployment}.yaml` | Config runtime thật, do `platform_/bootstrap.py` nạp. |
-| `docs/CODEBASE_OVERVIEW.md` §11–11c | **Lịch automation + Daily Intelligence Report**: scheduler Render + GitHub Actions (3 mốc) + `hmip_daily_report` (CronTrigger 08:00 UTC, PR #20); §12 bảng env đầy đủ (`HMIP_DAILY_REPORT*`). |
+| `docs/CODEBASE_OVERVIEW.md` §11–11c | **Lịch automation + Daily Intelligence Report**: scheduler Render + GitHub Actions (3 mốc) + `hmip_daily_report` (CronTrigger 00:00 UTC = 07:00 VN, PR #20); §12 bảng env đầy đủ (`HMIP_DAILY_REPORT*`). |
 | `AGENTS.md` "Tự động hằng ngày — tổng hợp lịch" | Tóm tắt tay trái (giờ VN) + ghi chú CronTrigger động trong Render (trang handler của report). |
 
 ## Kiểm thử và xác nhận của tôi (27/08/2026)

@@ -26,6 +26,16 @@ def db():
     return PI_DB
 
 
+@pytest.fixture(autouse=True)
+def _no_real_email(monkeypatch):
+    """TUYỆT ĐỐI không gửi email thật từ test (env CI có SMTP_APP_PASS thật).
+
+    Test email bật lại bằng monkeypatch.setenv('HMIP_EMAIL_REPORT', 'on')
+    + mock smtplib.SMTP_SSL.
+    """
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "off")
+
+
 def _busiest_day(db: str) -> str:
     row = pi_store.fetch_one(
         "SELECT substr(timestamp,1,10) AS d, COUNT(*) AS n FROM pi_price_events "
@@ -273,6 +283,7 @@ def test_send_daily_report_includes_email(db, monkeypatch):
     monkeypatch.setattr("smtplib.SMTP_SSL", _FakeSMTP)
     monkeypatch.setenv("SMTP_USER", "u@x")
     monkeypatch.setenv("SMTP_APP_PASS", "p")
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "on")  # autouse fixture tắt mặc định
     day = _busiest_day(db)
     res = report_engine.send_daily_report(report_date=day, path=db)
     assert res["sent"]["email"] == {"vi": True, "zh": True}

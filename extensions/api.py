@@ -193,11 +193,11 @@ async def lifespan(_app: FastAPI):
         _start_auto_scan()
         # Job PI: quét giá thật (chain 4-tier) định kỳ + detect/notify.
         _start_pi_collect(int(os.getenv("HMIP_PI_COLLECT_MIN", "30")))
-    # Daily Intelligence Report (mặc định BẬT, 08:00 UTC — chỉ console-fallback
+    # Daily Intelligence Report (mặc định BẬT, 00:00 UTC = 07:00 VN — chỉ console-fallback
     # nếu chưa cấu hình Telegram/Discord; tắt bằng HMIP_DAILY_REPORT=off).
     if os.getenv("HMIP_DAILY_REPORT", "on").lower() not in ("0", "off", "false", "no"):
         _start_daily_report(
-            hour=int(os.getenv("HMIP_DAILY_REPORT_HOUR", "8")),
+            hour=int(os.getenv("HMIP_DAILY_REPORT_HOUR", "0")),
             minute=int(os.getenv("HMIP_DAILY_REPORT_MINUTE", "0")),
         )
     yield

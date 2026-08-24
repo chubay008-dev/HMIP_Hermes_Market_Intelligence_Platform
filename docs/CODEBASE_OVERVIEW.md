@@ -288,7 +288,7 @@ HMIP/
 |---|---|---|---|
 | `hmip_auto_scan` | IntervalTrigger | `HMIP_SCAN_INTERVAL_MIN` (mặc định 30 phút) | Quét toàn bộ catalog, ghi SQLite, đẩy Telegram nếu decision≠IGNORE |
 | `hmip_pi_collect` | IntervalTrigger | `HMIP_PI_COLLECT_MIN` (mặc định 30 phút) | Thu thập giá thật PI (Firecrawl→Tiki), detect events |
-| `hmip_daily_report` | **CronTrigger** | `HMIP_DAILY_REPORT_HOUR` (mặc định **8:00** hàng ngày, UTC) + `HMIP_DAILY_REPORT_MINUTE` (mặc định 0) | **Daily Intelligence Report** — "Context Once, Delta Every Day": rebuild topics → render 7 section → đẩy Telegram/Discord | 
+| `hmip_daily_report` | **CronTrigger** | `HMIP_DAILY_REPORT_HOUR` (mặc định **0:00** hàng ngày, UTC = 07:00 VN) + `HMIP_DAILY_REPORT_MINUTE` (mặc định 0) | **Daily Intelligence Report** — "Context Once, Delta Every Day": rebuild topics → render 7 section → đẩy Telegram/Discord | 
 
 - Daily Report **mặc định BẬT** (`HMIP_DAILY_REPORT=on`) từ PR #20 (2026-08-27). Trái với auto-scan (`HMIP_AUTOSCAN=off`) là cron khác: job này **là report**, không quét giá/notify lẻ — chỉ dựng topic delta và đẩy nếu có. Kênh chưa cấu hình → console fallback, không block job khác.
 
@@ -356,7 +356,7 @@ Scheduler Render đã tắt (`HMIP_AUTOSCAN=off`) → lịch chạy thật nằm
 | `HMIP_PI_COLLECT_MIN` | 30 | Chu kỳ quét PI (phút) | Có |
 | `HMIP_PI_AUTOSEED` | on | Auto-seed PI khi rỗng | Có |
 | `HMIP_DAILY_REPORT` | on | Bật/tắt Daily Intelligence Report | Có |
-| `HMIP_DAILY_REPORT_HOUR` | 8 | Giờ chạy report (UTC) | Có |
+| `HMIP_DAILY_REPORT_HOUR` | 0 | Giờ chạy report (UTC = 07:00 VN) | Có |
 | `HMIP_DAILY_REPORT_MINUTE` | 0 | Phút chạy report (UTC) | Có |
 | `HMIP_API_TOKEN` / `HMIP_API_TOKENS` | — | Bearer token auth | Có |
 | `HMIP_PRICE_API_BASE`/`_KEY`/`_FIELD_*` | — | Nguồn giá http | Có |
