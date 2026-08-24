@@ -58,7 +58,7 @@ python -m extensions.scheduler
     - `price_extract.py` — `extract_product_price(brand=)` dùng chung: filter hotline garbage + brand matching
     - `firecrawl_collector.py` (tier 1), `scraperapi_collector.py` (tier 2), `zenrows_collector.py` (tier 3), `jina_collector.py` (tier 4)
     - `service.py` — orchestration; `mark_ready` đã sửa `global _seed_state`
-  - `report_engine.py` — **Daily Intelligence Report** ("Context Once — Delta Every Day"): build 7-section (EXEC SUMMARY → NEW → CHANGED → WATCHLIST → ACTIONS → SIGNALS → HISTORY), render markdown Telegram/Discord, send qua `notifiers.send_text`. Phân loại theo events của NGÀY REPORT (không `last_updated` hiện tại) → backfill ngày quá khứ đúng.
+  - `report_engine.py` — **Daily Intelligence Report** ("Context Once — Delta Every Day"): build 7-section (EXEC SUMMARY → NEW → CHANGED → WATCHLIST → ACTIONS → SIGNALS → HISTORY), render markdown Telegram/Discord, send qua `notifiers.send_text`. Phân loại theo events của NGÀY REPORT (không `last_updated` hiện tại) → backfill ngày quá khứ đúng. Test: `extensions/tests/test_pi_daily_report.py` (9 test); render smoke TestClient (PR #20).
   - `pi_store.py` — thêm `pi_topics` (Intelligence Event có vòng đời: first_seen/last_updated/status/baseline/current/total delta/last_event id). `rebuild_topics()` idempotent (delete+insert, giữ `last_reported_at`); gọi cuối `detect_events()`.
     - `pi_store.py` — đã thêm cột `metadata` cho `pi_skus` (marker); **PR #12: `migrate_brand_ids()`** backfill `brand_id` observation từ `pi_products.brand_id`, xoá brand rỗng/Unknown (idempotent, wire vào `api.py` lifespan startup)
     - `analytics.py` — **PR #12:** JOIN `pi_brands` qua `pi_products.brand_id` (không qua `pi_observations.brand_id`) cho `positioning_matrix()`/`catalog()`/`competitor_comparison()` → Competitor Comparison + Price Index (by Brand) không còn "Unknown"; **+`promotion_by_brand` + `promotion_timeline`** (chart Promotion Intelligence)
@@ -135,6 +135,7 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - Thu thập giá: `HMIP_COLLECT_MODE` (demo|http). `http` mà không set `HMIP_PRICE_API_BASE` → fallback Tiki API.
 - Chain smart PI: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render `sync: false`).
 - Scheduler: `HMIP_AUTOSCAN` (bật/tắt quét nền `hmip_auto_scan` + `hmip_pi_collect`; 21/08 đã gỡ — deploy mặc định `off`), `HMIP_SCAN_INTERVAL_MIN`, `HMIP_PI_COLLECT_MIN` (chu kỳ nếu bật lại).
+- **Daily Intelligence Report (kênh email PR #21, 28/08):** `HMIP_DAILY_REPORT`=on (default) — job CronTrigger mình **mặc định BẬT mỗi ngày**; `HMIP_DAILY_REPORT_HOUR`=8 (UTC) + `HMIP_DAILY_REPORT_MINUTE`=0. Khác với auto-scan (PR #21/08 đã off): job này chỉ report — dựng `pi_topics` delta → render 7-section → đẩy TG/Discord qua `notifiers.send_text` (raw) **+ gửi email HTML bilingual qua `extensions/pi/email_report`** (vi → chubay008+kalihello541; zh → uythanhhoang+yingxue0510); console fallback. Tuyến phụ: (1) `GET .../daily-report` JSON; (2) `/text` markdown; (3) `POST .../send`; (4) `GET .../topics` (list) + (5) `/topics/timeline?topic_key=` (History). Endpoints xem trên API / smoke-tested TestClient (PR #20 commit `61c1e78`; PR #21 bổ sung email).
 - Auto-scan khi vào trang: `HMIP_AUTO_SCAN_STALE_MIN` (mặc định 5'). Khi user truy cập `/`, `/pi`, `/workspace` → frontend gọi `/api/scan-if-stale` (+ `/api/price-intelligence/collect-if-stale` cho PI) → backend chỉ quét background nếu dữ liệu cũ hơn cửa sổ; fresh → skip (tránh spam Render/credit khi refresh). `0` = luôn quét.
 - Xem `.env.example` cho danh sách đầy đủ (ghi rõ biến nào đã/ chưa nối code).
 
@@ -252,6 +253,21 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 - beer-scan schedule không chạy → do default branch `openhands/data-upload`, không có `main`. Fix: tạo `main` + đổi default (20/08).
 - `HMIP_SYNC_PAT` hết hạn (22/08) → bước "Sync scan data to HMIP repo" fail "Invalid username or token". Fix: rotate PAT mới vào secret. ⚠️ **`gh run rerun --failed` KHÔNG cứu được sync**: rerun checkout lại SHA cũ → step "Commit & push" bị remote reject (đã có commit cùng ngày) → step sync bị skip. Cách đồng bộ bù: clone beer-price-scan@main về local rồi chạy `HMIP_SYNC_PAT=... python3 sync_to_hmip.py` (script chỉ đọc file JSON/report ở repo root).
 - **GitHub Actions free tier trễ lịch 2,5–3h** vào khung UTC 00:00–04:00 (tức 07:00–11:00 VN): 3 mốc 07:30/08:00/08:30 VN thực tế chạy ~10:13/10:26/10:55 VN (quan sát 21–22/08). Pipeline vẫn đúng thứ tự, email đến ~10:30–11:00 VN. Đây là giới hạn SLA của GitHub, không phải lỗi pipeline.
+
+## Tự động hằng ngày — tổng hợp lịch (27/08/2026)
+
+**Two cụm chạy mỗi ngày sau khi PR #20 lên (giờ VN, nguồn cron chuẩn tại `.github/workflows/reconcile.yml` + `extensions/api.py`):**
+
+| Giờ VN | Lớp | Job | Hành động |
+|---|---|---|---|
+| 03:00 VN | GH Actions (beer-price-scan) | `daily-scan.yml` | Quét nguồn giá → email 4 hộp thư (VN+ZH) → push Supabase (repo scan) → notify TG+Discord |
+| 03:30 VN | GH Actions (HMIP) | `reconcile.yml` job `reconcile` (cron `30 20 * * *`) | `reconcile_prices.py` → commit `prices_real.json` → Render auto-deploy |
+| 04:00 VN | GH Actions (HMIP) | `reconcile.yml` job `app-sync` (cron `0 21 * * *`) | Wake Render → `POST /api/scan-if-stale` + `POST /api/price-intelligence/collect-if-stale` kích collect PI (detectEvents → rebuild_topics) |
+| **08:00 UTC (= 15:00 VN)** | **Render BackgroundScheduler** | `hmip_daily_report` (PR #20) | `build_daily_report(today)` → render 7-section → `send_daily_report` (TG/Discord send_text) |
+
+- Render scheduler 4 job: `hmip_auto_scan`, `hmip_pi_collect` (KHÔNG chạy — `HMIP_AUTOSCAN=off`), **`hmip_daily_report` (MỚI)**, trong background của web app (1 process).
+- `reconcile.yml` có 2 lịch (cron) trong 1 file, định tuyến job bằng `github.event.schedule`.
+- ⚠️ **Daily report KHÔNG dùng `POST /api/run-all` nào** — chỉ nội bộ CronTrigger; dev muốn chạy tay dùng `POST /api/price-intelligence/daily-report/send` hoặc set `HMIP_DAILY_REPORT=off/on` + restart.
 
 ## Nhật ký phiên 22/08/2026 — đại tu pipeline thông báo & tự xử lý lỗi
 

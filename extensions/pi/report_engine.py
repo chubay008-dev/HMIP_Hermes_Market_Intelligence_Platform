@@ -354,10 +354,13 @@ def _render_changed_topic(t: dict[str, Any]) -> str:
 
 def send_daily_report(report_date: str | None = None,
                       path: str | None = None) -> dict[str, Any]:
-    """Build + render + đẩy lên Telegram/Discord + đánh dấu topic đã report.
+    """Build + render + đẩy lên Telegram/Discord + email VN/ZH + đánh dấu topic.
 
-    Trả dict {sent: {telegram, discord}, text_len, report_date}. Kênh nào chưa
-    cấu hình → console fallback (vẫn tính sent=True như notify() gốc).
+    Trả dict {sent: {telegram, discord, email}, text_len, report_date}.
+    Kênh nào chưa cấu hình → console fallback.
+    Email: extensions/pi/email_report.send_report_email — bilingual
+    (vi → chubay008 + kalihello541, zh → uythanhhoang + yingxue0510),
+    định tuyến qua EMAIL_VI/EMAIL_ZH; tắt bằng HMIP_EMAIL_REPORT=off.
     """
     from extensions.notifiers import discord as dc
     from extensions.notifiers import telegram as tg
@@ -366,9 +369,17 @@ def send_daily_report(report_date: str | None = None,
     text = render_markdown(report)
     sent_tg = tg.send_text(text)
     sent_dc = dc.send_text(text)
+    sent_email: dict[str, bool] = {}
+    from extensions.pi import email_report
+    if email_report.email_report_enabled():
+        sent_email = email_report.send_report_email(report)
+        log.info("Daily report email → %s", sent_email)
+
     keys = [t["topic_key"] for t in (report["new_topics"] + report["changed_topics"])]
-    if sent_tg or sent_dc:
+    email_ok = any(sent_email.values()) if sent_email else False
+    sent_any = sent_tg or sent_dc or email_ok
+    if sent_any:
         pi_store.mark_topics_reported(keys, report["report_date"], path=path)
-    return {"sent": {"telegram": sent_tg, "discord": sent_dc},
+    return {"sent": {"telegram": sent_tg, "discord": sent_dc, "email": sent_email},
             "text_len": len(text), "report_date": report["report_date"],
-            "topics_reported": len(keys) if (sent_tg or sent_dc) else 0}
+            "topics_reported": len(keys) if sent_any else 0}

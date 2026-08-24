@@ -198,6 +198,7 @@ HMIP/
 - `GET /api/price-intelligence/{catalog,overview,workspace,status}`
 - `POST /api/price-intelligence/seed` — seed dữ liệu bất đồng bộ
 - `GET /api/prices/{trend,index-trend,index,positioning,channel-comparison,regional,promotions,events,alerts}`
+- **Daily Report (PR #20):** `GET /api/price-intelligence/daily-report` (payload JSON 7-section), `GET /api/price-intelligence/daily-report/text` (markdown), `POST /api/price-intelligence/daily-report/send` (đẩy TG/Discord + đánh dấu reported), `GET /api/price-intelligence/topics` (list Intelligence Events có status), `GET /api/price-intelligence/topics/timeline?topic_key=` (History View per topic)
 - `GET /api/prices/sku/{sku_id}`
 - `POST /api/prices/{reset,collect}`
 - `POST /api/ai/price-analysis` — AI Analyst (event_id hoặc question)
@@ -287,6 +288,9 @@ HMIP/
 |---|---|---|---|
 | `hmip_auto_scan` | IntervalTrigger | `HMIP_SCAN_INTERVAL_MIN` (mặc định 30 phút) | Quét toàn bộ catalog, ghi SQLite, đẩy Telegram nếu decision≠IGNORE |
 | `hmip_pi_collect` | IntervalTrigger | `HMIP_PI_COLLECT_MIN` (mặc định 30 phút) | Thu thập giá thật PI (Firecrawl→Tiki), detect events |
+| `hmip_daily_report` | **CronTrigger** | `HMIP_DAILY_REPORT_HOUR` (mặc định **8:00** hàng ngày, UTC) + `HMIP_DAILY_REPORT_MINUTE` (mặc định 0) | **Daily Intelligence Report** — "Context Once, Delta Every Day": rebuild topics → render 7 section → đẩy Telegram/Discord | 
+
+- Daily Report **mặc định BẬT** (`HMIP_DAILY_REPORT=on`) từ PR #20 (2026-08-27). Trái với auto-scan (`HMIP_AUTOSCAN=off`) là cron khác: job này **là report**, không quét giá/notify lẻ — chỉ dựng topic delta và đẩy nếu có. Kênh chưa cấu hình → console fallback, không block job khác.
 
 - Auto-scan bật khi `HMIP_AUTOSCAN=on`. Mặc định `off` ở mọi nơi (đã gỡ job nền từ `docker-compose.yml`/`render.yaml` 21/08).
 - `max_instances=1, coalesce=True` — tránh chồng chéo.
@@ -310,6 +314,27 @@ Scheduler Render đã tắt (`HMIP_AUTOSCAN=off`) → lịch chạy thật nằm
 - Secrets cần: repo HMIP có `HMIP_API_TOKEN` (= `HMIP_API_TOKEN` trên Render Dashboard); repo beer-scan có `HMIP_SYNC_PAT`, `SMTP_APP_PASS`, `APIFY_TOKEN`, TG/Discord, Supabase của repo scan.
 - Độ trễ email (~07:40) → web (~08:10) là **thiết kế** (buffer cho beer-scan sync xong), không phải lỗi.
 
+### 11c. Daily Intelligence Report Engine (PR #20, 2026-08-27)
+
+"Báo cáo hằng ngày" là **topic-state + delta**, không phải một message lặp lại snapshot. Tổng hợp trong `extensions/pi/report_engine.py` + cột `pi_topics` ở `pi_store.py`.
+
+**Pipeline (chạy cùng app, chạy cả local + GH-actions-ngầm):**
+
+1. **Collect (scheduled)** — `_pi_collect_job` (IntervalTrigger) cắm giá/observations vào PI DB (Render local storage `HMIP_PI_DB_PATH`); production source-of-truth cho giá nằm GitHub Actions `reconcile`+`app-sync` + Supabase cho giá quét; PI cột nằm local Render.
+2. **Detect + Topics** — `events.detect_events()` quét `pi_observations` → tạo `pi_price_events` (severity/dedup/significance) → gọi `pi_store.rebuild_topics()` **(idempotent)** → `pi_topics` (topic = sku\|channel\|region\|event_type, first_seen/last_updated/status/baseline/current/total delta/last_reported_at).
+3. **Report** — `report_engine.build_daily_report(date)` phân loại NEW (first_seen = ngày đó) / CHANGED (đã biết, cập nhật ngày đó, +enrich `today_old→new/today_change_pct` do event đầu→cuối) / WATCHLIST (OPEN không đổi) → payload JSON 7-section; `render_markdown()` → text; `send_daily_report()` → Telegram/Discord qua `notifiers.send_text` (raw, console fallback) → `mark_topics_reported()`.
+4. **API** — `GET /api/price-intelligence/daily-report`/(`/text`) + `POST /send`; `GET /api/price-intelligence/topics` (status) + `/topics/timeline?topic_key=` (History/timeline).
+
+**Quyết định kiến trúc (ưu tiên đúng không nuốt data ngày tương):** phân loại NEW vs CHANGED dựa trên **events của `report_date`** (không dùng `last_updated` hiện tại của pi_topics), nên backfill ngày quá khứ đúng báo cáo (không "chỉ có changed, không new").
+
+**Rendering:** mỗi topic có `today_old/today_new/today_change_pct` tính từ event đầu→cuối của ngày (lấy từ `pi_price_events`) → section CHANGED chính xác "hôm nay" mà vẫn giữ lifecycle (`total_change_pct`).
+
+**Delivery:** `@notifiers.*.send_text` — raw markdown; **Email kênh mới (**PR #21 mới)**: `extensions/pi/email_report.py` render HTML bilingual (vi → chubay008+kalihello541; zh → uythanhhoang+yingxue0510) + Gmail SMTP_SSL; console fallback (như `notify()` cổ xưa), không block trên kênh chưa cấu hình.
+
+**Email config:** `SMTP_HOST`(=smtp.gmail.com), `SMTP_PORT`(=465 SSL), `SMTP_USER`(=chubay008@gmail.com), `SMTP_APP_PASS` (secret), ghi đè recipients qua `EMAIL_VI`/`EMAIL_ZH` (comma). Tắt kênh này: `HMIP_EMAIL_REPORT=off` (mặc định on — trong `send_daily_report`).
+
+**Lifecycle/production:** render.yaml Render ephemeral FS → PI DB + topics sống cùng volume; `HMIP_DAILY_REPORT=on` để tắt; giờ/miúp qua `HMIP_DAILY_REPORT_HOUR/MINUTE`.
+
 ---
 
 ## 12. Cấu hình & biến môi trường
@@ -328,6 +353,9 @@ Scheduler Render đã tắt (`HMIP_AUTOSCAN=off`) → lịch chạy thật nằm
 | `HMIP_SCAN_INTERVAL_MIN` | 30 | Chu kỳ quét (phút) | Có |
 | `HMIP_PI_COLLECT_MIN` | 30 | Chu kỳ quét PI (phút) | Có |
 | `HMIP_PI_AUTOSEED` | on | Auto-seed PI khi rỗng | Có |
+| `HMIP_DAILY_REPORT` | on | Bật/tắt Daily Intelligence Report | Có |
+| `HMIP_DAILY_REPORT_HOUR` | 8 | Giờ chạy report (UTC) | Có |
+| `HMIP_DAILY_REPORT_MINUTE` | 0 | Phút chạy report (UTC) | Có |
 | `HMIP_API_TOKEN` / `HMIP_API_TOKENS` | — | Bearer token auth | Có |
 | `HMIP_PRICE_API_BASE`/`_KEY`/`_FIELD_*` | — | Nguồn giá http | Có |
 | `HMIP_BASE_PRICE_<ID>` | — | Ghi đè giá tham chiếu | Có |

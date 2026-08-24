@@ -126,3 +126,93 @@ def test_send_daily_report_marks_topics(db):
     row = pi_store.fetch_one(
         "SELECT COUNT(*) AS n FROM pi_topics WHERE last_reported_at = ?", (day,), path=db)
     assert row["n"] == res["topics_reported"]
+
+# ---------------------------------------------------------------------------
+# Email channel (PR: vi + zh qua Gmail SMTP) — mock SMTP để không gọi mạng.
+# ---------------------------------------------------------------------------
+
+def test_email_render_html_vi_and_zh(db):
+    from extensions.pi import email_report
+    day = _busiest_day(db)
+    report = report_engine.build_daily_report(report_date=day, path=db)
+    for lang, must_have in (
+        ("vi", ("BÁO CÁO TIN TỨC FMCG HÀNG NGÀY", "TÓM TẮT ĐIỀU HÀNH",
+                "MỚI HÔME NAY", "THAY ĐỔI", "LỊCH SỬ", "DAILY FMCG INTELLIGENCE REPORT")),
+        ("zh", ("每日快消品情报报告", "执行摘要", "今日新增",
+                "自上次报告以来的变化", "历史与来源")),
+    ):
+        subject, body = email_report.render_html(report, lang=lang)
+        for needle in must_have:
+            assert needle in body or needle in subject, f"[{lang}] missing {needle!r}"
+        assert "<html>" in body and "</html>" in body
+
+
+def test_email_recipients_and_send_all_langs(db, monkeypatch):
+    from extensions.pi import email_report
+    day = _busiest_day(db)
+    report = report_engine.build_daily_report(report_date=day, path=db)
+    calls: list[dict] = []
+
+    class _FakeSMTP:
+        def __init__(self, host, port, timeout=30, context=None):
+            calls.append({"host": host, "port": port})
+
+        def login(self, user, password):
+            calls.append({"login": user})
+
+        def sendmail(self, frm, to, msg):
+            calls.append({"send": list(to), "subject": frm})
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr("smtplib.SMTP_SSL", _FakeSMTP)
+    monkeypatch.setenv("SMTP_USER", "chubay008@gmail.com")
+    monkeypatch.setenv("SMTP_APP_PASS", "tok")
+    sent = email_report.send_report_email(report)
+    assert sent == {"vi": True, "zh": True}
+    tos = [c["send"] for c in calls if "send" in c]
+    vi = next(t for t in tos if "chubay008@gmail.com" in t)
+    zh = next(t for t in tos if "uythanhhoang@gmail.com" in t)
+    assert len(vi) == 2 and "kalihello541@gmail.com" in vi
+    assert len(zh) == 2 and "yingxue0510@gmail.com" in zh
+
+
+def test_send_daily_report_includes_email(db, monkeypatch):
+    captured = {}
+
+    class _FakeSMTP:
+        def __init__(self, host, port, timeout=30, context=None):
+            pass
+
+        def login(self, user, password):
+            pass
+
+        def sendmail(self, frm, to, msg):
+            captured.setdefault("lang", []).append((frm, list(to)))
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+    monkeypatch.setattr("smtplib.SMTP_SSL", _FakeSMTP)
+    monkeypatch.setenv("SMTP_USER", "u@x")
+    monkeypatch.setenv("SMTP_APP_PASS", "p")
+    day = _busiest_day(db)
+    res = report_engine.send_daily_report(report_date=day, path=db)
+    assert res["sent"]["email"] == {"vi": True, "zh": True}
+    assert res["sent"]["telegram"] and res["sent"]["discord"]
+
+
+def test_email_disabled_env(db, monkeypatch):
+    from extensions.pi import email_report
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "off")
+    assert email_report.email_report_enabled() is False
+    monkeypatch.setenv("HMIP_EMAIL_REPORT", "on")
+    assert email_report.email_report_enabled() is True
+
