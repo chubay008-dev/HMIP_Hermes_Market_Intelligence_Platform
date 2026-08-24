@@ -34,7 +34,7 @@ from extensions.pi.report_engine import (
 log = logging.getLogger("hmip.email_report")
 
 _VI = ["chubay008@gmail.com", "kalihello541@gmail.com"]
-_ZH = ["uythanhhoang@gmail.com"]  # yingxue0510 tạm thời gỡ (28/08) — có thể thêm lại bất cứ lúc nào
+_ZH = ["uythanhhoang@gmail.com", "yingxue0510@gmail.com"]  # VN → _VI; ZH thuần → _ZH
 
 _L: dict[str, dict[str, str]] = {
     "vi": {

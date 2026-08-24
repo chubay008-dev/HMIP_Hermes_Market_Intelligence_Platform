@@ -135,7 +135,14 @@ Thứ tự fallback: **Firecrawl → ScraperAPI → ZenRows → Jina** (→ Craw
 - Thu thập giá: `HMIP_COLLECT_MODE` (demo|http). `http` mà không set `HMIP_PRICE_API_BASE` → fallback Tiki API.
 - Chain smart PI: `FIRECRAWL_API_KEY`, `SCRAPERAPI_KEY`, `ZENROWS_KEY` (Render `sync: false`).
 - Scheduler: `HMIP_AUTOSCAN` (bật/tắt quét nền `hmip_auto_scan` + `hmip_pi_collect`; 21/08 đã gỡ — deploy mặc định `off`), `HMIP_SCAN_INTERVAL_MIN`, `HMIP_PI_COLLECT_MIN` (chu kỳ nếu bật lại).
-- **Daily Intelligence Report (kênh email PR #21, 28/08):** `HMIP_DAILY_REPORT`=on (default) — job CronTrigger mình **mặc định BẬT mỗi ngày**; `HMIP_DAILY_REPORT_HOUR`=0 (UTC = 07:00 VN) + `HMIP_DAILY_REPORT_MINUTE`=0. Khác với auto-scan (PR #21/08 đã off): job này chỉ report — dựng `pi_topics` delta → render 7-section → đẩy TG/Discord qua `notifiers.send_text` (raw) **+ gửi email HTML bilingual qua `extensions/pi/email_report`** (vi → chubay008+kalihello541; zh → uythanhhoang (yingxue0510 đã gỡ 28/08 tạm thời)); console fallback. Tuyến phụ: (1) `GET .../daily-report` JSON; (2) `/text` markdown; (3) `POST .../send`; (4) `GET .../topics` (list) + (5) `/topics/timeline?topic_key=` (History). Endpoints xem trên API / smoke-tested TestClient (PR #20 commit `61c1e78`; PR #21 bổ sung email).
+- **Lịch chạy hằng ngày (giờ VN):**
+  - **03:00** — beer-scan `daily-scan.yml` → email 4 hộp (VN 2 + ZH 2, thuần ZH = uythanhhoang+yingxue0510) → push Supabase → notify TG+Discord
+  - **03:30** — HMIP `reconcile` (cron `30 20 * * *`) → commit giá → Render auto-deploy
+  - **04:00** — HMIP `app-sync` (cron `0 21 * * *`) → wake → `/api/scan-if-stale` (trang chủ) + **`/api/price-intelligence/collect` (blocking — chờ PI xong trước)**
+  - **≈05:00** — HMIP `report` (needs: app-sync trong `reconcile.yml`) → `POST /api/price-intelligence/daily-report/send` trên Render → gửi **TG+Discord+Email** với dữ liệu đã nạp
+- **Trạng thái Render scheduler (KHÔNG tự chạy, GH Actions điều khiển):** `hmip_auto_scan`=off (`HMIP_AUTOSCAN=off`), `hmip_pi_collect`=off (spr), `hmip_daily_report`=**off mặc định** (`HMIP_DAILY_REPORT=off`) — Render chỉ cung cấp endpoints, workflow là nguồn. User muốn bật nội bộ cho đuidelim qua `HMIP_DAILY_REPORT=on` trên Render (chọn riêng).
+- **Email channel (PR #21):** `extensions/pi/email_report.py` HTML bilingual — vi → chubay008+kalihello541; **zh thuần → uythanhhoang+yingxue0510**. Env `EMAIL_VI`/`EMAIL_ZH` ghi đè. `HMIP_EMAIL_REPORT`=on (mặc định). SMTP Gmail SSL; secret `SMTP_APP_PASS`; user `SMTP_USER` (=chubay008@gmail.com).
+- **Endpoints:** (1) `GET .../daily-report` JSON; (2) `/text` markdown; (3) `POST .../send` (workflow report); (4) `GET .../topics` (list) + (5) `/topics/timeline?topic_key=` (History); (6) **`POST .../collect` blocking** (app-sync); (7) `POST .../collect-if-stale` (async — vào /pi). Smoke-tested TestClient + CURL smoke (PR #20 61c1e78; PR #21 bổ sung email + report-after-app-sync).
 - Auto-scan khi vào trang: `HMIP_AUTO_SCAN_STALE_MIN` (mặc định 5'). Khi user truy cập `/`, `/pi`, `/workspace` → frontend gọi `/api/scan-if-stale` (+ `/api/price-intelligence/collect-if-stale` cho PI) → backend chỉ quét background nếu dữ liệu cũ hơn cửa sổ; fresh → skip (tránh spam Render/credit khi refresh). `0` = luôn quét.
 - Xem `.env.example` cho danh sách đầy đủ (ghi rõ biến nào đã/ chưa nối code).
 
@@ -260,14 +267,14 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 
 | Giờ VN | Lớp | Job | Hành động |
 |---|---|---|---|
-| 03:00 VN | GH Actions (beer-price-scan) | `daily-scan.yml` | Quét nguồn giá → email 4 hộp thư (VN+ZH) → push Supabase (repo scan) → notify TG+Discord |
+| 03:00 VN | GH Actions (beer-price-scan) | `daily-scan.yml` | Quét nguồn giá → email 4 hộp thư (VN 2 + ZH 2, thuần ZH = uythanhhoang+yingxue0510) → push Supabase (repo scan) → notify TG+Discord |
 | 03:30 VN | GH Actions (HMIP) | `reconcile.yml` job `reconcile` (cron `30 20 * * *`) | `reconcile_prices.py` → commit `prices_real.json` → Render auto-deploy |
-| 04:00 VN | GH Actions (HMIP) | `reconcile.yml` job `app-sync` (cron `0 21 * * *`) | Wake Render → `POST /api/scan-if-stale` + `POST /api/price-intelligence/collect-if-stale` kích collect PI (detectEvents → rebuild_topics) |
-| **00:00 UTC (= 07:00 VN)** | **Render BackgroundScheduler** | `hmip_daily_report` (PR #20) | `build_daily_report(today)` → render 7-section → `send_daily_report` (TG/Discord send_text) |
+| 04:00 VN | GH Actions (HMIP) | `reconcile.yml` job `app-sync` (cron `0 21 * * *`) | Wake Render → `POST /api/scan-if-stale` + **`POST /api/price-intelligence/collect` (blocking — chờ PI xong)** |
+| **≈05:00 VN (sau app-sync)** | GH Actions (HMIP) | `reconcile.yml` job `report` (needs: app-sync) | `POST /api/price-intelligence/daily-report/send` trên Render → gửi **TG+Discord+Email** |
 
-- Render scheduler 4 job: `hmip_auto_scan`, `hmip_pi_collect` (KHÔNG chạy — `HMIP_AUTOSCAN=off`), **`hmip_daily_report` (MỚI)**, trong background của web app (1 process).
-- `reconcile.yml` có 2 lịch (cron) trong 1 file, định tuyến job bằng `github.event.schedule`.
-- ⚠️ **Daily report KHÔNG dùng `POST /api/run-all` nào** — chỉ nội bộ CronTrigger; dev muốn chạy tay dùng `POST /api/price-intelligence/daily-report/send` hoặc set `HMIP_DAILY_REPORT=off/on` + restart.
+- Render scheduler (off by default): `hmip_auto_scan`, `hmip_pi_collect`, `hmip_daily_report` (KHÔNG chạy — workflow điều khiển). User muốn bật nội bộ (lựa chọn riêng) qua `HMIP_DAILY_REPORT=on`.
+- `reconcile.yml` giờ 3 job: `reconcile` (03:30) → `app-sync` (04:00) → **`report` (needs: app-sync)**.
+- ⚠️ **Daily report không dùng `POST /api/run-all` nào** — chỉ qua workflow; dev muốn chạy tay dùng `POST /api/price-intelligence/daily-report/send` + optional `?date=`.
 
 ## Nhật ký phiên 22/08/2026 — đại tu pipeline thông báo & tự xử lý lỗi
 
