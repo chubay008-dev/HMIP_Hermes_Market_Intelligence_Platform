@@ -257,7 +257,9 @@ def send_via_smtp(subject: str, html_body: str, to_addrs: list[str],
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = user
-    msg["To"] = ", ".join(to_addrs)
+    # Recipients đi qua BCC: không hiển thị địa chỉ email của nhau trong báo
+    # cáo (đặt BCC trước khi as_string() render lại header theo yêu cầu này).
+    msg["Bcc"] = ", ".join(to_addrs)
     msg.attach(MIMEText(html_body, "html", "utf-8"))
     ctx = ssl.create_default_context()
     try:
