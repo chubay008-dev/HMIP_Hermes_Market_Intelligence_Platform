@@ -116,7 +116,23 @@ def test_report_no_events_day_is_calm(db):
     assert rep["summary"]["new_topics"] == 0
     assert rep["summary"]["changed_topics"] == 0
     text = report_engine.render_markdown(rep)
-    assert "Không có thông tin mới" in text
+    assert "Chưa có thông tin mới" in text
+
+
+def test_report_empty_day_has_market_snapshot(db):
+    """Fallback: ngày không có delta vẫn phải có snapshot giá thật (Job 1)."""
+    rep = report_engine.build_daily_report(report_date="1999-01-01", path=db)
+    snap = rep["market_snapshot"]
+    assert snap is not None and snap["items"], "phải có snapshot giá thật khi delta rỗng"
+    assert snap["total_products"] > 0
+    assert all(it["price_case_vnd"] for it in snap["items"])
+    text = report_engine.render_markdown(rep)
+    assert "Giá niêm yết mới nhất" in text
+    # Email cả 2 ngôn ngữ đều render được snapshot, không vỡ format.
+    from extensions.pi import email_report
+    for lang in ("vi", "zh"):
+        _, body = email_report.render_html(rep, lang=lang)
+        assert "<li>" in body and "₫" in body
 
 
 def test_topic_timeline(db):

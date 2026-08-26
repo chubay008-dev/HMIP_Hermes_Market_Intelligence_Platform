@@ -13,14 +13,23 @@ nguồn: pi_topics (derived từ pi_price_events) + pi_promotions cho signal.
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from extensions.pi import pi_store
 from extensions.pi.models import Severity, now_iso
 
 log = logging.getLogger("hmip.report")
+
+# Nguồn dữ liệu thật dự phòng: master prices_real.json (được Job reconcile
+# ghi sau mỗi daily scan của repo beer-price-scan) + meta lần sync gần nhất.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_PRICES_REAL_FILE = _REPO_ROOT / "knowledge" / "master" / "prices_real.json"
+_BEER_SCAN_META = (_REPO_ROOT / "knowledge" / "dynamic" / "beer_scan"
+                   / "latest" / "_sync_meta.json")
 
 _SEV_EMOJI = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡", "LOW": "🟢", "INFO": "⚪"}
 _IMPACT = {"CRITICAL": "🔴 High", "HIGH": "🟠 Medium", "MEDIUM": "🟢 Low", "LOW": "🟢 Low"}
@@ -137,6 +146,7 @@ def build_daily_report(report_date: str | None = None,
 
     actions = _build_actions(critical, important, watchlist)
     signals = _build_signals(changed_today, report_date, path)
+    snapshot = _build_market_snapshot() if not changed_today else None
 
     return {
         "report_date": report_date,
@@ -156,6 +166,68 @@ def build_daily_report(report_date: str | None = None,
         "signals": signals,
         "top_critical": critical[:5],
         "top_important": _sort_topics(important)[:5],
+        # Fallback: khi không có delta (PI events rỗng / changed = 0), vẫn
+        # luôn có snapshot giá thật từ Job daily scan → người đọc không bao
+        # giờ nhận báo cáo trắng. None khi hôm nay đã có delta thật.
+        "market_snapshot": snapshot,
+    }
+
+
+def _build_market_snapshot(top_n: int = 8) -> dict[str, Any] | None:
+    """Snapshot giá thật từ knowledge/master/prices_real.json (Job 1 daily
+    scan → reconcile). Trả None khi file thiếu/rỗng (không vỡ report).
+
+    Mỗi item: {product_id, name, price_case_vnd, price_single_vnd,
+    best_channel, confidence, captured_date}. Meta gồm scan_date (ngày
+    beer-price-scan sync gần nhất) + captured_date (ngày reconcile).
+    """
+    if not _PRICES_REAL_FILE.exists():
+        log.warning("snapshot: thiếu %s", _PRICES_REAL_FILE)
+        return None
+    try:
+        data = json.loads(_PRICES_REAL_FILE.read_text(encoding="utf-8"))
+    except Exception as exc:
+        log.warning("snapshot: lỗi đọc prices_real.json: %s", exc)
+        return None
+    prices = [p for p in data.get("prices", [])
+              if isinstance(p, dict) and p.get("price_case_vnd")]
+    if not prices:
+        return None
+    # Ưu tiên SP confidence cao, nguồn đa kênh — thông tin đáng tin nhất lên đầu.
+    conf_rank = {"high": 3, "medium": 2, "low": 1}
+    prices.sort(key=lambda p: (-conf_rank.get(p.get("confidence") or "", 0),
+                               -(len(p.get("channels") or {}))))
+    scan_date = ""
+    try:
+        if _BEER_SCAN_META.exists():
+            scan_date = json.loads(_BEER_SCAN_META.read_text(
+                encoding="utf-8")).get("scan_date", "")
+    except Exception:
+        pass
+    items = [{
+        "product_id": p.get("product_id"),
+        "name": p.get("name") or p.get("product_id") or "?",
+        "price_case_vnd": p.get("price_case_vnd"),
+        "price_single_vnd": p.get("price_single_vnd"),
+        "best_channel": p.get("best_channel") or "",
+        "confidence": p.get("confidence") or "",
+        "n_channels": len(p.get("channels") or {}),
+        "captured_date": p.get("captured_date") or "",
+        # Dải giá qua các kênh — mốc tham chiếu nhanh cho người đọc.
+        "min_case": min((c.get("case_vnd") for c in (p.get("channels") or {}).values()
+                         if isinstance(c, dict) and c.get("case_vnd")), default=None),
+        "max_case": max((c.get("case_vnd") for c in (p.get("channels") or {}).values()
+                         if isinstance(c, dict) and c.get("case_vnd")), default=None),
+    } for p in prices[:top_n]]
+    # Mốc tham chiếu: giá cũ nhất còn lưu (min captured_date) để người đọc
+    # đối chiếu "trước đó vs hiện tại" ngay trong báo cáo.
+    ref_dates = sorted({p.get("captured_date") or "" for p in prices} - {""})
+    return {
+        "scan_date": scan_date,
+        "captured_date": (data.get("meta") or {}).get("captured_date", ""),
+        "ref_date": ref_dates[0] if ref_dates else "",
+        "total_products": len(data.get("prices", [])),
+        "items": items,
     }
 
 
@@ -233,7 +305,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         for t in report["new_topics"]:
             lines.append(_render_new_topic(t))
     else:
-        lines.append("Không có thông tin mới hôm nay.")
+        lines.append("Chưa có thông tin mới hôm nay.")
+        snap_lines = _render_snapshot_md(report.get("market_snapshot"))
+        if snap_lines:
+            lines.append("")
+            lines.extend(snap_lines)
     lines.append("")
 
     # 3. CHANGED SINCE LAST REPORT
@@ -242,7 +318,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         for t in report["changed_topics"]:
             lines.append(_render_changed_topic(t))
     else:
-        lines.append("Không có thay đổi nào trên các vấn đề đang theo dõi.")
+        lines.append("Chưa có thay đổi nào trên các vấn đề đang theo dõi.")
+        if not report["new_topics"] and report.get("market_snapshot"):
+            lines.append("(Giá niêm yết mới nhất xem ở mục 2.)")
     lines.append("")
 
     # 4. ONGOING WATCHLIST
@@ -290,6 +368,29 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines.append("Timeline & raw data: dùng endpoint /api/price-intelligence/topics "
                  "(View Timeline per topic). Nguồn: collectors Firecrawl/ScraperAPI/ZenRows/Jina.")
     return "\n".join(lines)
+
+
+def _render_snapshot_md(snap: dict[str, Any] | None) -> list[str]:
+    """Render snapshot giá thật (fallback khi delta rỗng) — markdown."""
+    if not snap or not snap.get("items"):
+        return []
+    scan = _fmt_date(snap["scan_date"]) if snap.get("scan_date") else "—"
+    cap = _fmt_date(snap["captured_date"]) if snap.get("captured_date") else "—"
+    lines = [
+        f"📷 *Giá niêm yết mới nhất* (daily scan {scan}, hòa giải {cap} — "
+        f"{snap.get('total_products', 0)} SP theo dõi; dải giá = min–max qua kênh):",
+    ]
+    for it in snap["items"]:
+        seg = f"• {it['name']}: *{_vnd(it.get('price_case_vnd'))}/thùng*"
+        lo, hi = it.get("min_case"), it.get("max_case")
+        if lo and hi and hi != lo:
+            seg += f" (kênh {_vnd(lo)}–{_vnd(hi)})"
+        if it.get("price_single_vnd"):
+            seg += f" • lẻ {_vnd(it.get('price_single_vnd'))}"
+        if it.get("n_channels"):
+            seg += f" • {it['n_channels']} kênh"
+        lines.append(seg)
+    return lines
 
 
 def _fmt_date(iso_date: str) -> str:

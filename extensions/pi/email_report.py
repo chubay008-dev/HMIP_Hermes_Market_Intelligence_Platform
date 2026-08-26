@@ -49,8 +49,13 @@ _L: dict[str, dict[str, str]] = {
         "s7": "7️⃣ 📚 LỊCH SỬ & NGUỒN",
         "critical": "nghiêm trọng", "important": "quan trọng",
         "new": "mới", "changed": "thay đổi", "watchlist": "đang theo dõi",
-        "no_new": "Không có thông tin mới hôm nay.",
-        "no_changed": "Không có thay đổi nào trên các vấn đề đang theo dõi.",
+        "no_new": "Chưa có thông tin mới hôm nay.",
+        "no_changed": "Chưa có thay đổi nào trên các vấn đề đang theo dõi.",
+        "see_s2": "(Giá niêm yết mới nhất xem ở mục 2.)",
+        "snap_title": ("📷 Giá niêm yết mới nhất (daily scan {scan}, hòa giải {cap}"
+                       " — {total} SP theo dõi; dải giá = min–max qua kênh):"),
+        "case": "thùng", "retail": "lẻ", "channels_n": "kênh",
+        "chan_range": "kênh",
         "no_watch": "Watchlist trống.",
         "watch_status": "Đang theo dõi", "watch_stable": "Ổn định",
         "p1": "P1 — Ngay:", "p2": "P2 — Hôm nay:", "p3": "P3 — Theo dõi:",
@@ -77,8 +82,13 @@ _L: dict[str, dict[str, str]] = {
         "s7": "7️⃣ 📚 历史与来源",
         "critical": "严重", "important": "重要",
         "new": "新增", "changed": "变化", "watchlist": "观察中",
-        "no_new": "今天没有新增信息。",
-        "no_changed": "所跟踪议题今天无变化。",
+        "no_new": "今天暂无新增信息。",
+        "no_changed": "所跟踪议题今天暂无变化。",
+        "see_s2": "（最新挂牌价格见第 2 部分。）",
+        "snap_title": ("📷 最新挂牌价格（每日扫描 {scan}，对账 {cap}"
+                       " — 共跟踪 {total} 个商品；价格区间 = 各渠道最低–最高）："),
+        "case": "箱", "retail": "单", "channels_n": "个渠道",
+        "chan_range": "渠道",
         "no_watch": "观察名单为空。",
         "watch_status": "观察中", "watch_stable": "稳定",
         "p1": "P1 — 立即:", "p2": "P2 — 今天:", "p3": "P3 — 关注:",
@@ -98,6 +108,30 @@ _L: dict[str, dict[str, str]] = {
 
 def _l(lang: str, key: str) -> str:
     return _L[lang][key]
+
+
+def _render_snapshot_html(snap: dict[str, Any] | None, lang: str) -> list[str]:
+    """Snapshot giá thật (fallback khi delta rỗng) — giữ layout bullet của email."""
+    if not snap or not snap.get("items"):
+        return []
+    scan = _fmt_date(snap["scan_date"]) if snap.get("scan_date") else "—"
+    cap = _fmt_date(snap["captured_date"]) if snap.get("captured_date") else "—"
+    title = _l(lang, "snap_title").format(
+        scan=scan, cap=cap, total=snap.get("total_products", 0))
+    parts = [f"<p><b>{html.escape(title)}</b></p><ul>"]
+    for it in snap["items"]:
+        seg = (f"<b>{html.escape(it['name'])}</b>: "
+               f"{_vnd(it.get('price_case_vnd'))}/{_l(lang, 'case')}")
+        lo, hi = it.get("min_case"), it.get("max_case")
+        if lo and hi and hi != lo:
+            seg += f" ({_l(lang, 'chan_range')} {_vnd(lo)}–{_vnd(hi)})"
+        if it.get("price_single_vnd"):
+            seg += f" • {_l(lang, 'retail')} {_vnd(it.get('price_single_vnd'))}"
+        if it.get("n_channels"):
+            seg += f" • {it['n_channels']} {_l(lang, 'channels_n')}"
+        parts.append(f"<li>{seg}</li>")
+    parts.append("</ul>")
+    return parts
 
 
 def render_html(report: dict[str, Any], lang: str = "vi") -> tuple[str, str]:
@@ -145,6 +179,7 @@ def render_html(report: dict[str, Any], lang: str = "vi") -> tuple[str, str]:
                 f"{_l(lang,'impact')}: {_impact(t)}</p>")
     else:
         parts.append(f"<p>{_l(lang, 'no_new')}</p>")
+        parts.extend(_render_snapshot_html(report.get("market_snapshot"), lang))
 
     parts.append(f"<h3>{_l(lang, 's3')}</h3>")
     if report["changed_topics"]:
@@ -160,6 +195,8 @@ def render_html(report: dict[str, Any], lang: str = "vi") -> tuple[str, str]:
                 f"{_l(lang,'impact')}: {_impact(t)}</p>")
     else:
         parts.append(f"<p>{_l(lang, 'no_changed')}</p>")
+        if not report["new_topics"] and report.get("market_snapshot"):
+            parts.append(f"<p style=\"color:#666\">{_l(lang, 'see_s2')}</p>")
 
     parts.append(f"<h3>{_l(lang, 's4')}</h3>")
     if report["watchlist"]:
