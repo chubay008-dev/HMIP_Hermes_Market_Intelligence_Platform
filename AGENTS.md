@@ -277,6 +277,17 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 - `reconcile.yml` giờ 3 job: `reconcile` (03:30) → `app-sync` (04:00) → **`report` (needs: app-sync)**.
 - ⚠️ **Daily report không dùng `POST /api/run-all` nào** — chỉ qua workflow; dev muốn chạy tay dùng `POST /api/price-intelligence/daily-report/send` + optional `?date=`.
 
+## Nhật ký phiên 26/08/2026 — PI baseline từ Job 1 (stability phase 2)
+
+- **Vấn đề (báo cáo trắng):** collect phụ thuộc tiers → fail → tỉ lệ `changed=0` → events rỗng → report toàn section = 0.
+- **Giải:** commit `de56b85` thêm `seed_baseline_from_master()` trong `persistent_collector.collect_smart()`. Trước khi crawl: nếu DB chưa có `real_seeded` marker → nạp 72 SKU × kênh best từ `knowledge/master/prices_real.json`. Lần 2+ skip (idempotent). Mọi tầng fetch sau đó có baseline để so → changed delta != 0.
+- **Kênh động (`_channels_from_real_prices`):** từ prices_real thay vì hardcode 5 kênh default → FK `pi_channels` mọi kênh map được.
+- **Catalog giàu hơn:** thêm 4 sản phẩm thiếu (`P888`,`PCN_OB`,`PCN_SE`,`PRUS_B0`) vào `DEFAULT_PRODUCTS` (68→72); sửa test `len(DEFAULT_PRODUCTS)` thay vì hardcode 68.
+- **brand_id ≠ "" (SQLite FK ON) khi brand rỗng → fallback `"AGG"` (Aggregate) hoặc brand từ product.** Sửa `store_price_point`.
+- **`api._pi_collect_job` harden:** try/except per-tier collect + detect_events (log.exception, không crash scheduler).
+- **Tests:** baseline idempotent + has_real_prices; 154 pass.
+- **Pipeline ngày:** Job 1 scan 03:00 (beer-price-scan); HMIP `reconcile` 03:30 commit prices_real.json → Render auto-deploy; `app-sync` 04:00 PI collect sẽ kèm baseline; `report` ~05:00 email luôn render được snapshot kể cả khi events empty.
+
 ## Nhật ký phiên 22/08/2026 — đại tu pipeline thông báo & tự xử lý lỗi
 
 **Bối cảnh:** user hỏi "vì sao chưa nhận email" → phát hiện GitHub Actions free tier trễ 2,5–3h ở khung UTC 00:00–04:00 (không phải lỗi). Sau đó user yêu cầu chuỗi thay đổi lớn.
