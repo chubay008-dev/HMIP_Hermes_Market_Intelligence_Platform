@@ -270,6 +270,45 @@ def collect_product(channel: str, product_id: str, product_name: str, ref_vol: i
 
 _CATALOG_READY: set[str] = set()  # per-path cache: ensure_catalog chạy 1 lần/path
 
+def _channels_from_real_prices() -> list[tuple[str, str, str]]:
+    """Đọc kênh có trong knowledge/master/prices_real.json → list (id, name, type).
+
+    Camel-case tích hợp, ví dụ 'websosanh' → ('WEBSOSANH','Websosanh','aggregator').
+    Lọc duplicate/upper-case và chọn loại 'retail' theo tên; best-effort.
+    """
+    try:
+        import json
+        from pathlib import Path
+        f = Path(__file__).resolve().parents[2] / "knowledge" / "master" / "prices_real.json"
+        data = json.loads(f.read_text(encoding="utf-8"))
+        seen: dict[str, tuple[str, str, str]] = {}
+        for p in data.get("prices", []):
+            for raw in (p.get("channels") or {}):
+                if not raw:
+                    continue
+                cid = str(raw).upper()
+                if cid in seen or cid in ("", "SHOPEE", "LAZADA", "TIKI", "AEON", "WINMART"):
+                    continue
+                name = str(raw).capitalize()
+                # Loại mặc định retail; ecommerce cho Shopee/Lazada/Tiki, nhà
+                # nhập khẩu đánh 'importer', cửa hàng tiện lợi 'retail'.
+                if name in ("Shopee", "Lazada", "Tiki"):
+                    ctype = "ecommerce"
+                elif name in ("Bnk", "Tgd", "Importer"):
+                    ctype = "importer"
+                else:
+                    ctype = "retail"
+                seen[cid] = (cid, name, ctype)
+        # Kênh từ best_channel nếu không có key channels (vd 'go', 'kamereo').
+        for p in data.get("prices", []):
+            bc = p.get("best_channel")
+            if bc and str(bc).upper() not in seen and str(bc).upper() not in (
+                    "SHOPEE", "LAZADA", "TIKI", "AEON", "WINMART"):
+                cid = str(bc).upper()
+                seen[cid] = (cid, str(bc).capitalize(), "retail")
+        return list(seen.values())
+    except Exception:
+        return []
 
 def ensure_catalog(path: str | None = None) -> None:
     """Tạo bảng + bảng cha (category/channel/region/product/sku) nếu chưa có.
@@ -305,7 +344,8 @@ def ensure_catalog(path: str | None = None) -> None:
             ("TIKI", "Tiki", "ecommerce"),
             ("AEON", "AEON", "retail"),
             ("WINMART", "WinMart", "retail"),
-        ]:
+            ("AGG", "Aggregate", "aggregate"),
+        ] + _channels_from_real_prices():
             c.execute(
                 "INSERT INTO pi_channels (channel_id, channel_name, channel_type) "
                 "VALUES (?, ?, ?) ON CONFLICT(channel_id) DO UPDATE SET "
@@ -386,7 +426,9 @@ def store_price_point(pp: PricePoint, today: str | None = None, path: str | None
     bid_row = pi_store.fetch_one(
         "SELECT brand_id FROM pi_products WHERE product_id = ?",
         (pp.product_id,), path=path)
-    brand_id = bid_row["brand_id"] if bid_row and bid_row["brand_id"] else ""
+    # Fallback 'AGG' (Aggregate) khi brand_id rỗng → tránh FK fail (SQLite
+    # foreign_keys=ON phát lỗi). PR #12: migrate_brand_ids xóa brand rỗng.
+    brand_id = (bid_row["brand_id"] or "AGG") if bid_row else "AGG"
     pi_store.insert_observation(
         observation_id=f"OBS-{pp.source}-{pp.sku_id}-{ts}",
         sku_id=pp.sku_id,

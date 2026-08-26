@@ -21,7 +21,7 @@ def db():
     if Path(PI_DB).exists():
         Path(PI_DB).unlink()
     res = seed.seed_full(history_days=20, path=PI_DB, seed=42)
-    assert res["products"] == 68
+    assert res["products"] == 72
     assert res["observations"] > 0
     return PI_DB
 

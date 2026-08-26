@@ -62,23 +62,27 @@ def _auto_scan_job() -> None:
 
 
 def _pi_collect_job() -> None:
-    """Job nền (B): quét giá thật (chain 4-tier) định kỳ + detect/notify.
+    """Job nền (B): quét giá thử (chain 4-tier) định kỳ + detect/notify.
 
-    Lần đầu: cào 1 lần ghi toàn bộ observation, đánh dấu marker (giá thật gốc).
-    Các lần sau: chỉ ghi observation khi giá thay đổi + notify Telegram/Discord.
-    Dừng tại tier đầu tiên thành công: Firecrawl → ScraperAPI → ZenRows → Jina.
+    Lần đầu: cào 1 lần ghi toàn bộ observation. Retry soft-fail: lỗi từng tier
+    chỉ log + tiếp tục (log.exception); detect_events chạy best-effort.
+    Trước khi crawl: nạp baseline từ prices_real.json (nếu chưa có) để mọi
+    report luôn có delta, không phụ thuộc kết nối web.
     """
+    import os as _os
+    from extensions.pi import collectors as _col
+    from extensions.pi import events as _ev
+    _path = _os.getenv("HMIP_PI_DB_PATH") or None
     try:
-        import os as _os
-
-        from extensions.pi import collectors as _col
-        _path = _os.getenv("HMIP_PI_DB_PATH") or None
         r = _col.collect_realtime_smart(limit=None, path=_path)
-        log.info("PI collect: %s", r)
-        from extensions.pi import events as _ev
+    except Exception as exc:  # noqa: BLE001
+        log.exception("PI collect crawl lỗi: %s", exc)
+        r = {"source_used": "error", "error": str(exc)}
+    log.info("PI collect: %s", r)
+    try:
         _ev.detect_events(path=_path)
     except Exception as exc:  # noqa: BLE001
-        log.exception("PI collect job lỗi: %s", exc)
+        log.exception("PI detect_events lỗi: %s", exc)
 
 
 def _start_pi_collect(interval_min: int = 30) -> None:

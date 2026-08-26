@@ -25,6 +25,7 @@ import json
 import logging
 import os
 import time
+from pathlib import Path
 from typing import Any
 
 from . import pi_store
@@ -483,14 +484,85 @@ def collect_incremental(limit: int | None = None,
 
 def collect_smart(limit: int | None = None,
                   path: str | None = None) -> dict[str, Any]:
-    """Entry point thống nhất: seed lần đầu HOẶC incremental.
+    """Entry point thống nhất: baseline từ Job 1 (nếu chưa có) rồi crawl.
 
-    - Nếu chưa có giá thật (marker) → collect_realtime_persistent (lần đầu).
-    - Nếu đã có → collect_incremental (chỉ cập nhật khi đổi).
+    Nạp baseline từ `knowledge/master/prices_real.json` (idempotent) để PI
+    luôn có baseline so sánh khi crawl tiers đều fail → không report trắng.
+    Sau baseline → incremental (chỉ ghi khi đổi) hoặc first seed bằng crawl.
     """
     ensure_catalog(path=path)
+    if not has_real_prices(path=path):
+        log.info("collect_smart: thử nạp baseline từ prices_real.json trước")
+        pre = seed_baseline_from_master(path=path)
+        if pre.get("seeded"):
+            log.info("collect_smart: baseline master nạp %d SP", pre["seeded"])
     if has_real_prices(path=path):
         log.info("Đã có giá thật → chạy incremental scan (chỉ ghi khi đổi)")
         return collect_incremental(limit, path)
-    log.info("Chưa có giá thật → cào lần đầu (one-time seed)")
+    log.info("Chưa có giá thật → cào lần đầu (one-time seed crawl)")
     return collect_realtime_persistent(limit, path)
+
+
+
+# ---- Nạp baseline PI từ dữ liệu Job 1 (beer-price-scan → reconcile) ----
+#
+# Mục đích: ổn định PI khi crawl tiers đều fail (Jina/Firecrawl 402/timeout).
+# Đọc knowledge/master/prices_real.json (và beer_scan/latest/data_overrides.json
+# đã map qua SKU map) → tạo PricePoint từng kênh → lưu observation + đánh dấu
+# marker. Sau đó collect web chỉ cần so với baseline này → phát hiện delta
+# thật thay vì report trắng.
+
+_REAL_PRICES_DIR = Path(__file__).resolve().parents[2] / "knowledge" / "master"
+_REAL_PRICES_FILE = _REAL_PRICES_DIR / "prices_real.json"
+
+
+def seed_baseline_from_master(path: str | None = None) -> dict[str, Any]:
+    """Nạp baseline PI từ prices_real.json (Job 1 daily scan → reconcile).
+
+    Mỗi kênh (best_channel) → 1 PricePoint; nếu không có kênh thì ghi theo
+    product-level. Idempotent: chỉ nạp khi chưa có marker (tức DB mới/ rỗng).
+    Trả {"seeded": N, "skipped": True|False}.
+    """
+    if has_real_prices(path=path):
+        return {"seeded": 0, "skipped": True}
+    ensure_catalog(path=path)
+    try:
+        data = json.loads(_REAL_PRICES_FILE.read_text(encoding="utf-8"))
+    except Exception as exc:
+        log.warning("baseline seed: không đọc được prices_real.json: %s", exc)
+        return {"seeded": 0, "skipped": False, "error": str(exc)}
+    prices = [p for p in data.get("prices", []) if isinstance(p, dict)]
+    n_seeded = 0
+    for p in prices:
+        pid = p.get("product_id")
+        if not pid:
+            continue
+        channels = p.get("channels") or {}
+        # Chọn kênh tốt nhất (rẻ nhất / hoặc duy nhất) làm baseline.
+        best = p.get("best_channel")
+        if best and isinstance(channels.get(best), dict):
+            ch = best
+        elif channels:
+            ch = next(iter(channels))
+        else:
+            ch = "master"
+        rec = channels.get(ch) or {}
+        single = rec.get("single_vnd") if isinstance(rec, dict) else None
+        case = rec.get("case_vnd") if isinstance(rec, dict) else None
+        price = single if single is not None else (p.get("price_single_vnd") if p.get("price_single_vnd") is not None else case if case is not None else p.get("price_case_vnd"))
+        if price is None:
+            continue
+        # Single giá có nghĩa là pack 1; case-only → thùng 24.
+        pack, vol = (1, 330) if single is not None or p.get("price_single_vnd") is not None else (24, 330)
+        pp = PricePoint(
+            product_id=pid, sku_id=f"SKU-{pid}", channel_id=str(ch).upper(),
+            region_id="ONLINE", regular_price=float(price), promotion_price=None,
+            pack_quantity=int(pack), unit_volume_ml=float(vol),
+            source=f"baseline-master/{ch}",
+            raw={"channel": ch, "captured": p.get("captured_date")},
+        )
+        store_price_point(pp, path=path)
+        _mark_real_seeded(pp.sku_id, path=path)
+        n_seeded += 1
+    log.info("baseline seed: nạp %d sản phẩm từ prices_real.json", n_seeded)
+    return {"seeded": n_seeded, "skipped": False}

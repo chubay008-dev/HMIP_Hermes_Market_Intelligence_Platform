@@ -98,4 +98,9 @@ DEFAULT_PRODUCTS: dict[str, dict[str, str | float]] = {
     "PCN_19B": {"brand": "Tsingtao", "product_name": "Tsingtao 1903 Premium Lager 500ml", "ref_price": 42000.0, "province": "HCMC"},
     "PCN_PD": {"brand": "Tsingtao", "product_name": "Tsingtao Pure Draft 330ml", "ref_price": 31000.0, "province": "HCMC"},
     "PCN_LM": {"brand": "Tsingtao", "product_name": "Tsingtao Lemon 0.0 330ml", "ref_price": 29000.0, "province": "HCMC"},
+    "PCN_OB": {"brand": "Tsingtao", "product_name": "Tsingtao Oak Barrel Luxury Legend 330ml", "ref_price": 45000.0, "province": "HCMC"},
+    "PCN_SE": {"brand": "Tsingtao", "product_name": "Tsingtao 2026 Special Edition 330ml", "ref_price": 38000.0, "province": "HCMC"},
+    # Bia nhập khẩu Budweiser / Baltika 0 (map với knowledge/master/products.json)
+    "P888": {"brand": "Budweiser", "product_name": "Budweiser 330ml", "ref_price": 24000.0, "province": "HCMC"},
+    "PRUS_B0": {"brand": "Baltika", "product_name": "Baltika 0 (khong con) 330ml", "ref_price": 30000.0, "province": "HCMC"},
 }

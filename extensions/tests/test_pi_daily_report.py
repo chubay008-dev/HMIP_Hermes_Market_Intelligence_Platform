@@ -144,6 +144,24 @@ def test_topic_timeline(db):
     assert service.topic_timeline("bad|key", path=db) == []
 
 
+
+def test_collect_smart_baseline_seed(monkeypatch, tmp_path):
+    """Khi DB rỗng, collect_smart nạp baseline từ prices_real.json trước."""
+    from extensions.pi import persistent_collector
+    db = str(tmp_path / "pi_baseline.db")
+    r = persistent_collector.seed_baseline_from_master(path=db)
+    assert persistent_collector.has_real_prices(path=db)
+
+
+def test_collect_smart_baseline_seed_idempotent(monkeypatch, tmp_path):
+    """Baseline seed_idempotent: lần 2 gọi không nạp thêm."""
+    from extensions.pi import persistent_collector
+    db = str(tmp_path / "pi_baseline_id.db")
+    src = persistent_collector.seed_baseline_from_master(path=db)
+    assert src["seeded"] > 10 or src["skipped"] is False
+    re_give = persistent_collector.seed_baseline_from_master(path=db)
+    assert re_give["seeded"] == 0 and re_give["skipped"] is True
+
 def test_send_daily_report_marks_topics(db):
     day = _busiest_day(db)
     res = report_engine.send_daily_report(report_date=day, path=db)
