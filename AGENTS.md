@@ -264,6 +264,19 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 
 ## Tự động hằng ngày — tổng hợp lịch (27/08/2026)
 
+**Pipeline healthcheck (27/08, PR #24 + beer-price-scan PR #1):** dead man's switch
+`scripts/pipeline_healthcheck.py` — kiểm tra run theo lịch hôm nay (theo ngày VN);
+thiếu → hỏi githubstatus API; đang sự cố → alert TG/Discord + session OpenHands;
+đã hồi → tự `workflow_dispatch` chạy bù; chống trùng khi đã dispatch. Cron 3 lượt/ngày
+(04:45/07:45/10:45 VN, `startsWith(schedule,'45 ')`). Bắt nguồn từ vụ 26-27/08:
+GitHub Actions miss run theo lịch và KHÔNG tự chạy bù sau hồi phục.
+
+**Market intel nguồn uy tín (beer-price-scan PR #1):** `market_intel.py` qua Google
+News RSS theo nguồn (NielsenIQ/Nielsen, Kantar, IPSOS, Metric.vn, Euromonitor, Q&ME,
+tin ngành bia VN + lọc keyword) → `market_intel.json` → section 10 trong email
+(`build_report.py::market_intel_section`, song ngữ VN/ZH, ghi rõ nguồn/bản quyền).
+Không scrape nội dung trả phí — chỉ tin công khai.
+
 **Two cụm chạy mỗi ngày sau khi PR #20 lên (giờ VN, nguồn cron chuẩn tại `.github/workflows/reconcile.yml` + `extensions/api.py`):**
 
 | Giờ VN | Lớp | Job | Hành động |
