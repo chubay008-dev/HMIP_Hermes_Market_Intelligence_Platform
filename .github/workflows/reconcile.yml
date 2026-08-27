@@ -1,20 +1,27 @@
 name: Reconcile giá đa nguồn + Daily Report
 
-# Ba lịch trong cùng file, định tuyến job bằng github.event.schedule:
+# Bốn lịch trong cùng file, định tuyến job bằng github.event.schedule:
 #   03:30 VN — job reconcile (giá thật → prices_real.json → Render auto-deploy)
 #   04:00 VN — job app-sync (giá quét trang chủ + PI collect BLOCKING — xong thật)
 #   ≈05:00 VN — job report (needs: app-sync → gọi /daily-report/send → TG+Discord+Email)
+#   04:45 / 07:45 / 10:45 VN — job healthcheck (dead man's switch: phát hiện run
+#     theo lịch bị miss do sự cố GitHub Actions → cảnh báo TG/Discord + mở session
+#     OpenHands + tự dispatch chạy bù khi Actions hồi phục). Lặp 3 lần/ngày để bắt
+#     kịp ngay khi GitHub hồi phục trong ngày (vụ 26-27/08/2026).
 # workflow_dispatch chạy cả ba (app-sync chỉ chạy nếu reconcile thành công).
 
 on:
   schedule:
     - cron: "30 20 * * *"  # 03:30 VN (UTC+7) — chạy sau beer-price-scan (03:00)
     - cron: "0 21 * * *"   # 04:00 VN (UTC+7) — app sync sau reconcile 30'
+    - cron: "45 21 * * *"  # 04:45 VN — healthcheck lượt 1 (sau app-sync 45')
+    - cron: "45 0 * * *"   # 07:45 VN — healthcheck lượt 2
+    - cron: "45 3 * * *"   # 10:45 VN — healthcheck lượt 3
   workflow_dispatch: {}
 
 permissions:
   contents: write
-  actions: read         # auto_remediate đọc log run khi fail
+  actions: write        # auto_remediate đọc log run; healthcheck dispatch chạy bù
   pull-requests: write  # agent mở/merge PR auto-remediate có điều kiện
   checks: read          # agent đọc trạng thái CI check của PR
 
@@ -222,4 +229,27 @@ jobs:
           DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
           DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
         run: python3 scripts/notify_done.py
+
+  # ---- pipeline healthcheck (dead man's switch) -------------------------------
+  # Chạy sau giờ pipeline (3 cron "45 *"): kiểm tra run theo lịch hôm nay có tồn
+  # tại không. Thiếu → hỏi GitHub Status API; nếu Actions đang sự cố thì cảnh báo
+  # TG/Discord + mở session OpenHands theo dõi, nếu Actions đã hồi thì tự dispatch
+  # chạy bù. Chỉ schedule (workflow_dispatch không chạy job này để tránh nhiễu).
+  healthcheck:
+    if: github.event_name == 'schedule' && startsWith(github.event.schedule, '45 ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Healthcheck dead man's switch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_WORKFLOW_FILE: reconcile.yml
+          REPO_LABEL: HMIP reconcile (app-sync + report)
+          OPENHANDS_API_KEY: ${{ secrets.OPENHANDS_API_KEY }}
+          TELEGRAM_DONE_BOT_TOKEN: ${{ secrets.TELEGRAM_DONE_BOT_TOKEN }}
+          TELEGRAM_DONE_CHAT_ID: ${{ secrets.TELEGRAM_DONE_CHAT_ID }}
+          DISCORD_DONE_BOT_TOKEN: ${{ secrets.DISCORD_DONE_BOT_TOKEN }}
+          DISCORD_DONE_CHANNEL_ID: ${{ secrets.DISCORD_DONE_CHANNEL_ID }}
+        run: python3 scripts/pipeline_healthcheck.py
 

@@ -264,6 +264,25 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 
 ## Tự động hằng ngày — tổng hợp lịch (27/08/2026)
 
+**Pipeline healthcheck (27/08, PR #24 + beer-price-scan PR #1):** dead man's switch
+`scripts/pipeline_healthcheck.py` — kiểm tra run theo lịch hôm nay (theo ngày VN);
+thiếu → hỏi githubstatus API; đang sự cố → alert TG/Discord + session OpenHands;
+đã hồi → tự `workflow_dispatch` chạy bù; chống trùng khi đã dispatch. Cron 3 lượt/ngày
+(04:45/07:45/10:45 VN, `startsWith(schedule,'45 ')`). Bắt nguồn từ vụ 26-27/08:
+GitHub Actions miss run theo lịch và KHÔNG tự chạy bù sau hồi phục.
+
+**Market intel nguồn uy tín (beer-price-scan PR #1):** `market_intel.py` qua Google
+News RSS theo nguồn (NielsenIQ/Nielsen, Kantar, IPSOS, Metric.vn, Euromonitor, Q&ME,
+tin ngành bia VN + lọc keyword) → `market_intel.json` → section 10 trong email
+(`build_report.py::market_intel_section`, song ngữ VN/ZH, ghi rõ nguồn/bản quyền).
+Không scrape nội dung trả phí — chỉ tin công khai.
+
+**Đề nghị 2 (27/08) — đánh giá + khuyến nghị, KHÔNG code:**
+- **Vấn đề thật**: `bachhoaxanh.com` (API Zuul bị proxy `zuul.reverse` chặn → 403 kể cả `FIRECRAWL/ScraperAPI/ZenRows chain`), `cooponline.vn` (SPA render JS — HTML trắng, Jina 403), Còn các site khác OK.
+- **Hướng đúng** (không Hysteria/CloakBrowser): mở rộng Apify actors (đã có `xtracto~shopee-search` làm mẫu — actor bên 3 chịu trách bypass) cho Lazada + Bách Hóa Xanh; hoặc nâng cấp plan ScraperAPI/ZenRows (premium proxy) cho Akamai/BHX.
+- **Thực tế ổn định**: kênh fail thì kênh khác gánh + fallback `prices_real.json` (report không trắng); Tiki API public OK; email vẫn đủ dữ liệu. Không cần cố ép kênh chặn 403 → giữ graceful degradation.
+- **Action cho user**: (1) Đăng ký affiliate Tiki/Lazada/Shopee Open Platform có phí nhưng API chính thức ổn định nhất; (2) Thêm Apify actor với khi quota đủ; (3) Nâng plan ZenRows/ScraperAPI (~50-100 USD/tháng) nếu muốn BHX/Coop hiện hành ổn định.
+
 **Two cụm chạy mỗi ngày sau khi PR #20 lên (giờ VN, nguồn cron chuẩn tại `.github/workflows/reconcile.yml` + `extensions/api.py`):**
 
 | Giờ VN | Lớp | Job | Hành động |
