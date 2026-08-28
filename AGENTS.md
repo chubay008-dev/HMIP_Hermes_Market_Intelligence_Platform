@@ -263,6 +263,13 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 - **GitHub Actions free tier trễ lịch 2,5–3h** vào khung UTC 00:00–04:00 (tức 07:00–11:00 VN): 3 mốc 07:30/08:00/08:30 VN thực tế chạy ~10:13/10:26/10:55 VN (quan sát 21–22/08). Pipeline vẫn đúng thứ tự, email đến ~10:30–11:00 VN. Đây là giới hạn SLA của GitHub, không phải lỗi pipeline.
 
 
+## Nhật ký phiên 28/08/2026 (chiều) — FIX race deploy + watchdog ngoài GitHub
+
+- **Fix race 502 (app-sync):** `/api/health` giờ trả `commit` (từ env `RENDER_GIT_COMMIT` Render tự inject; local = ""). Job `reconcile` output `pushed_sha`; job `app-sync` có step "Chờ Render deploy đúng commit" — poll `health.commit == pushed_sha` tối đa 15' (20s/lần) trước khi collect. App không trả commit (bản cũ) → WARN + tiếp tục sau 15'. Timeout app-sync nâng 45'→60'. Skip khi pushed_sha rỗng (cron 04:00 thường đã đủ buffer 30').
+- **Fix dead man's switch chết theo GitHub:** `scripts/external_watchdog.py` chạy trên **OpenHands Cloud Automation** (id `67feb11c-645f-42fd-bd0f-4a34acd1216d`, cron `15 5-9,11,14 * * *` Asia/Ho_Chi_Minh — 7 tick/ngày, KHÔNG LLM, chỉ stdlib). Logic: repo nào thiếu run schedule hôm nay (VN) và chưa có dispatch → dispatch chạy bù; beer-scan trước, HMIP reconcile chỉ sau khi scan HOÀN TẤT (tránh race deploy); chống false-positive free-tier delay 2,5-3h bằng guard: chỉ dispatch khi có incident Actions ≤30h qua HOẶC đã ≥08:00 VN; Actions đang degraded → chờ tick sau. Chỉ cần secret `GITHUB_TOKEN`.
+- **⚠️ Quirk OpenHands Automation runtime (đo thực tế 28/08):** KHÔNG inject `AGENT_SERVER_URL`/`AUTOMATION_CALLBACK_*` như tài liệu — chỉ có `RUNTIME_URL` + `SESSION_API_KEY` (get_secret dùng `{RUNTIME_URL}/api/settings/secrets/{name}`), `OPENHANDS_API_KEY`. **Run status theo EXIT CODE** (0=COMPLETED, khác 0=FAILED), callback không cần/không dùng được (401). stdout chỉ xem được trong `error_detail` của run FAILED. Sandbox provision chậm ~10-12'/run.
+- **Quan sát thêm 28/08:** các run schedule sáng nay THỰC RA đã fire — trễ ~6h (scan 09:18, reconcile 09:21+09:25 VN), success cả. Tức GitHub delay chứ không drop hoàn toàn hôm nay; drop hoàn toàn là 26-27/08. Watchdog guard ≥08:00 VN đỡ được cả 2 tình huống.
+
 ## Nhật ký phiên 28/08/2026 — miss toàn bộ schedule 2 ngày liền + race deploy Render
 
 - **Sự cố:** run theo lịch CUỐI CÙNG của cả 2 repo là tối 25/08 UTC (sáng 26/08 VN). Toàn bộ cron 26/08 + 27/08 (scan 03:00, reconcile 03:30, app-sync 04:00, report ~05:00 VN) KHÔNG fire → không email báo cáo 27/08 lẫn 28/08. Trùng đợt sự cố GitHub Actions 26/08 (incident critical 15:02–17:40 UTC + incident Actions&PR 22:56–00:26 UTC). GitHub KHÔNG chạy bù scheduled run bị miss.

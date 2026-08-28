@@ -29,6 +29,10 @@ jobs:
   reconcile:
     if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 20 * * *'
     runs-on: ubuntu-latest
+    outputs:
+      # SHA commit vừa push (rỗng nếu không có thay đổi) — app-sync chờ Render
+      # deploy đúng commit này trước khi gọi collect, tránh race 502 (28/08).
+      pushed_sha: ${{ steps.commit.outputs.pushed_sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,13 +51,18 @@ jobs:
         run: python3 scripts/reconcile_prices.py
 
       - name: Commit master update
+        id: commit
         run: |
           git config user.name "hmip-reconcile[bot]"
           git config user.email "hmip-reconcile[bot]@users.noreply.github.com"
           git add knowledge/master/prices_real.json knowledge/dynamic/last_reconcile.json
-          git commit -m "data: reconcile giá $(date -u +%Y-%m-%d) từ đa nguồn" \
-            || echo "không có thay đổi master"
-          git push
+          if git commit -m "data: reconcile giá $(date -u +%Y-%m-%d) từ đa nguồn"; then
+            git push
+            echo "pushed_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          else
+            echo "không có thay đổi master"
+            echo "pushed_sha=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Báo kết quả reconcile
         run: |
@@ -90,7 +99,7 @@ jobs:
   # Secret cần: HMIP_API_TOKEN (= giá trị HMIP_API_TOKEN trên Render Dashboard).
   app-sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60  # wake 5' + chờ deploy 15' + collect blocking 30' + dư
     needs: reconcile
     if: >
       always() && (
@@ -119,6 +128,32 @@ jobs:
             sleep 10
           done
           echo "::error::App không sống sau 5 phút (Render đang deploy lại hoặc sập?)."
+          exit 1
+
+      # Race 28/08: reconcile push commit → Render auto-deploy NGAY → health 200
+      # trả từ instance CŨ, rồi Render swap instance giữa chừng → collect 502 sau
+      # ~95s. Chờ tới khi app đang chạy ĐÚNG commit vừa push (health.commit).
+      - name: Chờ Render deploy đúng commit vừa reconcile (chống race 502)
+        if: needs.reconcile.outputs.pushed_sha != ''
+        run: |
+          want="${{ needs.reconcile.outputs.pushed_sha }}"
+          echo "Chờ health.commit == $want"
+          last=""
+          for i in $(seq 1 45); do
+            last=$(curl -sS -m 20 "$HMIP_BASE_URL/api/health" \
+              | python3 -c "import json,sys; print(json.load(sys.stdin).get('commit',''))" \
+              2>/dev/null || true)
+            echo "lần $i: health.commit=$last"
+            if [ "$last" = "$want" ]; then echo "Deploy đúng commit — tiếp tục."; exit 0; fi
+            sleep 20
+          done
+          if [ -z "$last" ]; then
+            # App không trả commit (bản cũ chưa có field / thiếu RENDER_GIT_COMMIT)
+            # → không verify được; đã chờ 15' nên deploy nhiều khả năng đã xong.
+            echo "::warning::Không verify được commit deploy (app không trả health.commit) — tiếp tục sau 15' chờ."
+            exit 0
+          fi
+          echo "::error::Render chưa deploy commit $want sau 15 phút (đang chạy $last) — deploy kẹt?"
           exit 1
 
       # /api/run-all quét đồng bộ ~68 SP → vượt 60s dễ timeout (exit 28).

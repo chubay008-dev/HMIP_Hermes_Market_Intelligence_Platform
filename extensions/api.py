@@ -257,6 +257,10 @@ class RunRequest(BaseModel):
 def health() -> dict[str, Any]:
     return {
         "status": "ok",
+        # Commit đang chạy (Render tự inject RENDER_GIT_COMMIT) — app-sync poll
+        # field này để chờ deploy đúng bản vừa reconcile, tránh race 502 khi
+        # Render swap instance giữa chừng (vụ 28/08/2026). Local: chuỗi rỗng.
+        "commit": os.environ.get("RENDER_GIT_COMMIT", ""),
         "collect_mode": COLLECT_MODE,
         "telegram": telegram_configured(),
         "discord": discord_configured(),
