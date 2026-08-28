@@ -262,6 +262,14 @@ Báo cáo ngành bia gửi qua Gmail SMTP (secret `SMTP_APP_PASS`, sender `chuba
 - `HMIP_SYNC_PAT` hết hạn (22/08) → bước "Sync scan data to HMIP repo" fail "Invalid username or token". Fix: rotate PAT mới vào secret. ⚠️ **`gh run rerun --failed` KHÔNG cứu được sync**: rerun checkout lại SHA cũ → step "Commit & push" bị remote reject (đã có commit cùng ngày) → step sync bị skip. Cách đồng bộ bù: clone beer-price-scan@main về local rồi chạy `HMIP_SYNC_PAT=... python3 sync_to_hmip.py` (script chỉ đọc file JSON/report ở repo root).
 - **GitHub Actions free tier trễ lịch 2,5–3h** vào khung UTC 00:00–04:00 (tức 07:00–11:00 VN): 3 mốc 07:30/08:00/08:30 VN thực tế chạy ~10:13/10:26/10:55 VN (quan sát 21–22/08). Pipeline vẫn đúng thứ tự, email đến ~10:30–11:00 VN. Đây là giới hạn SLA của GitHub, không phải lỗi pipeline.
 
+
+## Nhật ký phiên 28/08/2026 — miss toàn bộ schedule 2 ngày liền + race deploy Render
+
+- **Sự cố:** run theo lịch CUỐI CÙNG của cả 2 repo là tối 25/08 UTC (sáng 26/08 VN). Toàn bộ cron 26/08 + 27/08 (scan 03:00, reconcile 03:30, app-sync 04:00, report ~05:00 VN) KHÔNG fire → không email báo cáo 27/08 lẫn 28/08. Trùng đợt sự cố GitHub Actions 26/08 (incident critical 15:02–17:40 UTC + incident Actions&PR 22:56–00:26 UTC). GitHub KHÔNG chạy bù scheduled run bị miss.
+- **⚠️ Lỗ hổng dead man's switch:** healthcheck (PR #24) chính nó cũng là cron trên GitHub (`45 21/0/3 * * *`) → khi GitHub miss schedule, healthcheck cũng chết theo, không ai dispatch bù. Cần trigger ngoài GitHub (cron máy khác/Render cron/OpenHands automation) nếu muốn thật sự là dead man's switch.
+- **Xử lý:** `gh workflow run daily-scan.yml` (beer-price-scan, run 33131703708, ~20') → `gh workflow run reconcile.yml` (run 33132742087). Báo cáo 28/08 đã gửi đủ TG+Discord+Email (vi+zh).
+- **⚠️ Race mới phát hiện khi dispatch reconcile bằng tay:** job `reconcile` push commit (0c22af3) → Render auto-deploy NGAY → job `app-sync` (chạy liền sau, không có buffer 30' như lịch cron) gọi `POST /api/price-intelligence/collect` trúng lúc Render đang deploy → **502 sau ~95s** → job `report` bị skip. Cách xử lý: chờ `GET /api/health` trả 200 rồi `gh run rerun <id> --failed` (app-sync + report chạy lại OK). Khi sửa workflow: nên thêm bước đợi deploy (poll health) đầu app-sync, hoặc tách dispatch 2 lần cách nhau vài phút.
+
 ## Tự động hằng ngày — tổng hợp lịch (27/08/2026)
 
 **Pipeline healthcheck (27/08, PR #24 + beer-price-scan PR #1):** dead man's switch
