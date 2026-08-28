@@ -21,7 +21,8 @@ Không gửi Telegram/Discord trực tiếp (không có secret bot trên OpenHan
 dispatch chạy bù thành công, chính pipeline gửi tin "HOÀN TẤT pipeline" như thường.
 
 Env:
-  GITHUB_TOKEN (qua get_secret) — token có quyền actions:write trên cả 2 repo
+  GITHUB_TOKEN (env HOA hoặc thường, hoặc qua get_secret) — token có quyền
+  actions:write trên cả 2 repo
   DRY_RUN=1                     — chỉ in quyết định, không dispatch
 """
 from __future__ import annotations
@@ -190,7 +191,10 @@ def check_repo(repo: str, workflow_file: str, token: str, now_vn: datetime,
 def main() -> None:
     now_vn = datetime.now(VN_TZ)
     print(f"=== External watchdog {now_vn.strftime('%d/%m/%Y %H:%M')} (giờ VN) ===")
-    token = os.environ.get("GITHUB_TOKEN") or get_secret("GITHUB_TOKEN")
+    # Conversation OpenHands inject secret tên HOA dưới dạng env chữ thường
+    # (đo thực tế 28/08: GITHUB_TOKEN -> env `github_token`).
+    token = (os.environ.get("GITHUB_TOKEN") or os.environ.get("github_token")
+             or get_secret("GITHUB_TOKEN"))
 
     beer_runs = fetch_runs_today(BEER_REPO, BEER_WORKFLOW, token)
     beer = check_repo(BEER_REPO, BEER_WORKFLOW, token, now_vn, "beer-scan", beer_runs)
