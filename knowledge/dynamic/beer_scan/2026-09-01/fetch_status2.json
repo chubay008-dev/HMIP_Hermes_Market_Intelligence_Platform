@@ -1,0 +1,58 @@
+{
+  "tgd_heineken": {
+    "url": "http://thegioidouong.net/category/bia-heineken",
+    "status": 200
+  },
+  "tgd_tiger": {
+    "url": "http://thegioidouong.net/category/bia-tiger",
+    "status": 200
+  },
+  "tgd_hanoi": {
+    "url": "http://thegioidouong.net/category/bia-ha-noi",
+    "status": 200
+  },
+  "tgd_bia_chai": {
+    "url": "http://thegioidouong.net/category/bia-sai-gon-chai",
+    "status": 200
+  },
+  "tgd_khongcon": {
+    "url": "http://thegioidouong.net/category/bia-khong-con",
+    "status": 200
+  },
+  "tgd_budweiser": {
+    "url": "http://thegioidouong.net/category/bia-budweiser",
+    "status": 200
+  },
+  "coop_bia": {
+    "url": "https://cooponline.vn/bia",
+    "status": 404
+  },
+  "kamereo_blog_index": {
+    "url": "https://kamereo.vn/blog/vi",
+    "status": 200
+  },
+  "kamereo_budweiser": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-budweiser",
+    "status": 200
+  },
+  "kamereo_khongcon": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-khong-con",
+    "status": 404
+  },
+  "pasteur_products": {
+    "url": "https://pasteurstreet.com/vi/san-pham",
+    "status": 404
+  },
+  "pasteur_beers": {
+    "url": "https://pasteurstreet.com/vi/bia",
+    "status": 404
+  },
+  "ibiero_shop": {
+    "url": "https://ibiero.com/cua-hang/",
+    "status": 404
+  },
+  "ibiero_sanpham": {
+    "url": "https://ibiero.com/san-pham/",
+    "status": 404
+  }
+}
