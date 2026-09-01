@@ -1,0 +1,30 @@
+{
+  "tgd_heineken_lon": {
+    "url": "http://thegioidouong.net/category/bia-heineken-lon/",
+    "status": 200
+  },
+  "tgd_heineken_chai": {
+    "url": "http://thegioidouong.net/category/bia-heineken-chai/",
+    "status": 200
+  },
+  "tgd_tiger_crystal": {
+    "url": "http://thegioidouong.net/category/bia-tiger-crystal/",
+    "status": 200
+  },
+  "tgd_trucbach": {
+    "url": "http://thegioidouong.net/category/bia-truc-bach/",
+    "status": 200
+  },
+  "tgd_sg_chai": {
+    "url": "http://thegioidouong.net/category/bia-sai-gon-chai/",
+    "status": 200
+  },
+  "tgd_333": {
+    "url": "http://thegioidouong.net/category/bia-sai-gon/bia-333/",
+    "status": 200
+  },
+  "tgd_ken": {
+    "url": "http://thegioidouong.net/category/bia-ken/",
+    "status": 200
+  }
+}
