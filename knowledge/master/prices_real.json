@@ -2,7 +2,7 @@
   "meta": {
     "description": "Giá bia thật ngoài thị trường VN (không dùng data ảo). Nguồn: Tiki.vn public API + web_search (LotteMart, BachHoaXanh, Emart, websosanh, nhà nhập khẩu). price_case_vnd=thùng 24 lon/chai; price_single_vnd=lẻ 1 lon/chai (một số ước tính case/24 khi chỉ có giá thùng).",
     "currency": "VND",
-    "captured_date": "2026-09-15",
+    "captured_date": "2026-09-16",
     "sources": [
       "tiki.vn/api",
       "lotte.vn",
@@ -24,91 +24,91 @@
       "source": "bachhoaxanh+circlek+coopmart+emart+go+gs25+lotte+mmmega+seveneleven+shopee+tiki+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "auto-tiki",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 368000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 230000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 220000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 220000,
           "single_vnd": 109000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 240000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 289000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 230000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 230000,
           "single_vnd": 14200,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 220000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 792000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 230000,
           "single_vnd": 51000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 250000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 250000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 235000,
           "single_vnd": 19555,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -126,97 +126,97 @@
       "source": "aeon+bachhoaxanh+beer_scan/tgd+coopmart+emart+go+gs25+lotte+seveneleven+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 340000,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 370000,
           "single_vnd": 15208,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 282000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 282000,
           "single_vnd": 15208,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 336000,
           "single_vnd": 13800,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 359000,
           "single_vnd": 15208,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 349000,
           "single_vnd": 15208,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 752400,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 385000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": null,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 219500,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 318000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 445555,
           "single_vnd": 45000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "seveneleven",
@@ -235,97 +235,97 @@
       "source": "aeon+bachhoaxanh+circlek+coopmart+emart+go+gs25+lotte+mmmega+seveneleven+shopee+tiki+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "auto-tiki",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 368400,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 278400,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 275000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 275000,
           "single_vnd": 25000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 259091,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 268000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 265000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 268000,
           "single_vnd": 19600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 397000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 268000,
           "single_vnd": 19600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 285000,
           "single_vnd": 29000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 275000,
           "single_vnd": 19600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 265000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 275000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 249000,
           "single_vnd": 28950,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "emart",
@@ -342,103 +342,103 @@
       "source": "aeon+beer_scan/tgd+circlek+coopmart+go+gs25+lotte+mmmega+seveneleven+shopee+tiki+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "auto-tiki",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 598800,
           "single_vnd": 25000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 448000,
           "single_vnd": 19375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 360000,
           "single_vnd": 19375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 392000,
           "single_vnd": 8000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 447000,
           "single_vnd": 8000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 397000,
           "single_vnd": 19375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 382000,
           "single_vnd": 19375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 444000,
           "single_vnd": 19375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 448000,
           "single_vnd": 19375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 410000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 550000,
           "single_vnd": 23000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 360000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 410000,
           "single_vnd": 19375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 450000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 219900,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "winmart",
@@ -456,103 +456,103 @@
       "source": "aeon+bachhoaxanh+beer_scan/tgd+coopmart+emart+go+gs25+lotte+mmmega+seveneleven+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "auto-tiki",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 445500,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 12292,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 299999,
           "single_vnd": 12430,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 280000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 370000,
           "single_vnd": 12292,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 259000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 259000,
           "single_vnd": 12292,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 280000,
           "single_vnd": 12292,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 359000,
           "single_vnd": 12292,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 988000,
           "single_vnd": 12292,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 285455,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 415000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": null,
           "single_vnd": 12292,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 336000,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 355000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 330000,
           "single_vnd": 22000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "winmart",
@@ -570,91 +570,91 @@
       "source": "aeon+bachhoaxanh+beer_scan/bnk+coopmart+emart+lotte+shopee+tiki+websosanh+winmart",
       "confidence": "medium",
       "note": "auto-tiki",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 510000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 477600,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 469000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 482000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 432200,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 449500,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 469000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 432200,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 477600,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": null,
           "single_vnd": 28000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": 520000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 214000,
           "single_vnd": 21100,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "winmart_plus",
@@ -671,103 +671,103 @@
       "source": "aeon+bachhoaxanh+beer_scan/tgd+circlek+coopmart+emart+go+gs25+mmmega+seveneleven+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "auto-tiki",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 468000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 292000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 292000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 292000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 360000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 292000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 278000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 292000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 356000,
           "single_vnd": 14958,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 355455,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 360000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 360000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 360000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 350000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 230000,
           "single_vnd": 23000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "coopmart",
@@ -785,97 +785,97 @@
       "source": "aeon+bachhoaxanh+beer_scan/bnk+coopmart+emart+go+gs25+lotte+mmmega+seveneleven+shopee+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 436800,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 418000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 350000,
           "single_vnd": 19500,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 448800,
           "single_vnd": 22000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 448800,
           "single_vnd": 22000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 267500,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 530000,
           "single_vnd": 38000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 448800,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 350000,
           "single_vnd": 20900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": 980000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 265000,
           "single_vnd": 20600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -894,91 +894,91 @@
       "source": "aeon+bachhoaxanh+beer_scan/bnk+circlek+coopmart+emart+go+gs25+lotte+seveneleven+tiki+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 512000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": null,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 603900,
           "single_vnd": 25000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 375000,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 531000,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 650000,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 388000,
           "single_vnd": 30000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 620000,
           "single_vnd": 26000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 620000,
           "single_vnd": 30000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 530000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 650000,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 648000,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": 520000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -997,91 +997,91 @@
       "source": "aeon+bachhoaxanh+circlek+coopmart+emart+go+gs25+lotte+mmmega+seveneleven+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 1340000,
           "single_vnd": 56000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 470000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 740000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 399000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 450000,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 300000,
           "single_vnd": 87000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 470000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 265000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 448000,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 450000,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 285455,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 470000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": null,
           "single_vnd": 28000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "coopmart",
@@ -1098,91 +1098,91 @@
       "source": "aeon+bachhoaxanh+beer_scan/bnk+circlek+coopmart+emart+go+gs25+lotte+mmmega+websosanh+winmart_plus",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 372000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 600000,
           "single_vnd": 16500,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 515000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 515000,
           "single_vnd": 94500,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 515000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 443000,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 515000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 285455,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 219000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 515000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 580000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": 550000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "circlek",
@@ -1201,97 +1201,97 @@
       "source": "aeon+bachhoaxanh+beer_scan/bnk+circlek+coopmart+emart+gs25+mmmega+websosanh+winmart_plus",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "tiki": {
           "case_vnd": 1408000,
           "single_vnd": 59000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 55000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 935000,
           "single_vnd": 55000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 1050000,
           "single_vnd": 50000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 935000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 935000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 935000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 889000,
           "single_vnd": 37000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 1250000,
           "single_vnd": 52000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 989000,
           "single_vnd": 41000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 935000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 935000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 450000,
           "single_vnd": 63000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": null,
           "single_vnd": 55000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte"
@@ -1305,85 +1305,85 @@
       "source": "aeon+bachhoaxanh+circlek+coopmart+emart+go+gs25+lotte+seveneleven+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 460800,
           "single_vnd": 22550,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 17600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 400000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 446200,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 298000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 460800,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 446200,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 460800,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 752400,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 446200,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 460800,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 460800,
           "single_vnd": 26000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "winmart",
@@ -1401,85 +1401,85 @@
       "source": "aeon+bachhoaxanh+circlek+coopmart+emart+go+gs25+lotte+mmmega+seveneleven+websosanh+winmart+winmart_plus",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 504000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 799000,
           "single_vnd": 89000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 799000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 799000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 799000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 799000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 799000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": 799000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 799000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 799000,
           "single_vnd": 33000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 600000,
           "single_vnd": 36000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -1496,79 +1496,79 @@
       "source": "aeon+bachhoaxanh+coopmart+emart+go+gs25+lotte+mmmega+seveneleven+websosanh+winmart+winmart_plus",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 900000,
           "single_vnd": 38000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 850000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "mmmega": {
           "case_vnd": null,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": 697368,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -1586,73 +1586,73 @@
       "source": "aeon+circlek+coopmart+emart+go+gs25+lotte+winmart+winmart_plus",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 480000,
           "single_vnd": 61900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "coopmart": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "seveneleven": {
           "case_vnd": null,
           "single_vnd": 36000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -1666,67 +1666,67 @@
       "source": "aeon+circlek+emart+go+gs25+lotte+winmart+winmart_plus",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 499000,
           "single_vnd": 61900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 499000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart": {
           "case_vnd": 499000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "winmart_plus": {
           "case_vnd": 499000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "aeon": {
           "case_vnd": 499000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "go": {
           "case_vnd": 480000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "circlek": {
           "case_vnd": 499000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "gs25": {
           "case_vnd": 499000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -1740,13 +1740,13 @@
       "source": "emart",
       "confidence": "medium",
       "note": "web thùng",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "emart": {
           "case_vnd": 490000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "emart"
@@ -1760,31 +1760,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 504000,
           "single_vnd": 61900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 1999000,
           "single_vnd": 83000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -1801,37 +1801,37 @@
       "source": "bachhoaxanh+beer_scan/bnk+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 465000,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 450000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": 650000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -1850,31 +1850,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 799000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 504000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 799000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -1891,31 +1891,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 490000,
           "single_vnd": 25000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 412500,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 590000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 590000,
           "single_vnd": 25000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -1932,37 +1932,37 @@
       "source": "bachhoaxanh+beer_scan/bnk+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 1150000,
           "single_vnd": 48000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": null,
           "single_vnd": 65000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 1485000,
           "single_vnd": 65000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -1979,31 +1979,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 396000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 392000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 396000,
           "single_vnd": 16000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2020,49 +2020,49 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 780000,
           "single_vnd": 32000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 888000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 318000,
           "single_vnd": 59700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 680000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2079,37 +2079,37 @@
       "source": "bachhoaxanh+emart+lotte+shopee",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 297000,
           "single_vnd": 12200,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte"
@@ -2123,49 +2123,49 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 343740,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 259300,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 375000,
           "single_vnd": 16000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 280000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 343740,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 343740,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 280000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -2182,49 +2182,49 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 408000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 650000,
           "single_vnd": 27500,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 11042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 820000,
           "single_vnd": 34000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 240000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lazada",
@@ -2241,49 +2241,49 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 260000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 250000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 220000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 247000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 230000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 230000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 247000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -2297,49 +2297,49 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 289000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 289000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 290000,
           "single_vnd": 12375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 289000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 305000,
           "single_vnd": 13000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 290000,
           "single_vnd": 12375,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte"
@@ -2353,31 +2353,31 @@
       "source": "emart+lazada+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "websosanh": {
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 292000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 1555000,
           "single_vnd": 65000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 1555000,
           "single_vnd": 65000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2394,37 +2394,37 @@
       "source": "emart+lotte+shopee+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 2552000,
           "single_vnd": 106000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 299000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 2400000,
           "single_vnd": 100000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 2400000,
           "single_vnd": 100000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2441,37 +2441,37 @@
       "source": "lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 2400000,
           "single_vnd": 100000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 299000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 2160000,
           "single_vnd": 90000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 2400000,
           "single_vnd": 100000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2488,43 +2488,43 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 2600000,
           "single_vnd": 108000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 1900000,
           "single_vnd": 79000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 299000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 2600000,
           "single_vnd": 108000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 950000,
           "single_vnd": 40000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 2600000,
           "single_vnd": 108000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2541,31 +2541,31 @@
       "source": "bachhoaxanh+lotte+shopee+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 22550,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 11042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 343740,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2582,37 +2582,37 @@
       "source": "bachhoaxanh+emart+lotte+shopee+websosanh",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 300000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 22550,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 300000,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 343740,
           "single_vnd": 76900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 275000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "shopee",
@@ -2629,43 +2629,43 @@
       "source": "bachhoaxanh+emart+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 259300,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 359000,
           "single_vnd": 8000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 259091,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 343740,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 343740,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "emart",
@@ -2682,49 +2682,49 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 850000,
           "single_vnd": 29700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 365000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 744000,
           "single_vnd": 45000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 525000,
           "single_vnd": 22000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 744000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 744000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte",
@@ -2741,55 +2741,55 @@
       "source": "bachhoaxanh+beer_scan/bnk+emart+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 45000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 850000,
           "single_vnd": 29700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 1000000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 340000,
           "single_vnd": 45000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 1350000,
           "single_vnd": 45000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 1350000,
           "single_vnd": 45000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 695000,
           "single_vnd": 45000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": 250000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "emart",
@@ -2807,43 +2807,43 @@
       "source": "bachhoaxanh+lazada+lotte+shopee+tiktok+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 1200000,
           "single_vnd": 72600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 620000,
           "single_vnd": 26000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 1200000,
           "single_vnd": 60000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 1200000,
           "single_vnd": 50000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tiktok": {
           "case_vnd": 1450000,
           "single_vnd": 60000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2860,43 +2860,43 @@
       "source": "bachhoaxanh+emart+lazada+lotte+shopee+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 450000,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 662000,
           "single_vnd": 28000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 950000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "lazada": {
           "case_vnd": 450000,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte",
@@ -2913,31 +2913,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 650000,
           "single_vnd": 27000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 1200000,
           "single_vnd": 11042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 619000,
           "single_vnd": 26000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte",
@@ -2954,31 +2954,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 297000,
           "single_vnd": 74000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 850000,
           "single_vnd": 35000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 220000,
           "single_vnd": 34000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 280000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -2995,37 +2995,37 @@
       "source": "bachhoaxanh+beer_scan/bnk+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 220000,
           "single_vnd": 12300,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 215000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bnk": {
           "case_vnd": 680000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "emart",
@@ -3043,31 +3043,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 273600,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 469999,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 11042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 270000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3084,25 +3084,25 @@
       "source": "bachhoaxanh+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 359000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -3119,31 +3119,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 273600,
           "single_vnd": 28000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 650000,
           "single_vnd": 27500,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 365000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 650000,
           "single_vnd": 27000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte",
@@ -3160,31 +3160,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 300000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 219000,
           "single_vnd": 50490,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 375000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 343740,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -3201,31 +3201,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 300000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 359000,
           "single_vnd": 8000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 270000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "emart",
@@ -3242,31 +3242,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 450000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 750000,
           "single_vnd": 31000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte",
@@ -3283,31 +3283,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 737000,
           "single_vnd": 38500,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 520000,
           "single_vnd": 22000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3324,31 +3324,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 265000,
           "single_vnd": 23000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 375000,
           "single_vnd": 16000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 265000,
           "single_vnd": 11042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -3365,31 +3365,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 340470,
           "single_vnd": 12430,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 265000,
           "single_vnd": 102000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3406,37 +3406,37 @@
       "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+tgd+websosanh",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 340470,
           "single_vnd": 22400,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 340470,
           "single_vnd": 14000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 340470,
           "single_vnd": 22400,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 355000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh"
@@ -3450,37 +3450,37 @@
       "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+tgd+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 265000,
           "single_vnd": 11042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 250000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 11042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 270000,
           "single_vnd": 50000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 280000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -3497,31 +3497,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 260000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 260000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 249000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 260000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3538,31 +3538,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 465000,
           "single_vnd": 19200,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 450000,
           "single_vnd": 19000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 465000,
           "single_vnd": 39000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3580,37 +3580,37 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "high",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 337000,
           "single_vnd": 14042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 295000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 240000,
           "single_vnd": 32000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh"
@@ -3624,31 +3624,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 337000,
           "single_vnd": 14042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 295000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 364800,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -3665,31 +3665,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 337000,
           "single_vnd": 14042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 295000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 364800,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -3706,37 +3706,37 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "high",
       "note": "auto-tiki",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 337000,
           "single_vnd": 14042,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 364800,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 364000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "shopee": {
           "case_vnd": 150000,
           "single_vnd": 6000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3753,37 +3753,37 @@
       "source": "bachhoaxanh+beer_scan/tgd+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 359000,
           "single_vnd": 80000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 292000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 405600,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 350000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3801,31 +3801,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 300000,
           "single_vnd": 12000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 300000,
           "single_vnd": 15180,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 292000,
           "single_vnd": 10000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 361000,
           "single_vnd": 15000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3842,31 +3842,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 350000,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 405900,
           "single_vnd": 20900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -3883,31 +3883,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 490000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 375000,
           "single_vnd": 16000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "lotte",
@@ -3924,31 +3924,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 343740,
           "single_vnd": 87600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 21000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 263000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -3965,31 +3965,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 680000,
           "single_vnd": 28000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 600000,
           "single_vnd": 27500,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 1200000,
           "single_vnd": 50000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -4006,31 +4006,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 336000,
           "single_vnd": 20900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 220000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 264000,
           "single_vnd": 11000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -4047,31 +4047,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 436800,
           "single_vnd": 18000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 297000,
           "single_vnd": 13700,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 418000,
           "single_vnd": 17000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -4088,31 +4088,31 @@
       "source": "bachhoaxanh+emart+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 436800,
           "single_vnd": 76900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 219000,
           "single_vnd": 9000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 265000,
           "single_vnd": 29000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 418000,
           "single_vnd": 76900,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
@@ -4129,25 +4129,25 @@
       "source": "bachhoaxanh+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 360000,
           "single_vnd": 62000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 750000,
           "single_vnd": 62000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 270000,
           "single_vnd": 62000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "bachhoaxanh",
@@ -4164,37 +4164,37 @@
       "source": "bachhoaxanh+beer_scan/tgd+lotte+websosanh",
       "confidence": "medium",
       "note": "deep-scan-live",
-      "captured_date": "2026-09-15",
+      "captured_date": "2026-09-16",
       "channels": {
         "lotte": {
           "case_vnd": 460800,
           "single_vnd": 17600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "websosanh": {
           "case_vnd": 360000,
           "single_vnd": 17600,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "bachhoaxanh": {
           "case_vnd": 392000,
           "single_vnd": 20000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "emart": {
           "case_vnd": 447000,
           "single_vnd": 8000,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         },
         "tgd": {
           "case_vnd": 450000,
           "single_vnd": null,
           "confidence": "medium",
-          "captured_date": "2026-09-15"
+          "captured_date": "2026-09-16"
         }
       },
       "best_channel": "websosanh",
