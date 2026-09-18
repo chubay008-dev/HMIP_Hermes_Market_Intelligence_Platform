@@ -1,0 +1,66 @@
+{
+  "eastwest": {
+    "url": "https://eastwestbrewing.vn",
+    "status": 200
+  },
+  "eastwest_shop": {
+    "url": "https://eastwestbrewing.vn/collections/all",
+    "status": 404
+  },
+  "hod": {
+    "url": "https://heartofdarknessbrewery.com",
+    "status": 200
+  },
+  "rooster": {
+    "url": "https://roosterbeers.com",
+    "status": "ERR:SSLError"
+  },
+  "belgo": {
+    "url": "https://belgo.vn",
+    "status": "ERR:ConnectionError"
+  },
+  "seven_bridges": {
+    "url": "https://7bridges.vn",
+    "status": 200
+  },
+  "kamereo_craft": {
+    "url": "https://kamereo.vn/blog/vi/bia-thu-cong",
+    "status": 404
+  },
+  "kamereo_heineken2": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-heineken-moi-nhat",
+    "status": 404
+  },
+  "kamereo_tiger2": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-tiger-moi-nhat",
+    "status": 404
+  },
+  "kamereo_halida": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-halida",
+    "status": 404
+  },
+  "kamereo_hanoi": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-ha-noi",
+    "status": 200
+  },
+  "bnk_search_bavaria": {
+    "url": "https://bianhapkhau.com.vn/?s=bavaria",
+    "status": 200
+  },
+  "bnk_search_corona": {
+    "url": "https://bianhapkhau.com.vn/?s=corona",
+    "status": 200
+  },
+  "bnk_search_guinness": {
+    "url": "https://bianhapkhau.com.vn/?s=guinness",
+    "status": 200
+  },
+  "bnk_search_khongcon": {
+    "url": "https://bianhapkhau.com.vn/?s=kh%C3%B4ng+c%E1%BB%93n",
+    "status": 200
+  },
+  "dailoc_khongcon": {
+    "url": "https://bianhapkhaudailoc.com/?s=0.0",
+    "status": 200
+  }
+}
