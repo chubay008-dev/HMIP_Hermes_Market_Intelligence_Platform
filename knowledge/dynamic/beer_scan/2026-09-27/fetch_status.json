@@ -1,0 +1,90 @@
+{
+  "coop_sg_lager": {
+    "url": "https://cooponline.vn/bia-sai-gon-lager-thung-24-lon-x-330ml--s250105748",
+    "status": 200
+  },
+  "bhx_bia": {
+    "url": "https://www.bachhoaxanh.com/bia",
+    "status": "ERR:ConnectionError"
+  },
+  "kamereo_sg": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-sai-gon-hom-nay",
+    "status": 200
+  },
+  "tgd_sg_lon": {
+    "url": "http://thegioidouong.net/category/bia-sai-gon-lon",
+    "status": 200
+  },
+  "govn_gia_bia": {
+    "url": "https://go-vietnam.vn/cam-nang-mua-sam/cap-nhat-thong-tin-gia-bia-cac-loai-moi-nhat-dang-ban-chay-tren-thi-truong-3114.html",
+    "status": "ERR:ConnectionError"
+  },
+  "bhx_heineken": {
+    "url": "https://www.bachhoaxanh.com/bia/bia-heineken",
+    "status": "ERR:ConnectionError"
+  },
+  "bhx_tiger": {
+    "url": "https://www.bachhoaxanh.com/bia/bia-tiger",
+    "status": "ERR:ConnectionError"
+  },
+  "bhx_budweiser": {
+    "url": "https://www.bachhoaxanh.com/bia/bia-budweiser",
+    "status": "ERR:ConnectTimeout"
+  },
+  "bhx_carlsberg": {
+    "url": "https://www.bachhoaxanh.com/bia/bia-carlsberg",
+    "status": "ERR:ConnectTimeout"
+  },
+  "bhx_sanmiguel": {
+    "url": "https://www.bachhoaxanh.com/bia/bia-san-miguel",
+    "status": "ERR:ConnectTimeout"
+  },
+  "kamereo_heineken": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-heineken",
+    "status": 404
+  },
+  "kamereo_tiger": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-tiger",
+    "status": 404
+  },
+  "bianhapkhau": {
+    "url": "https://bianhapkhau.com.vn",
+    "status": 200
+  },
+  "douongcaocap": {
+    "url": "https://douongcaocap.vn",
+    "status": 200
+  },
+  "kamereo_corona": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-corona",
+    "status": 200
+  },
+  "bhx_corona": {
+    "url": "https://www.bachhoaxanh.com/bia/bia-corona",
+    "status": "ERR:ConnectionError"
+  },
+  "pasteurstreet": {
+    "url": "https://pasteurstreet.com/vi",
+    "status": 200
+  },
+  "pasteurstreet_shop": {
+    "url": "https://pasteurstreet.com/vi/cua-hang",
+    "status": 404
+  },
+  "ibiero": {
+    "url": "https://ibiero.com",
+    "status": 200
+  },
+  "dailybiahoi": {
+    "url": "https://dailybiahoihanoi.vn",
+    "status": 200
+  },
+  "dailoc": {
+    "url": "https://bianhapkhaudailoc.com",
+    "status": 200
+  },
+  "bhx_khongcon": {
+    "url": "https://www.bachhoaxanh.com/bia-do-uong-khong-con",
+    "status": "ERR:ConnectionError"
+  }
+}
