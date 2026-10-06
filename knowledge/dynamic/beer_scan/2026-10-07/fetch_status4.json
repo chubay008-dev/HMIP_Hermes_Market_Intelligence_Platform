@@ -1,0 +1,30 @@
+{
+  "hod_products": {
+    "url": "https://heartofdarknessbrewery.com/products.json?limit=250",
+    "status": 200
+  },
+  "eastwest_products": {
+    "url": "https://eastwestbrewing.vn/products.json?limit=250",
+    "status": 200
+  },
+  "sevenb_products": {
+    "url": "https://7bridges.vn/products.json?limit=250",
+    "status": 400
+  },
+  "ibiero_products": {
+    "url": "https://ibiero.com/products.json?limit=250",
+    "status": 404
+  },
+  "pasteur_menu": {
+    "url": "https://pasteurstreet.com/vi/pasteur-street-menu/",
+    "status": 200
+  },
+  "pasteur_beers": {
+    "url": "https://pasteurstreet.com/vi/beers/",
+    "status": 200
+  },
+  "tgd_home": {
+    "url": "http://thegioidouong.net/",
+    "status": 200
+  }
+}
