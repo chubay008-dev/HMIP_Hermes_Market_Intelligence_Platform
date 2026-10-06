@@ -1,0 +1,108 @@
+{
+ "carlsberg": {
+  "status": 200,
+  "links": [
+   {
+    "title": "Carlsberg Thùng 24 Lon, nơi bán giá rẻ, uy tín, chất lượng nhất | Websosanh",
+    "url": "https://websosanh.vn/s/carlsberg+th%C3%B9ng+24+lon.htm"
+   },
+   {
+    "title": "Bia Carlsberg, nơi bán giá rẻ, uy tín, chất lượng nhất | Websosanh",
+    "url": "https://websosanh.vn/s/bia+carlsberg.htm"
+   },
+   {
+    "title": "24 lon Carlsberg Premium 500ml giá tốt tại Bách hoá XANH",
+    "url": "https://www.bachhoaxanh.com/bia/thung-24-lon-bia-carlsberg-premium-smooth-draught-500ml"
+   },
+   {
+    "title": "Carlsberg - Bia Giá Tốt, Chính Hãng, Đảm Bảo | Shopee Việt Nam",
+    "url": "https://shopee.vn/list/carlsberg"
+   },
+   {
+    "title": "Bia carlsberg - Giá Tốt, Miễn Phí Vận Chuyển, Đủ Loại | Shopee Việt Nam",
+    "url": "https://shopee.vn/list/bia/carlsberg"
+   },
+   {
+    "title": "Thùng 24 lon bia Carlsberg Smooth Draught 330ml - WinMart",
+    "url": "https://www.winmart.vn/products/carlsberg-bia-lon-330ml--s10604143"
+   },
+   {
+    "title": "Bia Carlsberg Danish Pilsner 330ml/Lon Thùng 24 Lon",
+    "url": "https://www.lottemart.vn/vi-nsg/product/bia-carlsberg-pilsner-330ml-8934692020225-p47099"
+   },
+   {
+    "title": "Bia Carlsberg Pilsner Thùng 24 Lon 330ml - lottemart.vn",
+    "url": "https://www.lottemart.vn/vi-wle/product/thung-24-lon-bia-carlsberg-smooth-draught-330ml-8934692020072-p10652"
+   }
+  ]
+ },
+ "sanmiguel": {
+  "status": 200,
+  "links": [
+   {
+    "title": "San miguel - Giá Tốt, Miễn Phí Vận Chuyển, Đủ Loại | Shopee Việt Nam",
+    "url": "https://shopee.vn/list/san%20miguel"
+   },
+   {
+    "title": "BIA SAN Miguel giá rẻ Tháng 6,2026 | BigGo Việt Nam",
+    "url": "https://vn.biggo.com/s/BIA%20SAN%20Miguel"
+   },
+   {
+    "title": "Thùng 24 lon bia San Miguel 330ml giá tốt tại Bách hoá XANH",
+    "url": "https://www.bachhoaxanh.com/bia/bia-sanmiguel-330ml-thung"
+   },
+   {
+    "title": "Mua Bia San Miguel Giá Tốt, Giao Nhanh | Lazada Việt Nam",
+    "url": "https://www.lazada.vn/tag/bia-san-miguel/"
+   },
+   {
+    "title": "Bia San Miguel chính hãng giá tốt",
+    "url": "http://dailybia.com.vn/bia-san-miguel/"
+   },
+   {
+    "title": "Thùng 24 lon San Miguel vải 330ml giá tốt tại Bách hoá XANH",
+    "url": "https://www.bachhoaxanh.com/bia/thung-24-lon-bia-trai-cay-san-miguel-vi-vai-330ml"
+   },
+   {
+    "title": "Thùng 24 lon bia trái cây San Miguel vị vải 330ml (HT) | Shopee Việt Nam",
+    "url": "https://shopee.vn/Th%C3%B9ng-24-lon-bia-tr%C3%A1i-c%C3%A2y-San-Miguel-v%E1%BB%8B-v%E1%BA%A3i-330ml-%28HT%29-i.1086006715.42619390762"
+   },
+   {
+    "title": "Bia San Miguel Wheat Blanca 5.4% - Lon 500ml - Thùng 24 Lon",
+    "url": "https://biaruoungoai.com.vn/shop/bia-san-miguel-wheat-blanca-5-4-lon-500ml-thung-24-lon/"
+   }
+  ]
+ },
+ "guinness": {
+  "status": 202,
+  "links": []
+ },
+ "bavaria00": {
+  "status": 202,
+  "links": []
+ },
+ "halida": {
+  "status": 202,
+  "links": []
+ },
+ "huda": {
+  "status": 202,
+  "links": []
+ },
+ "clausthaler": {
+  "status": 202,
+  "links": []
+ },
+ "belgo": {
+  "status": 202,
+  "links": []
+ },
+ "rooster": {
+  "status": 202,
+  "links": []
+ },
+ "lacviet": {
+  "status": 202,
+  "links": []
+ }
+}
