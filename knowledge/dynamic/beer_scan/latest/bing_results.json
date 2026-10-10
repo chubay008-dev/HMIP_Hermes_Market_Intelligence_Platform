@@ -28,27 +28,27 @@
   "links": [
    {
     "title": "Rooster (TV series) - Wikipedia",
-    "url": "https://en.wikipedia.org/wiki/Rooster_(TV_series)"
+    "url": "https://en.m.wikipedia.org/wiki/Rooster_(TV_series)"
    },
    {
     "title": "Rooster (TV Series 2026– ) - IMDb",
-    "url": "https://www.imdb.com/title/tt32420734/"
+    "url": "https://m.imdb.com/title/tt32420734/"
    },
    {
     "title": "Chicken - Wikipedia",
-    "url": "https://en.wikipedia.org/wiki/Chicken"
+    "url": "https://en.m.wikipedia.org/wiki/Chicken"
    },
    {
     "title": "22 Types of Roosters with Pictures - Own Yard Life",
     "url": "https://ownyardlife.com/22-types-of-roosters-with-pictures/"
    },
    {
-    "title": "' Rooster ' Season 2: Premiere Date, Trailer, Cast, Plot, and More Details",
-    "url": "https://www.tvinsider.com/1251577/rooster-season-2-renewed-premiere-date-trailer-cast-plot/"
+    "title": "Rooster (TV Series 2026– ) - Full cast & crew - IMDb",
+    "url": "https://m.imdb.com/title/tt32420734/fullcredits/"
    },
    {
-    "title": "Rooster Animal Facts - Gallus gallus domesticus - A-Z Animals",
-    "url": "https://a-z-animals.com/animals/rooster/"
+    "title": "' Rooster ' Season 2: Premiere Date, Trailer, Cast, Plot, and More Details",
+    "url": "https://www.tvinsider.com/1251577/rooster-season-2-renewed-premiere-date-trailer-cast-plot/"
    },
    {
     "title": "Rooster : Season 1 | Rotten Tomatoes",
@@ -92,10 +92,6 @@
     "url": "https://www.britannica.com/biography/Louis-Pasteur"
    },
    {
-    "title": "Institut Pasteur | For every life, science takes action",
-    "url": "https://www.pasteur.fr/en"
-   },
-   {
     "title": "Louis Pasteur : Contributions and the Father of Microbiology",
     "url": "https://microbeonline.com/louis-pasteur/"
    },
@@ -104,16 +100,20 @@
     "url": "https://www.sciencehistory.org/education/scientific-biographies/louis-pasteur/"
    },
    {
-    "title": "Louis Pasteur — Wikipédia",
-    "url": "https://fr.m.wikipedia.org/wiki/Louis_Pasteur"
-   },
-   {
     "title": "About Louis Pasteur - Pasteur Foundation",
     "url": "https://pasteurfoundation.org/louis-pasteur/"
    },
    {
+    "title": "Institut Pasteur | For every life, science takes action",
+    "url": "https://www.pasteur.fr/en"
+   },
+   {
     "title": "Louis Pasteur - Inventions, Achievements & Facts - Biography",
     "url": "https://www.biography.com/scientists/louis-pasteur"
+   },
+   {
+    "title": "Louis Pasteur — Wikipédia",
+    "url": "https://fr.m.wikipedia.org/wiki/Louis_Pasteur"
    }
   ]
  },
