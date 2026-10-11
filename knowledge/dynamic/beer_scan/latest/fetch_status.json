@@ -21,7 +21,7 @@
   },
   "bhx_heineken": {
     "url": "https://www.bachhoaxanh.com/bia/bia-heineken",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   },
   "bhx_tiger": {
     "url": "https://www.bachhoaxanh.com/bia/bia-tiger",
@@ -61,7 +61,7 @@
   },
   "bhx_corona": {
     "url": "https://www.bachhoaxanh.com/bia/bia-corona",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   },
   "pasteurstreet": {
     "url": "https://pasteurstreet.com/vi",
@@ -77,7 +77,7 @@
   },
   "dailybiahoi": {
     "url": "https://dailybiahoihanoi.vn",
-    "status": 200
+    "status": "ERR:ConnectTimeout"
   },
   "dailoc": {
     "url": "https://bianhapkhaudailoc.com",
@@ -85,6 +85,6 @@
   },
   "bhx_khongcon": {
     "url": "https://www.bachhoaxanh.com/bia-do-uong-khong-con",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   }
 }

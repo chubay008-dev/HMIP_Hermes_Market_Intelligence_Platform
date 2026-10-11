@@ -1,0 +1,124 @@
+{
+ "guinness": {
+  "status": 200,
+  "links": []
+ },
+ "bavaria00": {
+  "status": 200,
+  "links": []
+ },
+ "halida": {
+  "status": 200,
+  "links": []
+ },
+ "huda": {
+  "status": 200,
+  "links": []
+ },
+ "clausthaler": {
+  "status": 200,
+  "links": []
+ },
+ "belgo": {
+  "status": 200,
+  "links": []
+ },
+ "rooster": {
+  "status": 200,
+  "links": [
+   {
+    "title": "Rooster (TV series) - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Rooster_(TV_series)"
+   },
+   {
+    "title": "Rooster (TV Series 2026– ) - IMDb",
+    "url": "https://www.imdb.com/title/tt32420734/"
+   },
+   {
+    "title": "Chicken - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Chicken"
+   },
+   {
+    "title": "' Rooster ' Season 2: Premiere Date, Trailer, Cast, Plot, and More Details",
+    "url": "https://www.tvinsider.com/1251577/rooster-season-2-renewed-premiere-date-trailer-cast-plot/"
+   },
+   {
+    "title": "22 Types of Roosters with Pictures - Own Yard Life",
+    "url": "https://ownyardlife.com/22-types-of-roosters-with-pictures/"
+   },
+   {
+    "title": "Rooster Animal Facts - Gallus gallus domesticus - A-Z Animals",
+    "url": "https://a-z-animals.com/animals/rooster/"
+   },
+   {
+    "title": "Rooster 's Wood-fired Kitchen | Restaurant and Wine Bar",
+    "url": "https://www.roosterskitchen.com/"
+   },
+   {
+    "title": "Rooster Season 2: Release Date, Cast, Plot and Everything",
+    "url": "https://fandomwire.com/rooster-season-2-release-date-cast-plot-and-everything-we-know-about-steve-carell-hbo-series/"
+   }
+  ]
+ },
+ "lacviet": {
+  "status": 200,
+  "links": []
+ },
+ "sanmiguel": {
+  "status": 200,
+  "links": []
+ },
+ "333pilsner": {
+  "status": 200,
+  "links": []
+ },
+ "stella": {
+  "status": 200,
+  "links": []
+ },
+ "bitburger": {
+  "status": 200,
+  "links": []
+ },
+ "pasteur": {
+  "status": 200,
+  "links": [
+   {
+    "title": "Louis Pasteur - Wikipedia",
+    "url": "https://en.m.wikipedia.org/wiki/Louis_Pasteur"
+   },
+   {
+    "title": "Louis Pasteur | Biography, Inventions, Achievements, Germ ...",
+    "url": "https://www.britannica.com/biography/Louis-Pasteur"
+   },
+   {
+    "title": "Institut Pasteur | For every life, science takes action",
+    "url": "https://www.pasteur.fr/en"
+   },
+   {
+    "title": "Louis Pasteur : Contributions and the Father of Microbiology",
+    "url": "https://microbeonline.com/louis-pasteur/"
+   },
+   {
+    "title": "About Louis Pasteur - Pasteur Foundation",
+    "url": "https://pasteurfoundation.org/louis-pasteur/"
+   },
+   {
+    "title": "Louis Pasteur — Wikipédia",
+    "url": "https://fr.m.wikipedia.org/wiki/Louis_Pasteur"
+   },
+   {
+    "title": "Louis Pasteur | Science History Institute Biography",
+    "url": "https://www.sciencehistory.org/education/scientific-biographies/louis-pasteur/"
+   },
+   {
+    "title": "PASTEUR ELEMENTARY - Home",
+    "url": "http://pasteur.cps.edu/"
+   }
+  ]
+ },
+ "corona355": {
+  "status": 200,
+  "links": []
+ }
+}
