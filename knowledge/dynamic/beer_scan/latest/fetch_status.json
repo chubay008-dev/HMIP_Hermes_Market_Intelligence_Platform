@@ -33,11 +33,11 @@
   },
   "bhx_carlsberg": {
     "url": "https://www.bachhoaxanh.com/bia/bia-carlsberg",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "bhx_sanmiguel": {
     "url": "https://www.bachhoaxanh.com/bia/bia-san-miguel",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "kamereo_heineken": {
     "url": "https://kamereo.vn/blog/vi/gia-bia-heineken",
@@ -61,7 +61,7 @@
   },
   "bhx_corona": {
     "url": "https://www.bachhoaxanh.com/bia/bia-corona",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "pasteurstreet": {
     "url": "https://pasteurstreet.com/vi",
