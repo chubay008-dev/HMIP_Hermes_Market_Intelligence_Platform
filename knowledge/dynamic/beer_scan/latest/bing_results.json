@@ -51,12 +51,12 @@
     "url": "https://www.rottentomatoes.com/tv/rooster/s01"
    },
    {
-    "title": "21 Rooster Breeds for Backyard Flocks: Size, & Temperament",
-    "url": "https://chickenjournal.com/rooster-breeds/"
+    "title": "Roosters Wings",
+    "url": "https://roosterswings.com/"
    },
    {
-    "title": "Rooster Animal Facts - Gallus gallus domesticus - A-Z Animals",
-    "url": "https://a-z-animals.com/animals/rooster/"
+    "title": "Roaming Rooster DC in Washington, DC",
+    "url": "https://www.roamingroosterdc.com/"
    }
   ]
  },
@@ -78,47 +78,14 @@
  },
  "bitburger": {
   "status": 200,
-  "links": [
-   {
-    "title": "Device Manager - Copy and Paste Information - Ten Forums",
-    "url": "https://www.tenforums.com/general-support/8721-device-manager-copy-paste-information.html"
-   },
-   {
-    "title": "Question about my USB Ports and Device Manager",
-    "url": "https://www.tenforums.com/drivers-hardware/150972-question-about-my-usb-ports-device-manager-2.html"
-   },
-   {
-    "title": "Protect your personal data against theft - Android Help",
-    "url": "https://www.bing.com/ck/a?!&&p=5b368e6349e4e0fd9f09ee1f007159aab7856b4ec0c8023fd6d27ae831cbee20JmltdHM9MTc5MTg0OTYwMA&ptn=3&ver=2&hsh=4&fclid=3e4773f1-5d50-6dae-1598-64005c216c98&u=a1aHR0cHM6Ly9zdXBwb3J0Lmdvb2dsZS5jb20vYW5kcm9pZC9hbnN3ZXIvMTUxNDY5MDg_aGw9ZW4&ntb=1"
-   },
-   {
-    "title": "Prepararse para encontrar un dispositivo Android perdido",
-    "url": "https://www.bing.com/ck/a?!&&p=c181010588b24cedd64752f70fbfeec829d3a9cec8f7452cce37f864238635c1JmltdHM9MTc5MTg0OTYwMA&ptn=3&ver=2&hsh=4&fclid=3e4773f1-5d50-6dae-1598-64005c216c98&u=a1aHR0cHM6Ly9zdXBwb3J0Lmdvb2dsZS5jb20vYWNjb3VudHMvYW5zd2VyLzMyNjU5NTU_aGw9ZXM&ntb=1"
-   },
-   {
-    "title": "Prevent Windows Update from Updating Specific Device Driver",
-    "url": "https://www.tenforums.com/tutorials/146562-prevent-windows-update-updating-specific-device-driver.html"
-   },
-   {
-    "title": "Device Manager Error Codes and Solutions in Windows",
-    "url": "https://www.tenforums.com/tutorials/127336-device-manager-error-codes-solutions-windows.html"
-   },
-   {
-    "title": "Enable or Disable a Sound Output Device in Windows",
-    "url": "https://www.tenforums.com/tutorials/128343-enable-disable-sound-output-device-windows.html"
-   },
-   {
-    "title": "How to Open Device Manager in Windows 10 | Tutorials",
-    "url": "https://www.tenforums.com/tutorials/128588-how-open-device-manager-windows-10-a.html"
-   }
-  ]
+  "links": []
  },
  "pasteur": {
   "status": 200,
   "links": [
    {
     "title": "Louis Pasteur - Wikipedia",
-    "url": "https://en.m.wikipedia.org/wiki/Louis_Pasteur"
+    "url": "https://en.wikipedia.org/wiki/Louis_Pasteur"
    },
    {
     "title": "Louis Pasteur | Biography, Inventions, Achievements, Germ Theory ...",
@@ -129,24 +96,24 @@
     "url": "https://www.pasteur.fr/en"
    },
    {
-    "title": "Louis Pasteur : Contributions and the Father of Microbiology",
-    "url": "https://microbeonline.com/louis-pasteur/"
-   },
-   {
     "title": "Louis Pasteur | Science History Institute Biography",
     "url": "https://www.sciencehistory.org/education/scientific-biographies/louis-pasteur/"
    },
    {
-    "title": "Louis Pasteur — Wikipédia",
-    "url": "https://fr.m.wikipedia.org/wiki/Louis_Pasteur"
+    "title": "Louis Pasteur : Contributions and the Father of Microbiology",
+    "url": "https://microbeonline.com/louis-pasteur/"
    },
    {
-    "title": "About Louis Pasteur - Pasteur Foundation",
-    "url": "https://pasteurfoundation.org/louis-pasteur/"
+    "title": "Louis Pasteur — Wikipédia",
+    "url": "https://fr.wikipedia.org/wiki/Louis_Pasteur"
    },
    {
     "title": "Louis Pasteur - Inventions, Achievements & Facts - Biography",
     "url": "https://www.biography.com/scientists/louis-pasteur"
+   },
+   {
+    "title": "About Louis Pasteur - Pasteur Foundation",
+    "url": "https://pasteurfoundation.org/louis-pasteur/"
    }
   ]
  },

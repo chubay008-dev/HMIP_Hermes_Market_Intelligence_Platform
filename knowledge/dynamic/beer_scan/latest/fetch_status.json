@@ -61,7 +61,7 @@
   },
   "bhx_corona": {
     "url": "https://www.bachhoaxanh.com/bia/bia-corona",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   },
   "pasteurstreet": {
     "url": "https://pasteurstreet.com/vi",
