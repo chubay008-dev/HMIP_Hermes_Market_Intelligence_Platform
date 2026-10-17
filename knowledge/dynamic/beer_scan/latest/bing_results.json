@@ -28,15 +28,15 @@
   "links": [
    {
     "title": "Rooster (TV series) - Wikipedia",
-    "url": "https://en.wikipedia.org/wiki/Rooster_(TV_series)"
+    "url": "https://en.m.wikipedia.org/wiki/Rooster_(TV_series)"
    },
    {
     "title": "Rooster (TV Series 2026– ) - IMDb",
-    "url": "https://www.imdb.com/title/tt32420734/"
+    "url": "https://m.imdb.com/title/tt32420734/"
    },
    {
     "title": "Chicken - Wikipedia",
-    "url": "https://en.wikipedia.org/wiki/Chicken"
+    "url": "https://en.m.wikipedia.org/wiki/Chicken"
    },
    {
     "title": "' Rooster ' Season 2: Premiere Date, Trailer, Cast, Plot, and More Details",
@@ -47,16 +47,16 @@
     "url": "https://ownyardlife.com/22-types-of-roosters-with-pictures/"
    },
    {
-    "title": "Rooster Rehoming - Facebook",
-    "url": "https://www.facebook.com/groups/186295841206963/"
-   },
-   {
     "title": "Rooster : Season 1 | Rotten Tomatoes",
     "url": "https://www.rottentomatoes.com/tv/rooster/s01"
    },
    {
-    "title": "Rooster (TV Series 2026– ) - Full cast & crew - IMDb",
-    "url": "https://www.imdb.com/title/tt32420734/fullcredits/"
+    "title": "21 Rooster Breeds for Backyard Flocks: Size, & Temperament",
+    "url": "https://chickenjournal.com/rooster-breeds/"
+   },
+   {
+    "title": "12 Fascinating Facts About Roosters - Backyard Poultry",
+    "url": "https://backyardpoultry.iamcountryside.com/chickens-101/12-fascinating-facts-about-roosters/"
    }
   ]
  },
@@ -82,40 +82,7 @@
  },
  "pasteur": {
   "status": 200,
-  "links": [
-   {
-    "title": "Louis Pasteur - Wikipedia",
-    "url": "https://en.wikipedia.org/wiki/Louis_Pasteur"
-   },
-   {
-    "title": "Louis Pasteur | Biography, Inventions, Achievements, Germ Theory ...",
-    "url": "https://www.britannica.com/biography/Louis-Pasteur"
-   },
-   {
-    "title": "Institut Pasteur | For every life, science takes action",
-    "url": "https://www.pasteur.fr/en"
-   },
-   {
-    "title": "Louis Pasteur : Contributions and the Father of Microbiology",
-    "url": "https://microbeonline.com/louis-pasteur/"
-   },
-   {
-    "title": "Louis Pasteur | Science History Institute Biography",
-    "url": "https://www.sciencehistory.org/education/scientific-biographies/louis-pasteur/"
-   },
-   {
-    "title": "Louis Pasteur — Wikipédia",
-    "url": "https://fr.wikipedia.org/wiki/Louis_Pasteur"
-   },
-   {
-    "title": "Louis Pasteur - Inventions, Achievements & Facts - Biography",
-    "url": "https://www.biography.com/scientists/louis-pasteur"
-   },
-   {
-    "title": "Louis Pasteur : a universal legacy - Institut Pasteur",
-    "url": "https://www.pasteur.fr/en/whats-new/latest-news/features/louis-pasteur-universal-legacy"
-   }
-  ]
+  "links": []
  },
  "corona355": {
   "status": 200,

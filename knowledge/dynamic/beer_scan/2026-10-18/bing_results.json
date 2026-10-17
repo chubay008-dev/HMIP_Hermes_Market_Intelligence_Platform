@@ -1,0 +1,91 @@
+{
+ "guinness": {
+  "status": 200,
+  "links": []
+ },
+ "bavaria00": {
+  "status": 200,
+  "links": []
+ },
+ "halida": {
+  "status": 200,
+  "links": []
+ },
+ "huda": {
+  "status": 200,
+  "links": []
+ },
+ "clausthaler": {
+  "status": 200,
+  "links": []
+ },
+ "belgo": {
+  "status": 200,
+  "links": []
+ },
+ "rooster": {
+  "status": 200,
+  "links": [
+   {
+    "title": "Rooster (TV series) - Wikipedia",
+    "url": "https://en.m.wikipedia.org/wiki/Rooster_(TV_series)"
+   },
+   {
+    "title": "Rooster (TV Series 2026– ) - IMDb",
+    "url": "https://m.imdb.com/title/tt32420734/"
+   },
+   {
+    "title": "Chicken - Wikipedia",
+    "url": "https://en.m.wikipedia.org/wiki/Chicken"
+   },
+   {
+    "title": "' Rooster ' Season 2: Premiere Date, Trailer, Cast, Plot, and More Details",
+    "url": "https://www.tvinsider.com/1251577/rooster-season-2-renewed-premiere-date-trailer-cast-plot/"
+   },
+   {
+    "title": "22 Types of Roosters with Pictures - Own Yard Life",
+    "url": "https://ownyardlife.com/22-types-of-roosters-with-pictures/"
+   },
+   {
+    "title": "Rooster : Season 1 | Rotten Tomatoes",
+    "url": "https://www.rottentomatoes.com/tv/rooster/s01"
+   },
+   {
+    "title": "21 Rooster Breeds for Backyard Flocks: Size, & Temperament",
+    "url": "https://chickenjournal.com/rooster-breeds/"
+   },
+   {
+    "title": "12 Fascinating Facts About Roosters - Backyard Poultry",
+    "url": "https://backyardpoultry.iamcountryside.com/chickens-101/12-fascinating-facts-about-roosters/"
+   }
+  ]
+ },
+ "lacviet": {
+  "status": 200,
+  "links": []
+ },
+ "sanmiguel": {
+  "status": 200,
+  "links": []
+ },
+ "333pilsner": {
+  "status": 200,
+  "links": []
+ },
+ "stella": {
+  "status": 200,
+  "links": []
+ },
+ "bitburger": {
+  "status": 200,
+  "links": []
+ },
+ "pasteur": {
+  "status": 200,
+  "links": []
+ },
+ "corona355": {
+  "status": 200,
+  "links": []
+ }
+}

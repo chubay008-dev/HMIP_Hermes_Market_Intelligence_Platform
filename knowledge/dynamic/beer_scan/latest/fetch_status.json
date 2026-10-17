@@ -21,7 +21,7 @@
   },
   "bhx_heineken": {
     "url": "https://www.bachhoaxanh.com/bia/bia-heineken",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "bhx_tiger": {
     "url": "https://www.bachhoaxanh.com/bia/bia-tiger",
@@ -33,7 +33,7 @@
   },
   "bhx_carlsberg": {
     "url": "https://www.bachhoaxanh.com/bia/bia-carlsberg",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "bhx_sanmiguel": {
     "url": "https://www.bachhoaxanh.com/bia/bia-san-miguel",
@@ -61,7 +61,7 @@
   },
   "bhx_corona": {
     "url": "https://www.bachhoaxanh.com/bia/bia-corona",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "pasteurstreet": {
     "url": "https://pasteurstreet.com/vi",

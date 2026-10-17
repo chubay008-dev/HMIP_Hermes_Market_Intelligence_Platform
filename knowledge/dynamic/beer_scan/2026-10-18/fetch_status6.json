@@ -1,0 +1,38 @@
+{
+  "winmart_carlsberg": {
+    "url": "https://www.winmart.vn/products/carlsberg-bia-lon-330ml--s10604143",
+    "status": 200
+  },
+  "dailybia_sm": {
+    "url": "http://dailybia.com.vn/bia-san-miguel/",
+    "status": 200
+  },
+  "dailybia_home": {
+    "url": "http://dailybia.com.vn/",
+    "status": 200
+  },
+  "kamereo_carlsberg": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-carlsberg",
+    "status": 404
+  },
+  "kamereo_guinness": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-guinness",
+    "status": 404
+  },
+  "kamereo_bavaria": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-bavaria",
+    "status": 404
+  },
+  "kamereo_huda": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-huda",
+    "status": 404
+  },
+  "kamereo_sanmiguel": {
+    "url": "https://kamereo.vn/blog/vi/gia-bia-san-miguel",
+    "status": 404
+  },
+  "kamereo_khongcon2": {
+    "url": "https://kamereo.vn/blog/vi/bia-khong-con",
+    "status": 404
+  }
+}
