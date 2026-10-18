@@ -21,15 +21,15 @@
   },
   "bhx_heineken": {
     "url": "https://www.bachhoaxanh.com/bia/bia-heineken",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   },
   "bhx_tiger": {
     "url": "https://www.bachhoaxanh.com/bia/bia-tiger",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   },
   "bhx_budweiser": {
     "url": "https://www.bachhoaxanh.com/bia/bia-budweiser",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "bhx_carlsberg": {
     "url": "https://www.bachhoaxanh.com/bia/bia-carlsberg",
@@ -37,7 +37,7 @@
   },
   "bhx_sanmiguel": {
     "url": "https://www.bachhoaxanh.com/bia/bia-san-miguel",
-    "status": "ERR:ConnectionError"
+    "status": "ERR:ConnectTimeout"
   },
   "kamereo_heineken": {
     "url": "https://kamereo.vn/blog/vi/gia-bia-heineken",
@@ -85,6 +85,6 @@
   },
   "bhx_khongcon": {
     "url": "https://www.bachhoaxanh.com/bia-do-uong-khong-con",
-    "status": "ERR:ConnectTimeout"
+    "status": "ERR:ConnectionError"
   }
 }

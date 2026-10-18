@@ -47,16 +47,16 @@
     "url": "https://ownyardlife.com/22-types-of-roosters-with-pictures/"
    },
    {
+    "title": "rooster -net",
+    "url": "https://rooster-net.org/"
+   },
+   {
     "title": "Rooster : Season 1 | Rotten Tomatoes",
     "url": "https://www.rottentomatoes.com/tv/rooster/s01"
    },
    {
     "title": "21 Rooster Breeds for Backyard Flocks: Size, & Temperament",
     "url": "https://chickenjournal.com/rooster-breeds/"
-   },
-   {
-    "title": "12 Fascinating Facts About Roosters - Backyard Poultry",
-    "url": "https://backyardpoultry.iamcountryside.com/chickens-101/12-fascinating-facts-about-roosters/"
    }
   ]
  },
@@ -82,7 +82,40 @@
  },
  "pasteur": {
   "status": 200,
-  "links": []
+  "links": [
+   {
+    "title": "Louis Pasteur - Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Louis_Pasteur"
+   },
+   {
+    "title": "Louis Pasteur | Biography, Inventions, Achievements, Germ Theory ...",
+    "url": "https://www.britannica.com/biography/Louis-Pasteur"
+   },
+   {
+    "title": "Institut Pasteur | For every life, science takes action",
+    "url": "https://www.pasteur.fr/en"
+   },
+   {
+    "title": "Louis Pasteur — Wikipédia",
+    "url": "https://fr.wikipedia.org/wiki/Louis_Pasteur"
+   },
+   {
+    "title": "Louis Pasteur : Contributions and the Father of Microbiology",
+    "url": "https://microbeonline.com/louis-pasteur/"
+   },
+   {
+    "title": "Institut Pasteur | Pour chaque vie, la science agit",
+    "url": "https://www.pasteur.fr/fr"
+   },
+   {
+    "title": "| Farmacias Pasteur",
+    "url": "https://www.farmaciaspasteur.com.co/"
+   },
+   {
+    "title": "Louis Pasteur | Science History Institute Biography",
+    "url": "https://www.sciencehistory.org/education/scientific-biographies/louis-pasteur/"
+   }
+  ]
  },
  "corona355": {
   "status": 200,
