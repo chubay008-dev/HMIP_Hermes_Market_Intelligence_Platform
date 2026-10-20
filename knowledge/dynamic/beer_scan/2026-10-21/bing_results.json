@@ -1,0 +1,91 @@
+{
+ "guinness": {
+  "status": 200,
+  "links": []
+ },
+ "bavaria00": {
+  "status": 200,
+  "links": []
+ },
+ "halida": {
+  "status": 200,
+  "links": []
+ },
+ "huda": {
+  "status": 200,
+  "links": []
+ },
+ "clausthaler": {
+  "status": 200,
+  "links": []
+ },
+ "belgo": {
+  "status": 200,
+  "links": []
+ },
+ "rooster": {
+  "status": 200,
+  "links": [
+   {
+    "title": "Rooster (TV series) - Wikipedia",
+    "url": "https://en.m.wikipedia.org/wiki/Rooster_(TV_series)"
+   },
+   {
+    "title": "Rooster (TV Series 2026– ) - IMDb",
+    "url": "https://m.imdb.com/title/tt32420734/"
+   },
+   {
+    "title": "Chicken - Wikipedia",
+    "url": "https://en.m.wikipedia.org/wiki/Chicken"
+   },
+   {
+    "title": "' Rooster ' Season 2: Premiere Date, Trailer, Cast, Plot, and More Details",
+    "url": "https://www.tvinsider.com/1251577/rooster-season-2-renewed-premiere-date-trailer-cast-plot/"
+   },
+   {
+    "title": "Rooster - Jobs, Careers & HR Platform",
+    "url": "https://rooster.org/"
+   },
+   {
+    "title": "Rooster : Season 1 | Rotten Tomatoes",
+    "url": "https://www.rottentomatoes.com/tv/rooster/s01"
+   },
+   {
+    "title": "21 Rooster Breeds for Backyard Flocks: Size, & Temperament",
+    "url": "https://chickenjournal.com/rooster-breeds/"
+   },
+   {
+    "title": "Watch Rooster | HBO Max",
+    "url": "https://www.hbomax.com/show/c775cd23-a526-4c5f-a34c-30e831edf6e4"
+   }
+  ]
+ },
+ "lacviet": {
+  "status": 200,
+  "links": []
+ },
+ "sanmiguel": {
+  "status": 200,
+  "links": []
+ },
+ "333pilsner": {
+  "status": 200,
+  "links": []
+ },
+ "stella": {
+  "status": 200,
+  "links": []
+ },
+ "bitburger": {
+  "status": 200,
+  "links": []
+ },
+ "pasteur": {
+  "status": 200,
+  "links": []
+ },
+ "corona355": {
+  "status": 200,
+  "links": []
+ }
+}

@@ -28,23 +28,23 @@
   "links": [
    {
     "title": "Rooster (TV series) - Wikipedia",
-    "url": "https://en.wikipedia.org/wiki/Rooster_(TV_series)"
+    "url": "https://en.m.wikipedia.org/wiki/Rooster_(TV_series)"
    },
    {
     "title": "Rooster (TV Series 2026– ) - IMDb",
-    "url": "https://www.imdb.com/title/tt32420734/"
+    "url": "https://m.imdb.com/title/tt32420734/"
    },
    {
     "title": "Chicken - Wikipedia",
-    "url": "https://en.wikipedia.org/wiki/Chicken"
-   },
-   {
-    "title": "22 Types of Roosters with Pictures - Own Yard Life",
-    "url": "https://ownyardlife.com/22-types-of-roosters-with-pictures/"
+    "url": "https://en.m.wikipedia.org/wiki/Chicken"
    },
    {
     "title": "' Rooster ' Season 2: Premiere Date, Trailer, Cast, Plot, and More Details",
     "url": "https://www.tvinsider.com/1251577/rooster-season-2-renewed-premiere-date-trailer-cast-plot/"
+   },
+   {
+    "title": "Rooster - Jobs, Careers & HR Platform",
+    "url": "https://rooster.org/"
    },
    {
     "title": "Rooster : Season 1 | Rotten Tomatoes",
@@ -55,8 +55,8 @@
     "url": "https://chickenjournal.com/rooster-breeds/"
    },
    {
-    "title": "Rooster Animal Facts - Gallus gallus domesticus - A-Z Animals",
-    "url": "https://a-z-animals.com/animals/rooster/"
+    "title": "Watch Rooster | HBO Max",
+    "url": "https://www.hbomax.com/show/c775cd23-a526-4c5f-a34c-30e831edf6e4"
    }
   ]
  },
@@ -82,40 +82,7 @@
  },
  "pasteur": {
   "status": 200,
-  "links": [
-   {
-    "title": "Louis Pasteur - Wikipedia",
-    "url": "https://en.m.wikipedia.org/wiki/Louis_Pasteur"
-   },
-   {
-    "title": "Louis Pasteur | Biography, Inventions, Achievements, Germ Theory ...",
-    "url": "https://www.britannica.com/biography/Louis-Pasteur"
-   },
-   {
-    "title": "Institut Pasteur | For every life, science takes action",
-    "url": "https://www.pasteur.fr/en"
-   },
-   {
-    "title": "Louis Pasteur — Wikipédia",
-    "url": "https://fr.m.wikipedia.org/wiki/Louis_Pasteur"
-   },
-   {
-    "title": "Institut Pasteur | Pour chaque vie, la science agit",
-    "url": "https://www.pasteur.fr/fr"
-   },
-   {
-    "title": "Louis Pasteur | Science History Institute Biography",
-    "url": "https://www.sciencehistory.org/education/scientific-biographies/louis-pasteur/"
-   },
-   {
-    "title": "The work of Louis Pasteur",
-    "url": "https://www.bing.com/ck/a?!&&p=599da4787f5a53e243bc0337fabf8a468be4e8bb9b6ea0b0021ac8bb28e90ba1JmltdHM9MTc5MjM2ODAwMA&ptn=3&ver=2&hsh=4&fclid=077e15df-8091-6d96-3742-022881f36cfd&u=a1aHR0cHM6Ly9wYXN0ZXVyLm5ldC9oZWFkaW5ncy9sb3Vpcy1wYXN0ZXVyL3RoZS1saWZlLWFuZC13b3JrLW9mLWxvdWlzLXBhc3RldXIvdGhlLXdvcmstb2YtbG91aXMtcGFzdGV1ci8_bGFuZz1lbg&ntb=1"
-   },
-   {
-    "title": "Louis Pasteur : Contributions and the Father of Microbiology",
-    "url": "https://microbeonline.com/louis-pasteur/"
-   }
-  ]
+  "links": []
  },
  "corona355": {
   "status": 200,
